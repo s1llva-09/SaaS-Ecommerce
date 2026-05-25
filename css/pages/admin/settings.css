@@ -1,0 +1,16 @@
+/* ============================================================
+   ADMIN: CONFIGURACOES
+   Cadastro da loja e ajustes comerciais.
+   ============================================================ */
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,186 @@
+/* ============================================================
+   PAGINA: HOME DA LOJA
+   Hero, beneficios, categorias, produtos, ofertas e footer.
+   ============================================================ */
+
+.hero {
+  position: relative;
+  min-height: 510px;
+  display: grid;
+  align-items: center;
+  overflow: hidden;
+  color: #fff;
+  background: #2d236f;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(47,44,139,.95), rgba(88,56,244,.78)),
+    url("https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1800&q=85") center/cover;
+}
+
+.hero__content {
+  position: relative;
+  width: min(1230px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+.hero__box {
+  width: min(570px, 100%);
+}
+
+.hero__badge {
+  display: inline-flex;
+  margin-bottom: 24px;
+  border-radius: 999px;
+  padding: 5px 13px;
+  background: var(--accent);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  margin: 0 0 18px;
+  font-size: clamp(42px, 5vw, 54px);
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.hero p {
+  max-width: 620px;
+  margin: 0 0 32px;
+  color: rgba(255,255,255,.9);
+  font-size: 18px;
+}
+
+.hero .btn-ghost {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.35);
+  color: #fff;
+}
+
+.benefits-bar {
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+}
+
+.benefits-bar__inner {
+  width: min(1230px, calc(100% - 48px));
+  min-height: 52px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  align-items: center;
+  color: #334155;
+  font-size: 14px;
+}
+
+.benefits-bar span {
+  color: var(--brand);
+  font-weight: 900;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 14px;
+}
+
+.category-card {
+  min-height: 80px;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  padding: 14px;
+  text-align: center;
+  transition: .18s ease;
+}
+
+.category-card:hover {
+  border-color: #c7d2fe;
+  transform: translateY(-2px);
+}
+
+.category-card__icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.category-card strong {
+  font-size: 13px;
+}
+
+.offers-section {
+  background: #fff7eb;
+  border-top: 1px solid #ffedd5;
+  border-bottom: 1px solid #ffedd5;
+}
+
+.offers-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.offers-heading h2 {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.countdown__box {
+  width: 48px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #ff3d00;
+  color: #fff;
+  font-weight: 900;
+}
+
+.countdown__box small {
+  display: block;
+  margin-top: -10px;
+  font-size: 10px;
+}
+
+@media (max-width: 1024px) {
+  .category-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .benefits-bar__inner {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 14px 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .hero {
+    min-height: 430px;
+  }
+
+  .category-grid,
+  .benefits-bar__inner {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .offers-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

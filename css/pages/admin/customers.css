@@ -1,0 +1,11 @@
+/* ============================================================
+   ADMIN: CLIENTES
+   Busca e tabela da base de clientes.
+   ============================================================ */
+
+.customer-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}

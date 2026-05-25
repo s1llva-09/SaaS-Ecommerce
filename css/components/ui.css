@@ -1,0 +1,122 @@
+/* ============================================================
+   UI COMPARTILHADO
+   Botoes, cards, badges, formularios e estados pequenos.
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 9px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 800;
+  transition: .18s ease;
+}
+
+.btn-primary {
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(88, 56, 244, .22);
+}
+
+.btn-primary:hover {
+  background: var(--brand-strong);
+}
+
+.btn-light {
+  background: #fff;
+  color: var(--brand);
+}
+
+.btn-ghost {
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  color: #64748b;
+  background: transparent;
+}
+
+.icon-btn:hover {
+  background: #f4f4ff;
+  color: var(--brand);
+}
+
+.btn-ghost:hover {
+  border-color: #c7d2fe;
+  color: var(--brand);
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.field,
+.select {
+  width: 100%;
+  max-width: 100%;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0 12px;
+  background: #fff;
+  color: var(--text);
+  box-shadow: none;
+}
+
+.field:focus,
+.select:focus {
+  border-color: var(--brand);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(88, 56, 244, .18);
+}
+
+.field[type="search"] {
+  appearance: none;
+}
+
+.field[type="search"]::-webkit-search-decoration,
+.field[type="search"]::-webkit-search-cancel-button,
+.field[type="search"]::-webkit-search-results-button,
+.field[type="search"]::-webkit-search-results-decoration {
+  appearance: none;
+}
+
+.select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #64748b 50%), linear-gradient(135deg, #64748b 50%, transparent 50%);
+  background-position: calc(100% - 17px) 18px, calc(100% - 12px) 18px;
+  background-repeat: no-repeat;
+  background-size: 5px 5px, 5px 5px;
+  padding-right: 36px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.badge-green { background: var(--green-soft); color: var(--green); }
+.badge-red { background: var(--red-soft); color: var(--red); }
+.badge-amber { background: var(--amber-soft); color: var(--amber); }
+.badge-blue { background: var(--blue-soft); color: var(--blue); }
+.badge-indigo { background: var(--brand-soft); color: var(--brand); }
+.text-muted { color: var(--muted); }
+.text-brand { color: var(--brand); }

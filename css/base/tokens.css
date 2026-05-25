@@ -1,0 +1,40 @@
+/* ============================================================
+   TOKENS
+   Cores, sombras, raios e medidas compartilhadas.
+   ============================================================ */
+
+:root {
+  --brand: #5838f4;
+  --brand-strong: #4325df;
+  --brand-soft: #eef2ff;
+  --accent: #ff5a00;
+
+  --green: #16a34a;
+  --green-soft: #dcfce7;
+  --red: #dc2626;
+  --red-soft: #fee2e2;
+  --amber: #d97706;
+  --amber-soft: #fef3c7;
+  --blue: #2563eb;
+  --blue-soft: #dbeafe;
+
+  --text: #111827;
+  --muted: #6b7280;
+  --subtle: #9ca3af;
+  --line: #e5e7eb;
+  --panel: #ffffff;
+  --store-bg: #f5f6f8;
+
+  --admin-bg: #0a0c10;
+  --admin-panel: #111318;
+  --admin-panel-2: #181b22;
+  --admin-line: rgba(255,255,255,.08);
+  --admin-text: #f1f0ff;
+  --admin-muted: #9896b8;
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, .08);
+  --shadow: 0 12px 30px rgba(15, 23, 42, .12);
+}

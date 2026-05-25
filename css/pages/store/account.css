@@ -1,0 +1,42 @@
+/* ============================================================
+   PAGINA: CONTA E CONFIRMACAO
+   Pedidos do cliente e tela final do checkout.
+   ============================================================ */
+
+.account-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.account-avatar {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 900;
+}
+
+.order-list {
+  display: grid;
+  gap: 12px;
+}
+
+.order-card {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 16px;
+  align-items: center;
+}
+
+.confirmation-card {
+  max-width: 680px;
+  margin: 56px auto;
+  padding: 34px;
+  text-align: center;
+}

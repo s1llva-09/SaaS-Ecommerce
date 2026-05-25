@@ -1,0 +1,22 @@
+/* ============================================================
+   ADMIN: CAIXA
+   Resumo financeiro e movimentacoes.
+   ============================================================ */
+
+.finance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.cash-value {
+  font-size: 28px;
+  font-weight: 900;
+}
+
+@media (max-width: 900px) {
+  .finance-grid {
+    grid-template-columns: 1fr;
+  }
+}

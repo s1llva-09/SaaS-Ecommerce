@@ -1,0 +1,134 @@
+/* ============================================================
+   ADMIN: DASHBOARD
+   KPIs, graficos, tabela de ultimos pedidos.
+   ============================================================ */
+
+.dashboard-subheader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.dashboard-subheader p {
+  font-size: 13px;
+  color: var(--admin-muted);
+  margin: 0;
+}
+
+.period-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--admin-panel-2);
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.period-tab {
+  padding: 6px 16px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--admin-muted);
+  background: transparent;
+  transition: .15s;
+}
+
+.period-tab.is-active {
+  background: var(--brand);
+  color: #fff;
+}
+
+.period-tab:hover:not(.is-active) {
+  color: var(--admin-text);
+}
+
+/* KPI cards */
+.admin-kpi-card {
+  background: var(--admin-panel);
+  border: 1px solid var(--admin-line);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+}
+
+.kpi-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.kpi-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+}
+
+.kpi-trend {
+  font-size: 12px;
+  font-weight: 900;
+  padding: 4px 9px;
+  border-radius: 999px;
+}
+
+.kpi-trend.up {
+  background: rgba(22, 163, 74, .18);
+  color: #4ade80;
+}
+
+.kpi-trend.down {
+  background: rgba(239, 68, 68, .18);
+  color: #f87171;
+}
+
+.kpi-value {
+  margin: 0 0 4px;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.kpi-label {
+  font-size: 13px;
+  color: var(--admin-muted);
+  margin: 0;
+}
+
+/* Charts */
+.chart-box {
+  height: 230px;
+}
+
+.chart-legend {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.chart-legend__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.chart-legend__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chart-legend__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--admin-muted);
+}
+
+.chart-legend__pct {
+  font-weight: 700;
+  color: var(--admin-text);
+}

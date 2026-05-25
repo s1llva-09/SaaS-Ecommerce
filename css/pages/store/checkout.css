@@ -1,0 +1,42 @@
+/* ============================================================
+   PAGINA: CHECKOUT
+   Formulario de dados, entrega e pagamento.
+   ============================================================ */
+
+.checkout-form {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.payment-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.payment-option {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  background: #fff;
+  text-align: left;
+}
+
+.payment-option.is-active {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+@media (max-width: 760px) {
+  .form-grid,
+  .payment-options {
+    grid-template-columns: 1fr;
+  }
+}

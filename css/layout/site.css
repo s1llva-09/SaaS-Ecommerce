@@ -1,0 +1,48 @@
+/* ============================================================
+   LAYOUT GERAL
+   Estruturas usadas pelas paginas publicas e administrativas.
+   ============================================================ */
+
+.page {
+  min-height: 100vh;
+}
+
+.container {
+  width: min(1280px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+.section {
+  padding: 46px 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.split-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .container {
+    width: min(100% - 32px, 1280px);
+  }
+
+  .split-grid {
+    grid-template-columns: 1fr;
+  }
+}

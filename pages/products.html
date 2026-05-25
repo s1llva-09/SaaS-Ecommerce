@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Produtos - ShopNow</title>
+  <link rel="stylesheet" href="../css/index.css">
+</head>
+<body class="page" data-root="../">
+  <header class="store-header">
+    <div class="store-header__inner">
+      <a class="store-brand" href="../index.html"><span class="store-brand__mark">S</span><span>ShopNow</span></a>
+      <nav class="store-nav" aria-label="Principal">
+        <a class="is-active" href="products.html">Produtos</a>
+        <a href="products.html?category=Eletr%C3%B4nicos">Eletrônicos</a>
+        <a href="products.html?category=Moda">Moda</a>
+        <a href="products.html?category=Cal%C3%A7ados">Calçados</a>
+      </nav>
+      <div class="store-actions">
+        <button class="icon-btn" aria-label="Buscar" data-search-toggle>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </button>
+        <a class="icon-btn" style="position:relative" href="cart.html" aria-label="Carrinho">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span class="cart-count" data-cart-count style="position:absolute;top:-6px;right:-6px;display:none">0</span>
+        </a>
+        <a class="btn btn-ghost cart-pill" href="account.html">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Entrar
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="search-overlay" data-search-overlay aria-hidden="true">
+    <div class="search-overlay__inner">
+      <form class="search-overlay__form" data-store-search>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="search-overlay__input" type="search" placeholder="Buscar produtos..." autofocus>
+        <button class="search-overlay__close" type="button" data-search-close aria-label="Fechar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <main class="section products-page">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Navegação estrutural">
+        <a href="../index.html">Home</a>
+        <span>/</span>
+        <span data-breadcrumb-current>Produtos</span>
+      </nav>
+
+      <div class="products-page-header">
+        <div>
+          <h1 class="section-title" data-products-title>Todos os Produtos</h1>
+          <p class="products-count" data-products-count>0 produtos encontrados</p>
+        </div>
+        <div class="products-toolbar">
+          <select class="select products-sort" data-products-sort>
+            <option value="relevance">Mais relevantes</option>
+            <option value="price-asc">Menor preço</option>
+            <option value="price-desc">Maior preço</option>
+            <option value="rating">Melhor avaliação</option>
+            <option value="name">A–Z</option>
+          </select>
+          <div class="view-toggle">
+            <button class="view-toggle__btn is-active" data-view="grid" aria-label="Grade">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </button>
+            <button class="view-toggle__btn" data-view="list" aria-label="Lista">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="products-layout">
+        <aside class="filters card">
+          <div class="filters__group">
+            <div class="category-filter" data-category-list></div>
+            <input type="hidden" data-filter-category value="">
+          </div>
+          <div class="filters__group">
+            <h2 class="filters__title">Faixa de Preço</h2>
+            <input class="price-range" data-filter-price type="range" min="0" max="15000" value="15000" step="100">
+            <div class="price-range__labels">
+              <span>R$ 0</span>
+              <span data-price-max>R$ 15.000</span>
+            </div>
+          </div>
+          <div class="filters__group">
+            <h2 class="filters__title">Avaliação mínima</h2>
+            <div class="rating-filter">
+              <button class="rating-filter__btn" type="button" data-filter-rating="4">★★★★ <span>ou mais</span></button>
+              <button class="rating-filter__btn" type="button" data-filter-rating="3">★★★ <span>ou mais</span></button>
+              <button class="rating-filter__btn" type="button" data-filter-rating="2">★★ <span>ou mais</span></button>
+              <button class="rating-filter__btn is-active" type="button" data-filter-rating="0">Qualquer avaliação</button>
+            </div>
+          </div>
+          <div class="filters__group">
+            <label class="stock-check"><input data-filter-stock type="checkbox"> Somente em estoque</label>
+          </div>
+        </aside>
+        <section class="products-results">
+          <div class="product-grid" data-products-grid></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/ui/common.js"></script>
+  <script src="../js/ui/store-products.js"></script>
+</body>
+</html>
