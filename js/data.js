@@ -39,10 +39,33 @@ const CUSTOMERS = [
 ];
 
 const CASHFLOW = [
-  { id: 'CF001', type: 'income', description: 'Venda #12847 - MacBook Pro', category: 'Vendas', amount: 12999, date: '2026-05-22 14:32', paymentMethod: 'Cartão', balance: 87543 },
-  { id: 'CF002', type: 'income', description: 'Venda #12846 - Sony + Camiseta', category: 'Vendas', amount: 2377, date: '2026-05-22 11:15', paymentMethod: 'PIX', balance: 74544 },
-  { id: 'CF003', type: 'expense', description: 'Fornecedor Apple - Reposição', category: 'Fornecedor', amount: 45000, date: '2026-05-21 09:00', paymentMethod: 'TED', balance: 72167 },
-  { id: 'CF004', type: 'expense', description: 'Aluguel - Maio 2026', category: 'Despesa fixa', amount: 8500, date: '2026-05-20 08:00', paymentMethod: 'TED', balance: 116268 },
+  // Hoje — 2026-05-25
+  { id: 'CF001', type: 'income',  description: 'Venda #12850 — Tênis Air Max 270',       category: 'Vendas',        amount: 899,   date: '2026-05-25 10:14', paymentMethod: 'Cartão' },
+  { id: 'CF002', type: 'income',  description: 'Venda #12851 — Camiseta Premium ×2',     category: 'Vendas',        amount: 178,   date: '2026-05-25 08:37', paymentMethod: 'PIX' },
+  // Esta semana (19–24/mai)
+  { id: 'CF003', type: 'income',  description: 'Venda #12847 — MacBook Pro 14"',         category: 'Vendas',        amount: 12999, date: '2026-05-22 14:32', paymentMethod: 'Cartão' },
+  { id: 'CF004', type: 'income',  description: 'Venda #12846 — Sony WH-1000XM5 + Cam.', category: 'Vendas',        amount: 2377,  date: '2026-05-22 11:15', paymentMethod: 'PIX' },
+  { id: 'CF005', type: 'income',  description: 'Venda #12845 — Tênis Air Max 270',       category: 'Vendas',        amount: 899,   date: '2026-05-21 16:48', paymentMethod: 'Cartão' },
+  { id: 'CF006', type: 'income',  description: 'Venda #12843 — Mesa Gamer RGB',          category: 'Vendas',        amount: 1899,  date: '2026-05-20 13:22', paymentMethod: 'Boleto' },
+  { id: 'CF007', type: 'income',  description: 'Venda #12848 — Mochila Notebook 15"',   category: 'Vendas',        amount: 279,   date: '2026-05-19 09:05', paymentMethod: 'PIX' },
+  // Este mês mas antes desta semana (1–18/mai)
+  { id: 'CF008', type: 'income',  description: 'Venda #12841 — Cadeira Ergonômica',      category: 'Vendas',        amount: 2799,  date: '2026-05-18 14:08', paymentMethod: 'PIX' },
+  { id: 'CF009', type: 'income',  description: 'Venda #12840 — Camisetas + Mochila',     category: 'Vendas',        amount: 546,   date: '2026-05-17 09:45', paymentMethod: 'Cartão' },
+  { id: 'CF010', type: 'income',  description: 'Venda #12839 — Tênis Nike Running',      category: 'Vendas',        amount: 699,   date: '2026-05-16 11:30', paymentMethod: 'PIX' },
+  { id: 'CF011', type: 'income',  description: 'Venda #12838 — Kit Moda + Mochila',      category: 'Vendas',        amount: 478,   date: '2026-05-15 15:55', paymentMethod: 'Cartão' },
+  { id: 'CF012', type: 'expense', description: 'Folha de pagamento — Maio 2026',         category: 'Despesa fixa',  amount: 18000, date: '2026-05-10 09:00', paymentMethod: 'TED' },
+  { id: 'CF013', type: 'expense', description: 'Aluguel — Maio 2026',                    category: 'Despesa fixa',  amount: 8500,  date: '2026-05-05 08:00', paymentMethod: 'TED' },
+  { id: 'CF014', type: 'income',  description: 'Venda #12844 — Kit Apple Watch+AirPods', category: 'Vendas',        amount: 5499,  date: '2026-05-03 13:20', paymentMethod: 'Cartão' },
+  // Meses anteriores (para filtro Ano)
+  { id: 'CF015', type: 'income',  description: 'Lote vendas — Abril 2026',               category: 'Vendas',        amount: 34500, date: '2026-04-30 18:00', paymentMethod: 'Cartão' },
+  { id: 'CF016', type: 'expense', description: 'Fornecedor Apple — Reposição',           category: 'Fornecedor',    amount: 45000, date: '2026-04-15 09:00', paymentMethod: 'TED' },
+  { id: 'CF017', type: 'expense', description: 'Aluguel — Abril 2026',                   category: 'Despesa fixa',  amount: 8500,  date: '2026-04-05 08:00', paymentMethod: 'TED' },
+  { id: 'CF018', type: 'income',  description: 'Lote vendas — Março 2026',               category: 'Vendas',        amount: 28900, date: '2026-03-31 18:00', paymentMethod: 'Cartão' },
+  { id: 'CF019', type: 'expense', description: 'Aluguel — Março 2026',                   category: 'Despesa fixa',  amount: 8500,  date: '2026-03-05 08:00', paymentMethod: 'TED' },
+  { id: 'CF020', type: 'income',  description: 'Lote vendas — Fevereiro 2026',           category: 'Vendas',        amount: 41200, date: '2026-02-28 18:00', paymentMethod: 'Cartão' },
+  { id: 'CF021', type: 'expense', description: 'Aluguel — Fevereiro 2026',               category: 'Despesa fixa',  amount: 8500,  date: '2026-02-05 08:00', paymentMethod: 'TED' },
+  { id: 'CF022', type: 'income',  description: 'Lote vendas — Janeiro 2026',             category: 'Vendas',        amount: 38700, date: '2026-01-31 18:00', paymentMethod: 'Cartão' },
+  { id: 'CF023', type: 'expense', description: 'Aluguel — Janeiro 2026',                 category: 'Despesa fixa',  amount: 8500,  date: '2026-01-05 08:00', paymentMethod: 'TED' },
 ];
 
 const CATEGORIES = [

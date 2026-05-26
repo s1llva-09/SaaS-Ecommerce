@@ -1,8 +1,21 @@
 /* ============================================================
    ADMIN: CAIXA
-   Resumo financeiro e movimentacoes.
+   Resumo financeiro, filtros de período e movimentações.
    ============================================================ */
 
+/* Linha com as abas de período */
+.cashflow-bar {
+  display: flex;
+  gap: 4px;
+  background: var(--admin-panel-2);
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 20px;
+  width: fit-content;
+}
+
+/* Grid dos 3 cards de resumo */
 .finance-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -10,13 +23,29 @@
   margin-bottom: 16px;
 }
 
-.cash-value {
-  font-size: 28px;
-  font-weight: 900;
+/* Ícone colorido no topo de cada card */
+.finance-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 12px;
 }
 
+/* Textos do card */
+.cash-label { font-size: 13px; color: var(--admin-muted); margin: 0 0 6px; }
+.cash-meta  { font-size: 12px; color: var(--admin-muted); margin: 6px 0 0; }
+
+/* Valor grande */
+.cash-value    { font-size: 26px; font-weight: 900; }
+.cash-positive { color: #22c55e; }
+.cash-negative { color: #ef4444; }
+
+/* Coluna de valor na tabela */
+.cash-income  { color: #22c55e; font-weight: 700; }
+.cash-expense { color: #ef4444; font-weight: 700; }
+
 @media (max-width: 900px) {
-  .finance-grid {
-    grid-template-columns: 1fr;
-  }
+  .finance-grid { grid-template-columns: 1fr; }
 }

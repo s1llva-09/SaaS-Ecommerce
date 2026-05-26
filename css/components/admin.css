@@ -203,6 +203,211 @@
   cursor: default;
 }
 
+/* ── Hamburguer ───────────────────────────────────────────── */
+
+/* Escondido no desktop, aparece no mobile via @media abaixo */
+.admin-hamburger {
+  display: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  color: var(--admin-muted);
+  background: var(--admin-panel-2);
+  border: 1px solid var(--admin-line);
+  flex-shrink: 0;
+}
+
+/* ── Overlay da sidebar ───────────────────────────────────── */
+
+.admin-sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .6);
+  z-index: 99;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+}
+
+.admin-sidebar-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Responsividade mobile (≤ 768 px) ─────────────────────── */
+
+@media (max-width: 768px) {
+  /* Shell vira coluna única — sidebar sai do fluxo */
+  .admin-shell {
+    grid-template-columns: 1fr;
+  }
+
+  /* Sidebar fixada à esquerda, fora da tela por padrão */
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+  }
+
+  .admin-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  /* Hamburguer aparece */
+  .admin-hamburger {
+    display: grid;
+  }
+
+  /* Searchbar some — economiza espaço no topbar */
+  .admin-topbar .admin-searchbar {
+    display: none;
+  }
+
+  /* Topbar: menos gap */
+  .admin-topbar {
+    gap: 8px;
+    padding: 0 14px;
+  }
+
+  /* Tabelas com scroll horizontal — sem quebrar layout */
+  .admin-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  /* Grid de 2 colunas vira 1 coluna */
+  .admin-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  /* Drawer de pedidos full-screen */
+  .order-drawer {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Cards de conteúdo com menos padding */
+  .admin-content {
+    padding: 14px;
+  }
+}
+
+/* ── Notificações ─────────────────────────────────────────── */
+
+/* Wrapper do botão — cria o contexto de posicionamento */
+.notif-wrapper {
+  position: relative;
+}
+
+/* Painel dropdown */
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 320px;
+  background: var(--admin-panel);
+  border: 1px solid var(--admin-line);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(0,0,0,.45);
+  z-index: 200;
+  overflow: hidden;
+  /* estado inicial: escondido */
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity .18s, transform .18s;
+}
+
+/* Classe adicionada pelo JS para abrir */
+.notif-dropdown.is-open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Cabeçalho: título + botão limpar */
+.notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--admin-line);
+}
+
+.notif-header span {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.notif-clear-btn {
+  font-size: 12px;
+  color: var(--brand);
+  font-weight: 700;
+}
+
+.notif-clear-btn:hover { opacity: .8; }
+
+/* Lista de notificações */
+.notif-list {
+  max-height: 320px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+/* Item individual */
+.notif-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--admin-line);
+  transition: background .12s;
+  cursor: default;
+}
+
+.notif-item:last-child { border-bottom: none; }
+.notif-item:hover { background: var(--admin-panel-2); }
+
+/* Bolinha não lida à esquerda */
+.notif-item--unread .notif-text {
+  font-weight: 700;
+}
+
+/* Ícone colorido por tipo */
+.notif-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+}
+
+.notif-icon--order   { background: rgba(99,102,241,.15); }
+.notif-icon--stock   { background: rgba(245,158,11,.15); }
+.notif-icon--payment { background: rgba(34,197,94,.15);  }
+
+/* Texto e hora */
+.notif-body { display: flex; flex-direction: column; gap: 3px; }
+.notif-text { font-size: 13px; line-height: 1.4; }
+.notif-time { font-size: 11px; color: var(--admin-muted); }
+
+/* Estado vazio */
+.notif-empty {
+  padding: 28px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--admin-muted);
+}
+
+/* ───────────────────────────────────────────────────────── */
+
 .admin-content {
   padding: 24px;
 }
