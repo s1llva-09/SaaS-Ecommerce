@@ -203,6 +203,76 @@
   cursor: default;
 }
 
+/* ── Busca global ────────────────────────────────────────── */
+
+.search-wrapper {
+  position: relative;
+}
+
+.search-results {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 320px;
+  background: var(--admin-panel);
+  border: 1px solid var(--admin-line);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(0,0,0,.45);
+  z-index: 200;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity .18s, transform .18s;
+}
+
+.search-results.is-open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.search-group-label {
+  margin: 0;
+  padding: 10px 14px 6px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--admin-muted);
+  border-bottom: 1px solid var(--admin-line);
+}
+
+.search-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--admin-line);
+  transition: background .12s;
+}
+
+.search-item:last-child { border-bottom: none; }
+.search-item:hover { background: var(--admin-panel-2); }
+
+.search-item__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.search-item__meta {
+  font-size: 11px;
+  color: var(--admin-muted);
+}
+
+.search-empty {
+  padding: 24px 14px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--admin-muted);
+}
+
 /* ── Hamburguer ───────────────────────────────────────────── */
 
 /* Escondido no desktop, aparece no mobile via @media abaixo */
@@ -235,9 +305,9 @@
   pointer-events: auto;
 }
 
-/* ── Responsividade mobile (≤ 768 px) ─────────────────────── */
+/* ── Responsividade mobile/tablet (≤ 980 px) ─────────────── */
 
-@media (max-width: 768px) {
+@media (max-width: 980px) {
   /* Shell vira coluna única — sidebar sai do fluxo */
   .admin-shell {
     grid-template-columns: 1fr;
@@ -469,15 +539,6 @@
 }
 
 @media (max-width: 980px) {
-  .admin-shell {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-sidebar {
-    position: static;
-    height: auto;
-  }
-
   .admin-grid-4,
   .admin-grid-2 {
     grid-template-columns: 1fr;

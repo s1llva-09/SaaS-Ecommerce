@@ -131,3 +131,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
   render();
 }); // ← fecha DOMContentLoaded
+
+// ============================================================
+// SIDEBAR MOBILE — toggle hamburguer
+//
+// Responsável por abrir e fechar a sidebar em telas pequenas.
+// O hamburguer ([data-sidebar-btn]) e o overlay ([data-sidebar-overlay])
+// só existem no HTML, mas o CSS só os exibe em @media ≤ 768px.
+//
+// Funcionamento:
+//   - Clicar no hamburguer: adiciona/remove .is-open na sidebar
+//     e no overlay ao mesmo tempo (toggle em ambos)
+//   - Clicar no overlay (área escura fora da sidebar): fecha tudo
+//     removendo .is-open de ambos
+//
+// O overlay serve dois propósitos:
+//   1. Indicar visualmente que a sidebar está aberta (fundo escuro)
+//   2. Ser o alvo de clique para fechar sem precisar de um botão X
+//
+// Guard `if (!btn) return` evita erros em páginas sem hamburguer.
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  const btn     = document.querySelector('[data-sidebar-btn]');
+  const sidebar = document.querySelector('.admin-sidebar');
+  const overlay = document.querySelector('[data-sidebar-overlay]');
+  if (!btn) return;
+
+  // Abre ou fecha a sidebar junto com o overlay
+  btn.addEventListener('click', () => {
+    sidebar.classList.toggle('is-open');
+    overlay.classList.toggle('is-open');
+  });
+
+  // Clicar fora (no overlay) fecha a sidebar
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('is-open');
+    overlay.classList.remove('is-open');
+  });
+});

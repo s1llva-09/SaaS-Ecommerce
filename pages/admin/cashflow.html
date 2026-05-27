@@ -56,9 +56,12 @@
         </button>
         <div><h1>Caixa</h1><span class="text-muted">Movimentação financeira</span></div>
         <div class="admin-topbar__right">
-          <div class="admin-searchbar">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input type="search" placeholder="Buscar...">
+          <div class="search-wrapper">
+            <div class="admin-searchbar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="search" placeholder="Buscar..." data-admin-search>
+            </div>
+            <div class="search-results" data-search-results></div>
           </div>
           <div class="notif-wrapper">
             <button class="admin-icon-btn" data-notif-btn>
@@ -97,6 +100,7 @@
   <script src="../../js/data.js"></script>
   <script src="../../js/ui/common.js"></script>
   <script src="../../js/ui/admin-cashflow.js"></script>
+  <script src="../../js/ui/admin-search.js"></script>
   <script src="../../js/ui/admin-notifications.js"></script>
 </body>
 </html>
