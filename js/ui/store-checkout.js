@@ -135,6 +135,74 @@ document.addEventListener('DOMContentLoaded', () => {
         option.classList.add('is-active');
       });
     });
+
+    // ---------------------------------------------------------
+    // Validação de CEP via ViaCEP — formata o input enquanto o
+    // usuário digita e consulta a API ao completar os 8 dígitos.
+    // Preenche logradouro, bairro, cidade e UF automaticamente.
+    // Os campos de endereço ficam disabled até um CEP válido.
+    // ---------------------------------------------------------
+    const cepInput    = checkoutForm.querySelector('[data-cep-input]');
+    const cepStatus   = checkoutForm.querySelector('[data-cep-status]');
+    const cepStreet   = checkoutForm.querySelector('[data-cep-street]');
+    const cepDistrict = checkoutForm.querySelector('[data-cep-district]');
+    const cepCity     = checkoutForm.querySelector('[data-cep-city]');
+    const cepState    = checkoutForm.querySelector('[data-cep-state]');
+
+    // Limpa e desabilita os campos de endereço
+    function clearAddress() {
+      [cepStreet, cepDistrict, cepCity, cepState].forEach(el => {
+        el.value = '';
+        el.disabled = true;
+      });
+    }
+
+    // Preenche os campos com os dados retornados pela ViaCEP e habilita edição
+    function fillAddress(data) {
+      cepStreet.value   = data.logradouro || '';
+      cepDistrict.value = data.bairro     || '';
+      cepCity.value     = data.localidade || '';
+      cepState.value    = data.uf         || '';
+      [cepStreet, cepDistrict, cepCity, cepState].forEach(el => el.disabled = false);
+      cepStatus.textContent = '✓ Endereço encontrado';
+      cepStatus.style.color = 'var(--green)';
+    }
+
+    cepInput?.addEventListener('input', () => {
+      // Formata enquanto digita: 12345-678
+      let v = cepInput.value.replace(/\D/g, '').slice(0, 8);
+      if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5);
+      cepInput.value = v;
+
+      const digits = v.replace(/\D/g, '');
+
+      // Menos de 8 dígitos: limpa tudo sem chamar a API
+      if (digits.length < 8) {
+        clearAddress();
+        cepStatus.textContent = '';
+        return;
+      }
+
+      // 8 dígitos completos: consulta a API
+      cepStatus.textContent = 'Buscando...';
+      cepStatus.style.color = 'var(--muted)';
+      clearAddress();
+
+      fetch(`https://viacep.com.br/ws/${digits}/json/`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.erro) {
+            cepStatus.textContent = 'CEP não encontrado';
+            cepStatus.style.color = 'var(--red)';
+          } else {
+            fillAddress(data);
+          }
+        })
+        .catch(() => {
+          cepStatus.textContent = 'Erro ao buscar CEP';
+          cepStatus.style.color = 'var(--red)';
+        });
+    });
   }
 
   // ---------------------------------------------------------

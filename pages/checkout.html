@@ -56,7 +56,16 @@
             <input class="field" style="grid-column:1/-1" required placeholder="Nome completo">
             <input class="field" required type="email" placeholder="E-mail">
             <input class="field" required placeholder="Telefone">
-            <input class="field" required placeholder="CEP" maxlength="9">
+            <div style="grid-column:1/-1;display:flex;gap:10px;align-items:center">
+              <input class="field" required placeholder="CEP" maxlength="9" data-cep-input style="max-width:160px">
+              <span style="font-size:13px" data-cep-status></span>
+            </div>
+            <input class="field" style="grid-column:1/-1" placeholder="Logradouro" data-cep-street disabled>
+            <input class="field" placeholder="Bairro" data-cep-district disabled>
+            <input class="field" placeholder="Cidade" data-cep-city disabled>
+            <input class="field" placeholder="UF" maxlength="2" data-cep-state disabled style="max-width:80px">
+            <input class="field" required placeholder="Número" data-cep-number>
+            <input class="field" placeholder="Complemento (opcional)">
           </div>
           <h2>Forma de pagamento</h2>
           <div class="payment-options">
