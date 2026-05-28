@@ -8,29 +8,60 @@ document.addEventListener('DOMContentLoaded', () => {
   const featured = document.querySelector('[data-featured-products]');
   const offers = document.querySelector('[data-offer-products]');
 
+  // ---------------------------------------------------------
+  // Categorias — gera um link por categoria.
+  // Usa createElement + textContent para evitar XSS:
+  // category.name e category.icon vêm do catálogo interno,
+  // mas em produção podem ser editados pelo admin — tratar como dado.
+  // href usa encodeURIComponent para escapar caracteres especiais na URL.
+  // ---------------------------------------------------------
   if (categories) {
-    categories.innerHTML = ShopData.categories().map(category => `
-      <a class="category-card card" href="pages/products.html?category=${encodeURIComponent(category.name)}">
-        <span class="category-card__icon">${category.icon}</span>
-        <strong>${category.name}</strong>
-      </a>
-    `).join('');
+    categories.innerHTML = '';
+    ShopData.categories().forEach(category => {
+      const a = document.createElement('a');
+      a.className = 'category-card card';
+      a.href = `pages/products.html?category=${encodeURIComponent(category.name)}`;
+
+      const iconSpan = document.createElement('span');
+      iconSpan.className = 'category-card__icon';
+      iconSpan.textContent = category.icon;
+      a.appendChild(iconSpan);
+
+      const nameStrong = document.createElement('strong');
+      nameStrong.textContent = category.name;
+      a.appendChild(nameStrong);
+
+      categories.appendChild(a);
+    });
   }
 
+  // ---------------------------------------------------------
+  // Produtos em destaque — até 8 produtos com estoque.
+  // ShopNow.productCard() retorna um elemento DOM (não string),
+  // por isso usamos appendChild em vez de insertAdjacentHTML.
+  // ---------------------------------------------------------
   if (featured) {
-    featured.innerHTML = ShopData.products()
+    featured.innerHTML = '';
+    ShopData.products()
       .filter(product => product.stock > 0)
       .slice(0, 8)
-      .map(product => ShopNow.productCard(product))
-      .join('');
+      .forEach(product => {
+        featured.appendChild(ShopNow.productCard(product));
+      });
   }
 
+  // ---------------------------------------------------------
+  // Ofertas — até 4 produtos com preço original cadastrado
+  // (produto.originalPrice indica que tem desconto aplicado).
+  // ---------------------------------------------------------
   if (offers) {
-    offers.innerHTML = ShopData.products()
+    offers.innerHTML = '';
+    ShopData.products()
       .filter(product => product.originalPrice)
       .slice(0, 4)
-      .map(product => ShopNow.productCard(product))
-      .join('');
+      .forEach(product => {
+        offers.appendChild(ShopNow.productCard(product));
+      });
   }
 
   const hEl = document.querySelector('[data-countdown-h]');

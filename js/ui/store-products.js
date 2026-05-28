@@ -38,15 +38,41 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (categoryList) {
-    const allBtn = `<button class="category-filter__item ${!category.value ? 'is-active' : ''}" type="button" data-category="">
-      <span>🏷️ Todas</span><strong>${ShopNow.int(ShopData.products().length)}</strong>
-    </button>`;
-    categoryList.innerHTML = allBtn + ShopData.categories().map(item => `
-      <button class="category-filter__item ${category.value === item.name ? 'is-active' : ''}" type="button" data-category="${item.name}">
-        <span>${item.icon} ${item.name}</span>
-        <strong>${ShopNow.int(item.count)}</strong>
-      </button>
-    `).join('');
+    categoryList.innerHTML = '';
+
+    // Botão "Todas"
+    const allBtn = document.createElement('button');
+    allBtn.className = 'category-filter__item' + (!category.value ? ' is-active' : '');
+    allBtn.type = 'button';
+    allBtn.dataset.category = '';
+
+    const allIconSpan = document.createElement('span');
+    allIconSpan.textContent = '🏷️ Todas';
+    allBtn.appendChild(allIconSpan);
+
+    const allCountStrong = document.createElement('strong');
+    allCountStrong.textContent = ShopNow.int(ShopData.products().length);
+    allBtn.appendChild(allCountStrong);
+
+    categoryList.appendChild(allBtn);
+
+    // Botões por categoria
+    ShopData.categories().forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'category-filter__item' + (category.value === item.name ? ' is-active' : '');
+      btn.type = 'button';
+      btn.dataset.category = item.name;
+
+      const iconSpan = document.createElement('span');
+      iconSpan.textContent = `${item.icon} ${item.name}`;
+      btn.appendChild(iconSpan);
+
+      const countStrong = document.createElement('strong');
+      countStrong.textContent = ShopNow.int(item.count);
+      btn.appendChild(countStrong);
+
+      categoryList.appendChild(btn);
+    });
   }
 
   function sortProducts(products) {
@@ -84,40 +110,131 @@ document.addEventListener('DOMContentLoaded', () => {
 
     grid.className = viewMode === 'list' ? 'product-list' : 'product-grid';
 
+    grid.innerHTML = '';
+
     if (!products.length) {
-      grid.innerHTML = '<div class="card" style="padding:32px;text-align:center;grid-column:1/-1">Nenhum produto encontrado para esse filtro.</div>';
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'card';
+      emptyDiv.style.padding = '32px';
+      emptyDiv.style.textAlign = 'center';
+      emptyDiv.style.gridColumn = '1/-1';
+      emptyDiv.textContent = 'Nenhum produto encontrado para esse filtro.';
+      grid.appendChild(emptyDiv);
       return;
     }
 
-    grid.innerHTML = viewMode === 'list'
-      ? products.map(p => productListItem(p)).join('')
-      : products.map(p => ShopNow.productCard(p)).join('');
+    // ---------------------------------------------------------
+    // Renderiza os cards conforme o modo de visualização:
+    //   'list' → productListItem() — layout horizontal com descrição
+    //   'grid' → ShopNow.productCard() — card compacto com imagem
+    // Ambas retornam elementos DOM (não strings), logo appendChild.
+    // ---------------------------------------------------------
+    if (viewMode === 'list') {
+      products.forEach(p => {
+        grid.appendChild(productListItem(p));
+      });
+    } else {
+      products.forEach(p => {
+        grid.appendChild(ShopNow.productCard(p));
+      });
+    }
   }
 
-  function productListItem(product) {
-    const discount = ShopNow.discount(product);
-    return `
-      <article class="product-list-item card">
-        <a class="product-list-item__image" href="${ShopNow.productUrl(product.id)}">
-          <img src="${product.image}" alt="${product.name}" loading="lazy">
-          ${discount ? `<span class="badge badge-red" style="position:absolute;top:8px;left:8px;background:#ff5a00;color:#fff">-${discount}%</span>` : ''}
-          ${product.stock === 0 ? '<span class="badge" style="position:absolute;top:8px;right:8px;background:#334155;color:#fff">Sem estoque</span>' : ''}
-        </a>
-        <div class="product-list-item__body">
-          <div class="product-card__category">${product.category}</div>
-          <a href="${ShopNow.productUrl(product.id)}"><h3 class="product-card__name">${product.name}</h3></a>
-          <p class="product-card__rating">${ShopNow.stars(product.rating)} <em>(${ShopNow.int(product.reviews)})</em></p>
-          <p class="product-list-item__desc">${product.description || ''}</p>
-        </div>
-        <div class="product-list-item__footer">
-          ${product.originalPrice ? `<div class="product-card__old-price">${ShopNow.money(product.originalPrice)}</div>` : ''}
-          <div class="product-card__price">${ShopNow.money(product.price)}</div>
-          ${product.stock > 0
-            ? `<button class="btn btn-primary product-card__add" data-add-cart="${product.id}" type="button">+ Carrinho</button>`
-            : '<span class="badge badge-red">Sem estoque</span>'}
-        </div>
-      </article>`;
+function productListItem(product) {
+  const discount = ShopNow.discount(product);
+
+  const article = document.createElement('article');
+  article.className = 'product-list-item card';
+
+  const imgLink = document.createElement('a');
+  imgLink.className = 'product-list-item__image';
+  imgLink.href = ShopNow.productUrl(product.id);
+
+  const img = document.createElement('img');
+  img.src = product.image;
+  img.alt = product.name;
+  img.loading = 'lazy';
+  imgLink.appendChild(img);
+
+  if (discount) {
+    const b = document.createElement('span');
+    b.className = 'badge badge-red';
+    b.style.cssText = 'position:absolute;top:8px;left:8px;background:#ff5a00;color:#fff';
+    b.textContent = `-${discount}%`;
+    imgLink.appendChild(b);
   }
+  if (product.stock === 0) {
+    const b = document.createElement('span');
+    b.className = 'badge';
+    b.style.cssText = 'position:absolute;top:8px;right:8px;background:#334155;color:#fff';
+    b.textContent = 'Sem estoque';
+    imgLink.appendChild(b);
+  }
+  article.appendChild(imgLink);
+
+  const bodyDiv = document.createElement('div');
+  bodyDiv.className = 'product-list-item__body';
+
+  const catDiv = document.createElement('div');
+  catDiv.className = 'product-card__category';
+  catDiv.textContent = product.category;
+  bodyDiv.appendChild(catDiv);
+
+  const nameLink = document.createElement('a');
+  nameLink.href = ShopNow.productUrl(product.id);
+  const nameH3 = document.createElement('h3');
+  nameH3.className = 'product-card__name';
+  nameH3.textContent = product.name;
+  nameLink.appendChild(nameH3);
+  bodyDiv.appendChild(nameLink);
+
+  const ratingP = document.createElement('p');
+  ratingP.className = 'product-card__rating';
+  ratingP.innerHTML = ShopNow.stars(product.rating);
+  const em = document.createElement('em');
+  em.textContent = ` (${ShopNow.int(product.reviews)})`;
+  ratingP.appendChild(em);
+  bodyDiv.appendChild(ratingP);
+
+  const descP = document.createElement('p');
+  descP.className = 'product-list-item__desc';
+  descP.textContent = product.description || '';
+  bodyDiv.appendChild(descP);
+
+  article.appendChild(bodyDiv);
+
+  const footerDiv = document.createElement('div');
+  footerDiv.className = 'product-list-item__footer';
+
+  if (product.originalPrice) {
+    const oldPrice = document.createElement('div');
+    oldPrice.className = 'product-card__old-price';
+    oldPrice.textContent = ShopNow.money(product.originalPrice);
+    footerDiv.appendChild(oldPrice);
+  }
+
+  const priceDiv = document.createElement('div');
+  priceDiv.className = 'product-card__price';
+  priceDiv.textContent = ShopNow.money(product.price);
+  footerDiv.appendChild(priceDiv);
+
+  if (product.stock > 0) {
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn btn-primary product-card__add';
+    addBtn.dataset.addCart = product.id;
+    addBtn.type = 'button';
+    addBtn.textContent = '+ Carrinho';
+    footerDiv.appendChild(addBtn);
+  } else {
+    const badge = document.createElement('span');
+    badge.className = 'badge badge-red';
+    badge.textContent = 'Sem estoque';
+    footerDiv.appendChild(badge);
+  }
+
+  article.appendChild(footerDiv);
+  return article;
+}
 
   categoryList?.addEventListener('click', event => {
     const button = event.target.closest('[data-category]');

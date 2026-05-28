@@ -37,34 +37,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sem resultados: mostra mensagem
     if (!orders.length && !products.length) {
-      panel.innerHTML = `<div class="search-empty">Nenhum resultado para "${query}"</div>`;
+      panel.innerHTML = '';
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'search-empty';
+      emptyDiv.textContent = `Nenhum resultado para "${query}"`;
+      panel.appendChild(emptyDiv);
       panel.classList.add('is-open');
       return;
     }
 
-    let html = '';
+    panel.innerHTML = '';
 
     if (orders.length) {
-      html += `<p class="search-group-label">Pedidos</p>`;
-      html += orders.map(o => `
-        <a class="search-item" href="orders.html">
-          <span class="search-item__title">${o.id} — ${o.customer}</span>
-          <span class="search-item__meta">${ShopNow.money(o.total)} · ${o.date}</span>
-        </a>
-      `).join('');
+      const groupLabel = document.createElement('p');
+      groupLabel.className = 'search-group-label';
+      groupLabel.textContent = 'Pedidos';
+      panel.appendChild(groupLabel);
+
+      orders.forEach(o => {
+        const a = document.createElement('a');
+        a.className = 'search-item';
+        a.href = 'orders.html';
+
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'search-item__title';
+        titleSpan.textContent = `${o.id} — ${o.customer}`;
+        a.appendChild(titleSpan);
+
+        const metaSpan = document.createElement('span');
+        metaSpan.className = 'search-item__meta';
+        metaSpan.textContent = `${ShopNow.money(o.total)} · ${o.date}`;
+        a.appendChild(metaSpan);
+
+        panel.appendChild(a);
+      });
     }
 
     if (products.length) {
-      html += `<p class="search-group-label">Produtos</p>`;
-      html += products.map(p => `
-        <a class="search-item" href="products.html">
-          <span class="search-item__title">${p.name}</span>
-          <span class="search-item__meta">${p.category} · ${ShopNow.money(p.price)}</span>
-        </a>
-      `).join('');
+      const groupLabel = document.createElement('p');
+      groupLabel.className = 'search-group-label';
+      groupLabel.textContent = 'Produtos';
+      panel.appendChild(groupLabel);
+
+      products.forEach(p => {
+        const a = document.createElement('a');
+        a.className = 'search-item';
+        a.href = 'products.html';
+
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'search-item__title';
+        titleSpan.textContent = p.name;
+        a.appendChild(titleSpan);
+
+        const metaSpan = document.createElement('span');
+        metaSpan.className = 'search-item__meta';
+        metaSpan.textContent = `${p.category} · ${ShopNow.money(p.price)}`;
+        a.appendChild(metaSpan);
+
+        panel.appendChild(a);
+      });
     }
 
-    panel.innerHTML = html;
     panel.classList.add('is-open');
   }
 

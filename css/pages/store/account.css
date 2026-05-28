@@ -34,6 +34,147 @@
   align-items: center;
 }
 
+/* ── Drawer de detalhe do pedido ──────────────────────────── */
+
+.od-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 300;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+}
+
+.od-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.od-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: min(480px, 100vw);
+  height: 100vh;
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+  box-shadow: -12px 0 40px rgba(0,0,0,.1);
+  z-index: 301;
+  transform: translateX(100%);
+  transition: transform .28s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.od-drawer.is-open {
+  transform: translateX(0);
+}
+
+.od-drawer__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.od-close {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  color: var(--muted);
+  flex-shrink: 0;
+  transition: background .12s, color .12s;
+}
+
+.od-close:hover {
+  background: var(--store-bg);
+  color: var(--text);
+}
+
+.od-drawer__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.od-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.od-section-title {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+.od-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.od-item:last-child { border-bottom: none; }
+
+.od-item__info { display: flex; flex-direction: column; gap: 2px; }
+.od-item__name { font-weight: 700; }
+.od-item__qty  { font-size: 12px; color: var(--muted); }
+.od-item__price { font-weight: 700; white-space: nowrap; }
+
+.od-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.od-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.od-meta-item label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+}
+
+.od-meta-item span {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.od-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0 0;
+  border-top: 2px solid var(--line);
+  font-weight: 900;
+  font-size: 17px;
+}
+
+/* ── Confirmação de compra ────────────────────────────────── */
+
 .confirmation-card {
   max-width: 680px;
   margin: 56px auto;

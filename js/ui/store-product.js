@@ -11,27 +11,131 @@ document.addEventListener('DOMContentLoaded', () => {
   const product = ShopData.products().find(item => item.id === productId);
 
   if (!product) {
-    mount.innerHTML = '<div class="card" style="padding:32px">Produto nao encontrado.</div>';
+    mount.innerHTML = '';
+    const notFound = document.createElement('div');
+    notFound.className = 'card';
+    notFound.style.padding = '32px';
+    notFound.textContent = 'Produto nao encontrado.';
+    mount.appendChild(notFound);
     return;
   }
 
   document.title = `${product.name} - ShopNow`;
-  mount.innerHTML = `
-    <div class="product-gallery card">
-      <img src="${product.image}" alt="${product.name}">
-    </div>
-    <aside class="product-buybox card">
-      <span class="badge badge-indigo">${product.category}</span>
-      <h1>${product.name}</h1>
-      <p class="text-muted">${product.description}</p>
-      <div class="price-xl">${ShopNow.money(product.price)}</div>
-      ${product.originalPrice ? `<p class="text-muted">De ${ShopNow.money(product.originalPrice)} por ${ShopNow.discount(product)}% OFF</p>` : ''}
-      <p><strong>SKU:</strong> ${product.sku}</p>
-      <p><strong>Estoque:</strong> ${product.stock} unidades</p>
-      ${product.colors ? `<h3>Cores</h3><div class="variant-row">${product.colors.map(color => `<button class="variant-pill">${color}</button>`).join('')}</div>` : ''}
-      ${product.sizes ? `<h3>Tamanhos</h3><div class="variant-row">${product.sizes.map(size => `<button class="variant-pill">${size}</button>`).join('')}</div>` : ''}
-      <button class="btn btn-primary" data-add-cart="${product.id}" style="width:100%;margin-top:14px">Adicionar ao carrinho</button>
-      <button class="btn btn-ghost" data-buy-now="${product.id}" style="width:100%;margin-top:10px">Comprar agora</button>
-    </aside>
-  `;
+
+  // Monta a página: galeria à esquerda, buybox com detalhes à direita.
+  mount.innerHTML = '';
+
+  // Galeria
+  const gallery = document.createElement('div');
+  gallery.className = 'product-gallery card';
+  const img = document.createElement('img');
+  img.src = product.image;
+  img.alt = product.name;
+  gallery.appendChild(img);
+  mount.appendChild(gallery);
+
+  // Buybox
+  // Buybox — informações, preço, variações e ações de compra.
+  const aside = document.createElement('aside');
+  aside.className = 'product-buybox card';
+
+  // Badge categoria
+  const categoryBadge = document.createElement('span');
+  categoryBadge.className = 'badge badge-indigo';
+  categoryBadge.textContent = product.category;
+  aside.appendChild(categoryBadge);
+
+  // Nome
+  const h1 = document.createElement('h1');
+  h1.textContent = product.name;
+  aside.appendChild(h1);
+
+  // Descrição
+  const descP = document.createElement('p');
+  descP.className = 'text-muted';
+  descP.textContent = product.description;
+  aside.appendChild(descP);
+
+  // Preço
+  const priceDiv = document.createElement('div');
+  priceDiv.className = 'price-xl';
+  priceDiv.textContent = ShopNow.money(product.price);
+  aside.appendChild(priceDiv);
+
+  // Preço original e desconto
+  if (product.originalPrice) {
+    const origP = document.createElement('p');
+    origP.className = 'text-muted';
+    origP.textContent = `De ${ShopNow.money(product.originalPrice)} por ${ShopNow.discount(product)}% OFF`;
+    aside.appendChild(origP);
+  }
+
+  // SKU
+  const skuP = document.createElement('p');
+  const skuStrong = document.createElement('strong');
+  skuStrong.textContent = 'SKU:';
+  skuP.appendChild(skuStrong);
+  skuP.appendChild(document.createTextNode(` ${product.sku}`));
+  aside.appendChild(skuP);
+
+  // Estoque
+  const stockP = document.createElement('p');
+  const stockStrong = document.createElement('strong');
+  stockStrong.textContent = 'Estoque:';
+  stockP.appendChild(stockStrong);
+  stockP.appendChild(document.createTextNode(` ${product.stock} unidades`));
+  aside.appendChild(stockP);
+
+  // Variações opcionais — só renderiza se o produto tiver cores/tamanhos cadastrados.
+  // Variações de cor
+  if (product.colors) {
+    const colorsH3 = document.createElement('h3');
+    colorsH3.textContent = 'Cores';
+    aside.appendChild(colorsH3);
+    const colorsRow = document.createElement('div');
+    colorsRow.className = 'variant-row';
+    product.colors.forEach(color => {
+      const btn = document.createElement('button');
+      btn.className = 'variant-pill';
+      btn.textContent = color;
+      colorsRow.appendChild(btn);
+    });
+    aside.appendChild(colorsRow);
+  }
+
+  // Variações de tamanho
+  if (product.sizes) {
+    const sizesH3 = document.createElement('h3');
+    sizesH3.textContent = 'Tamanhos';
+    aside.appendChild(sizesH3);
+    const sizesRow = document.createElement('div');
+    sizesRow.className = 'variant-row';
+    product.sizes.forEach(size => {
+      const btn = document.createElement('button');
+      btn.className = 'variant-pill';
+      btn.textContent = size;
+      sizesRow.appendChild(btn);
+    });
+    aside.appendChild(sizesRow);
+  }
+
+  // Botão adicionar ao carrinho
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn btn-primary';
+  addBtn.dataset.addCart = product.id;
+  addBtn.style.width = '100%';
+  addBtn.style.marginTop = '14px';
+  addBtn.textContent = 'Adicionar ao carrinho';
+  aside.appendChild(addBtn);
+
+  // Botão comprar agora
+  const buyBtn = document.createElement('button');
+  buyBtn.className = 'btn btn-ghost';
+  buyBtn.dataset.buyNow = product.id;
+  buyBtn.style.width = '100%';
+  buyBtn.style.marginTop = '10px';
+  buyBtn.textContent = 'Comprar agora';
+  aside.appendChild(buyBtn);
+
+  mount.appendChild(aside);
 });

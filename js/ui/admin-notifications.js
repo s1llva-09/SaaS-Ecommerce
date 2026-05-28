@@ -82,29 +82,63 @@ document.addEventListener('DOMContentLoaded', () => {
     // Ponto vermelho no sino: aparece só se houver não lidas
     dot.style.display = unread.length ? '' : 'none';
 
+    panel.innerHTML = '';
+
     if (!NOTIFICATIONS.length) {
-      panel.innerHTML = `<div class="notif-empty">Nenhuma notificação</div>`;
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'notif-empty';
+      emptyDiv.textContent = 'Nenhuma notificação';
+      panel.appendChild(emptyDiv);
       return;
     }
 
-    panel.innerHTML = `
-      <div class="notif-header">
-        <span>Notificações</span>
-        <button class="notif-clear-btn" data-notif-clear>Limpar tudo</button>
-      </div>
-      <ul class="notif-list">
-        ${NOTIFICATIONS.map(n => `
-          <li class="notif-item ${n.unread ? 'notif-item--unread' : ''}">
-            <div class="notif-icon notif-icon--${n.type}">${NOTIF_ICONS[n.type]}</div>
-            <div class="notif-body">
-              <p class="notif-text">${n.text}</p>
-              <span class="notif-time">${n.time}</span>
-            </div>
-          </li>
-        `).join('')}
-      </ul>
-    `
-    // Botão limpar só existe após o innerHTML acima, então ouve aqui
+    const header = document.createElement('div');
+    header.className = 'notif-header';
+
+    const headerTitle = document.createElement('span');
+    headerTitle.textContent = 'Notificações';
+    header.appendChild(headerTitle);
+
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'notif-clear-btn';
+    clearBtn.dataset.notifClear = '';
+    clearBtn.textContent = 'Limpar tudo';
+    header.appendChild(clearBtn);
+
+    panel.appendChild(header);
+
+    const ul = document.createElement('ul');
+    ul.className = 'notif-list';
+
+    NOTIFICATIONS.forEach(n => {
+      const li = document.createElement('li');
+      li.className = 'notif-item' + (n.unread ? ' notif-item--unread' : '');
+
+      const iconDiv = document.createElement('div');
+      iconDiv.className = `notif-icon notif-icon--${n.type}`;
+      iconDiv.textContent = NOTIF_ICONS[n.type];
+      li.appendChild(iconDiv);
+
+      const bodyDiv = document.createElement('div');
+      bodyDiv.className = 'notif-body';
+
+      const textP = document.createElement('p');
+      textP.className = 'notif-text';
+      textP.textContent = n.text;
+      bodyDiv.appendChild(textP);
+
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'notif-time';
+      timeSpan.textContent = n.time;
+      bodyDiv.appendChild(timeSpan);
+
+      li.appendChild(bodyDiv);
+      ul.appendChild(li);
+    });
+
+    panel.appendChild(ul);
+
+    // Botão limpar só existe após a construção acima, então ouve aqui
     panel.querySelector('[data-notif-clear]')?.addEventListener('click', () => {
       NOTIFICATIONS.length = 0;
       render();

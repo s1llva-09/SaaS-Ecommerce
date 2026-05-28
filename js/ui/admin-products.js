@@ -8,7 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const search = document.querySelector('[data-admin-product-search]');
   if (!grid) return;
 
-  // ---- Modal ----
+  // ---------------------------------------------------------
+  // Modal "Novo Produto" — estrutura estática injetada via innerHTML.
+  // Não contém dados do usuário: todos os campos são inputs vazios.
+  // O select de categorias é preenchido depois via createElement.
+  // ---------------------------------------------------------
   const overlay = document.createElement('div');
   overlay.className = 'admin-modal-overlay is-hidden';
   overlay.innerHTML = `
@@ -38,9 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="admin-form-grid-2">
           <div>
             <label class="admin-field-label">Categoria</label>
-            <select class="admin-field">
-              ${ShopData.categories().map(c => `<option>${c.name}</option>`).join('')}
-            </select>
+            <select class="admin-field" data-category-select></select>
           </div>
           <div>
             <label class="admin-field-label">SKU *</label>
@@ -79,6 +81,14 @@ document.addEventListener('DOMContentLoaded', () => {
   `;
   document.body.appendChild(overlay);
 
+  // Preenche o select de categorias via createElement (dados do sistema)
+  const categorySelect = overlay.querySelector('[data-category-select]');
+  ShopData.categories().forEach(c => {
+    const option = document.createElement('option');
+    option.textContent = c.name;
+    categorySelect.appendChild(option);
+  });
+
   overlay.querySelectorAll('[data-modal-close]').forEach(btn => {
     btn.addEventListener('click', () => overlay.classList.add('is-hidden'));
   });
@@ -94,16 +104,21 @@ document.addEventListener('DOMContentLoaded', () => {
   newBtn?.addEventListener('click', () => overlay.classList.remove('is-hidden'));
 
   // ---- Product card ----
+  // Retorna cor CSS conforme nível de estoque: vermelho (0), amarelo (≤5), verde (>5).
   function stockColor(stock) {
     if (stock === 0) return '#dc2626';
     if (stock <= 5) return '#d97706';
     return '#16a34a';
   }
 
+  // Converte unidades em % para a barra de estoque visual (cap: 50 un = 100%).
   function stockPct(stock) {
     return Math.min(100, Math.round((stock / 50) * 100));
   }
 
+  // ---------------------------------------------------------
+  // Filtra produtos por nome/SKU e renderiza os cards na grade.
+  // ---------------------------------------------------------
   function render() {
     const query = (search?.value || '').toLowerCase();
     const products = ShopData.products().filter(p =>
@@ -111,7 +126,9 @@ document.addEventListener('DOMContentLoaded', () => {
       (p.sku && p.sku.toLowerCase().includes(query))
     );
 
-    grid.innerHTML = products.map(product => {
+    grid.innerHTML = '';
+
+    products.forEach(product => {
       const outOfStock = product.stock === 0;
       const lowStock = product.stock > 0 && product.stock <= 5;
       const discount = product.originalPrice
@@ -120,29 +137,108 @@ document.addEventListener('DOMContentLoaded', () => {
       const color = stockColor(product.stock);
       const pct = stockPct(product.stock);
 
-      return `
-        <article class="admin-product-card admin-card">
-          <div class="admin-product-card__img">
-            <img src="${product.image}" alt="${product.name}" loading="lazy">
-            ${outOfStock ? '<span class="admin-product-card__badge" style="background:#dc2626;color:#fff">Sem estoque</span>' : ''}
-            ${lowStock ? '<span class="admin-product-card__badge" style="background:#d97706;color:#fff">Baixo estoque</span>' : ''}
-          </div>
-          <p class="text-muted" style="margin:0 0 4px;font-size:12px">${product.category}</p>
-          <strong style="font-size:14px;line-height:1.3">${product.name}</strong>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
-            <div>
-              <strong style="font-size:15px">${ShopNow.money(product.price)}</strong>
-              ${product.originalPrice ? `<span style="font-size:11px;text-decoration:line-through;color:var(--admin-muted);margin-left:4px">${ShopNow.money(product.originalPrice)}</span>` : ''}
-            </div>
-            <span class="badge" style="background:${outOfStock ? 'rgba(220,38,38,.18)' : lowStock ? 'rgba(217,119,6,.18)' : 'rgba(22,163,74,.18)'};color:${color};font-size:11px">${product.stock} un.</span>
-          </div>
-          <div class="admin-product-card__stock-bar">
-            <div class="admin-product-card__stock-bar-fill" style="width:${pct}%;background:${color}"></div>
-          </div>
-          <p class="admin-product-card__sku">SKU: ${product.sku || '—'}</p>
-        </article>
-      `;
-    }).join('');
+      const article = document.createElement('article');
+      article.className = 'admin-product-card admin-card';
+
+      // Imagem + badges de estoque
+      const imgDiv = document.createElement('div');
+      imgDiv.className = 'admin-product-card__img';
+
+      const img = document.createElement('img');
+      img.src = product.image;
+      img.alt = product.name;
+      img.loading = 'lazy';
+      imgDiv.appendChild(img);
+
+      if (outOfStock) {
+        const badge = document.createElement('span');
+        badge.className = 'admin-product-card__badge';
+        badge.style.background = '#dc2626';
+        badge.style.color = '#fff';
+        badge.textContent = 'Sem estoque';
+        imgDiv.appendChild(badge);
+      }
+      if (lowStock) {
+        const badge = document.createElement('span');
+        badge.className = 'admin-product-card__badge';
+        badge.style.background = '#d97706';
+        badge.style.color = '#fff';
+        badge.textContent = 'Baixo estoque';
+        imgDiv.appendChild(badge);
+      }
+      article.appendChild(imgDiv);
+
+      // Categoria
+      const categoryP = document.createElement('p');
+      categoryP.className = 'text-muted';
+      categoryP.style.margin = '0 0 4px';
+      categoryP.style.fontSize = '12px';
+      categoryP.textContent = product.category;
+      article.appendChild(categoryP);
+
+      // Nome
+      const nameStrong = document.createElement('strong');
+      nameStrong.style.fontSize = '14px';
+      nameStrong.style.lineHeight = '1.3';
+      nameStrong.textContent = product.name;
+      article.appendChild(nameStrong);
+
+      // Preço + badge de quantidade
+      const priceRow = document.createElement('div');
+      priceRow.style.display = 'flex';
+      priceRow.style.alignItems = 'center';
+      priceRow.style.justifyContent = 'space-between';
+      priceRow.style.marginTop = '8px';
+
+      const priceDiv = document.createElement('div');
+      const priceStrong = document.createElement('strong');
+      priceStrong.style.fontSize = '15px';
+      priceStrong.textContent = ShopNow.money(product.price);
+      priceDiv.appendChild(priceStrong);
+
+      if (product.originalPrice) {
+        const oldPriceSpan = document.createElement('span');
+        oldPriceSpan.style.fontSize = '11px';
+        oldPriceSpan.style.textDecoration = 'line-through';
+        oldPriceSpan.style.color = 'var(--admin-muted)';
+        oldPriceSpan.style.marginLeft = '4px';
+        oldPriceSpan.textContent = ShopNow.money(product.originalPrice);
+        priceDiv.appendChild(oldPriceSpan);
+      }
+      priceRow.appendChild(priceDiv);
+
+      const stockBadge = document.createElement('span');
+      stockBadge.className = 'badge';
+      stockBadge.style.background = outOfStock
+        ? 'rgba(220,38,38,.18)'
+        : lowStock
+          ? 'rgba(217,119,6,.18)'
+          : 'rgba(22,163,74,.18)';
+      stockBadge.style.color = color;
+      stockBadge.style.fontSize = '11px';
+      stockBadge.textContent = `${product.stock} un.`;
+      priceRow.appendChild(stockBadge);
+
+      article.appendChild(priceRow);
+
+      // Barra de estoque
+      const barDiv = document.createElement('div');
+      barDiv.className = 'admin-product-card__stock-bar';
+      const barFill = document.createElement('div');
+      barFill.className = 'admin-product-card__stock-bar-fill';
+      barFill.style.width = `${pct}%`;
+      barFill.style.background = color;
+      barDiv.appendChild(barFill);
+      article.appendChild(barDiv);
+
+      // SKU
+      const skuP = document.createElement('p');
+      skuP.className = 'admin-product-card__sku';
+      skuP.textContent = `SKU: ${product.sku || '—'}`;
+      article.appendChild(skuP);
+
+      grid.appendChild(article);
+    });
   }
 
   search?.addEventListener('input', render);

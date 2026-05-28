@@ -50,31 +50,20 @@ document.addEventListener('DOMContentLoaded', () => {
     return steps.map((s, i) => ({ ...s, done: i <= n }));
   }
 
-  function getActions(order) {
-    if (['delivered', 'cancelled'].includes(order.status)) return '';
-    const btns = [];
-    if (order.status === 'paid') {
-      const label = order.type === 'pickup' ? 'Marcar como pronto' : 'Marcar como enviado';
-      btns.push(`<button class="btn-confirm-delivery" style="background:var(--brand)" data-order-action="advance" data-order-id="${order.id}">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
-        ${label}
-      </button>`);
-    } else if (order.status === 'shipped') {
-      btns.push(`<button class="btn-confirm-delivery" data-order-action="advance" data-order-id="${order.id}">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
-        Confirmar entrega
-      </button>`);
-    } else if (order.status === 'ready') {
-      btns.push(`<button class="btn-confirm-delivery" data-order-action="advance" data-order-id="${order.id}">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
-        Confirmar retirada
-      </button>`);
-    }
-    btns.push(`<button class="btn-cancel-order" data-order-action="cancel" data-order-id="${order.id}">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
-      Cancelar pedido
-    </button>`);
-    return `<div class="drawer-actions">${btns.join('')}</div>`;
+  // SVGs estáticos usados nos botões de ação (sem dados do usuário)
+  const SVG_CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>';
+  const SVG_CANCEL = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>';
+
+  function buildActionButton(cls, action, orderId, svgHtml, label) {
+    const btn = document.createElement('button');
+    btn.className = cls;
+    btn.dataset.orderAction = action;
+    btn.dataset.orderId = orderId;
+    // svgHtml é código SVG estático definido no código, não dados do usuário
+    btn.innerHTML = svgHtml;
+    const labelText = document.createTextNode(` ${label}`);
+    btn.appendChild(labelText);
+    return btn;
   }
 
   function openDrawer(order) {
@@ -82,72 +71,204 @@ document.addEventListener('DOMContentLoaded', () => {
     const sc = STATUS_COLORS[cfg.cls] || STATUS_COLORS['badge-blue'];
     const timeline = getTimeline(order);
 
-    drawer.innerHTML = `
-      <div class="order-drawer__head">
-        <div>
-          <div class="order-drawer__id">${order.id}</div>
-          <div class="order-drawer__date">${order.date}</div>
-        </div>
-        <button class="order-drawer__close" data-drawer-close>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-        </button>
-      </div>
-      <div class="order-drawer__status-bar">
-        <span style="display:block;padding:10px;border-radius:10px;text-align:center;font-weight:900;font-size:13px;background:${sc.bg};color:${sc.text};letter-spacing:.04em">${cfg.label}</span>
-      </div>
-      <div class="order-drawer__body">
-        <div>
-          <p class="drawer-section__label">Cliente</p>
-          <div class="drawer-customer__name">${order.customer}</div>
-          <div class="drawer-customer__info">${order.email}<br>${order.city}</div>
-        </div>
-        <div>
-          <p class="drawer-section__label">Itens do pedido</p>
-          <div class="drawer-items">
-            ${order.items.map(item => `
-              <div class="drawer-item">
-                <span>${item.name} × ${item.qty}</span>
-                <strong>${ShopNow.money(item.price * item.qty)}</strong>
-              </div>`).join('')}
-          </div>
-          <div class="drawer-total">
-            <span>Total</span>
-            <strong style="color:var(--admin-text)">${ShopNow.money(order.total)}</strong>
-          </div>
-        </div>
-        <div>
-          <p class="drawer-section__label">Pagamento e entrega</p>
-          <div class="drawer-payment">
-            <div class="drawer-payment__row">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-              ${order.paymentMethod}
-            </div>
-            <div class="drawer-payment__row">
-              ${order.type === 'pickup'
-                ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'
-                : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="19" r="1"/><circle cx="20" cy="19" r="1"/></svg>'}
-              ${order.type === 'pickup' ? 'Retirada na loja' : 'Entrega em domicílio'}
-            </div>
-          </div>
-        </div>
-        <div>
-          <p class="drawer-section__label">Linha do tempo</p>
-          <div class="drawer-timeline">
-            ${timeline.map(step => `
-              <div class="timeline-step ${step.done ? 'is-done' : ''}">
-                <div class="timeline-dot">
-                  ${step.done ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' : ''}
-                </div>
-                <div>
-                  <div class="timeline-label">${step.label}</div>
-                  ${step.date && step.done ? `<div class="timeline-date">${step.date}</div>` : ''}
-                </div>
-              </div>`).join('')}
-          </div>
-        </div>
-        ${getActions(order)}
-      </div>
-    `;
+    drawer.innerHTML = '';
+
+    // Cabeçalho do drawer
+    const head = document.createElement('div');
+    head.className = 'order-drawer__head';
+
+    const headInfo = document.createElement('div');
+    const idDiv = document.createElement('div');
+    idDiv.className = 'order-drawer__id';
+    idDiv.textContent = order.id;
+    headInfo.appendChild(idDiv);
+    const dateDiv = document.createElement('div');
+    dateDiv.className = 'order-drawer__date';
+    dateDiv.textContent = order.date;
+    headInfo.appendChild(dateDiv);
+    head.appendChild(headInfo);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'order-drawer__close';
+    closeBtn.dataset.drawerClose = '';
+    // SVG estático de fechar — sem dados do usuário
+    closeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+    head.appendChild(closeBtn);
+    drawer.appendChild(head);
+
+    // Barra de status
+    const statusBar = document.createElement('div');
+    statusBar.className = 'order-drawer__status-bar';
+    const statusSpan = document.createElement('span');
+    statusSpan.style.display = 'block';
+    statusSpan.style.padding = '10px';
+    statusSpan.style.borderRadius = '10px';
+    statusSpan.style.textAlign = 'center';
+    statusSpan.style.fontWeight = '900';
+    statusSpan.style.fontSize = '13px';
+    statusSpan.style.background = sc.bg;
+    statusSpan.style.color = sc.text;
+    statusSpan.style.letterSpacing = '.04em';
+    statusSpan.textContent = cfg.label;
+    statusBar.appendChild(statusSpan);
+    drawer.appendChild(statusBar);
+
+    // Body
+    const body = document.createElement('div');
+    body.className = 'order-drawer__body';
+
+    // Seção Cliente
+    const customerSection = document.createElement('div');
+    const customerLabel = document.createElement('p');
+    customerLabel.className = 'drawer-section__label';
+    customerLabel.textContent = 'Cliente';
+    customerSection.appendChild(customerLabel);
+    const customerName = document.createElement('div');
+    customerName.className = 'drawer-customer__name';
+    customerName.textContent = order.customer;
+    customerSection.appendChild(customerName);
+    const customerInfo = document.createElement('div');
+    customerInfo.className = 'drawer-customer__info';
+    customerInfo.textContent = order.email;
+    const infoBr = document.createElement('br');
+    customerInfo.appendChild(infoBr);
+    customerInfo.appendChild(document.createTextNode(order.city));
+    customerSection.appendChild(customerInfo);
+    body.appendChild(customerSection);
+
+    // Seção Itens do pedido
+    const itemsSection = document.createElement('div');
+    const itemsLabel = document.createElement('p');
+    itemsLabel.className = 'drawer-section__label';
+    itemsLabel.textContent = 'Itens do pedido';
+    itemsSection.appendChild(itemsLabel);
+
+    const itemsDiv = document.createElement('div');
+    itemsDiv.className = 'drawer-items';
+    order.items.forEach(item => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'drawer-item';
+
+      const itemName = document.createElement('span');
+      itemName.textContent = `${item.name} × ${item.qty}`;
+      itemDiv.appendChild(itemName);
+
+      const itemPrice = document.createElement('strong');
+      itemPrice.textContent = ShopNow.money(item.price * item.qty);
+      itemDiv.appendChild(itemPrice);
+
+      itemsDiv.appendChild(itemDiv);
+    });
+    itemsSection.appendChild(itemsDiv);
+
+    const totalDiv = document.createElement('div');
+    totalDiv.className = 'drawer-total';
+    const totalLabel = document.createElement('span');
+    totalLabel.textContent = 'Total';
+    totalDiv.appendChild(totalLabel);
+    const totalStrong = document.createElement('strong');
+    totalStrong.style.color = 'var(--admin-text)';
+    totalStrong.textContent = ShopNow.money(order.total);
+    totalDiv.appendChild(totalStrong);
+    itemsSection.appendChild(totalDiv);
+    body.appendChild(itemsSection);
+
+    // Seção Pagamento e entrega
+    const paymentSection = document.createElement('div');
+    const paymentLabel = document.createElement('p');
+    paymentLabel.className = 'drawer-section__label';
+    paymentLabel.textContent = 'Pagamento e entrega';
+    paymentSection.appendChild(paymentLabel);
+
+    const paymentDiv = document.createElement('div');
+    paymentDiv.className = 'drawer-payment';
+
+    const paymentRow = document.createElement('div');
+    paymentRow.className = 'drawer-payment__row';
+    // SVG de cartão — estático, sem dados do usuário
+    paymentRow.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>';
+    paymentRow.appendChild(document.createTextNode(` ${order.paymentMethod}`));
+    paymentDiv.appendChild(paymentRow);
+
+    const typeRow = document.createElement('div');
+    typeRow.className = 'drawer-payment__row';
+    if (order.type === 'pickup') {
+      // SVG de casa — estático
+      typeRow.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
+      typeRow.appendChild(document.createTextNode(' Retirada na loja'));
+    } else {
+      // SVG de caminhão — estático
+      typeRow.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="19" r="1"/><circle cx="20" cy="19" r="1"/></svg>';
+      typeRow.appendChild(document.createTextNode(' Entrega em domicílio'));
+    }
+    paymentDiv.appendChild(typeRow);
+
+    paymentSection.appendChild(paymentDiv);
+    body.appendChild(paymentSection);
+
+    // Seção Linha do tempo
+    const timelineSection = document.createElement('div');
+    const timelineLabel = document.createElement('p');
+    timelineLabel.className = 'drawer-section__label';
+    timelineLabel.textContent = 'Linha do tempo';
+    timelineSection.appendChild(timelineLabel);
+
+    const timelineDiv = document.createElement('div');
+    timelineDiv.className = 'drawer-timeline';
+
+    timeline.forEach(step => {
+      const stepDiv = document.createElement('div');
+      stepDiv.className = 'timeline-step' + (step.done ? ' is-done' : '');
+
+      const dot = document.createElement('div');
+      dot.className = 'timeline-dot';
+      if (step.done) {
+        // SVG de check — estático
+        dot.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+      }
+      stepDiv.appendChild(dot);
+
+      const stepInfo = document.createElement('div');
+      const stepLabelDiv = document.createElement('div');
+      stepLabelDiv.className = 'timeline-label';
+      stepLabelDiv.textContent = step.label;
+      stepInfo.appendChild(stepLabelDiv);
+
+      if (step.date && step.done) {
+        const stepDate = document.createElement('div');
+        stepDate.className = 'timeline-date';
+        stepDate.textContent = step.date;
+        stepInfo.appendChild(stepDate);
+      }
+
+      stepDiv.appendChild(stepInfo);
+      timelineDiv.appendChild(stepDiv);
+    });
+
+    timelineSection.appendChild(timelineDiv);
+    body.appendChild(timelineSection);
+
+    // Ações
+    if (!['delivered', 'cancelled'].includes(order.status)) {
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = 'drawer-actions';
+
+      if (order.status === 'paid') {
+        const label = order.type === 'pickup' ? 'Marcar como pronto' : 'Marcar como enviado';
+        const btn = buildActionButton('btn-confirm-delivery', 'advance', order.id, SVG_CHECK, label);
+        btn.style.background = 'var(--brand)';
+        actionsDiv.appendChild(btn);
+      } else if (order.status === 'shipped') {
+        actionsDiv.appendChild(buildActionButton('btn-confirm-delivery', 'advance', order.id, SVG_CHECK, 'Confirmar entrega'));
+      } else if (order.status === 'ready') {
+        actionsDiv.appendChild(buildActionButton('btn-confirm-delivery', 'advance', order.id, SVG_CHECK, 'Confirmar retirada'));
+      }
+
+      actionsDiv.appendChild(buildActionButton('btn-cancel-order', 'cancel', order.id, SVG_CANCEL, 'Cancelar pedido'));
+      body.appendChild(actionsDiv);
+    }
+
+    drawer.appendChild(body);
 
     drawer.querySelector('[data-drawer-close]').addEventListener('click', closeDrawer);
     drawer.querySelectorAll('[data-order-action]').forEach(btn => {
@@ -182,7 +303,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const count = counts[key];
       if (count !== undefined) {
         const label = filter.textContent.trim();
-        filter.innerHTML = `${label} <span style="opacity:.65;font-size:12px">${count}</span>`;
+        filter.textContent = label;
+        const countSpan = document.createElement('span');
+        countSpan.style.opacity = '.65';
+        countSpan.style.fontSize = '12px';
+        countSpan.textContent = String(count);
+        filter.appendChild(document.createTextNode(' '));
+        filter.appendChild(countSpan);
       }
     });
   }
@@ -205,18 +332,71 @@ document.addEventListener('DOMContentLoaded', () => {
       );
     }
 
-    tbody.innerHTML = orders.map(order => `
-      <tr data-order-id="${order.id}">
-        <td><span style="color:#818cf8;font-weight:700">${order.id}</span></td>
-        <td>${order.customer}<br><span class="text-muted" style="font-size:12px">${order.email}</span></td>
-        <td style="color:var(--admin-muted)">${order.items.length}</td>
-        <td><strong>${ShopNow.money(order.total)}</strong></td>
-        <td style="color:var(--admin-muted)">${order.paymentMethod}</td>
-        <td style="font-size:17px">${order.type === 'pickup' ? '🏪' : '🏠'}</td>
-        <td>${ShopNow.statusBadge(order.status)}</td>
-        <td class="text-muted">${order.date}</td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = '';
+
+    orders.forEach(order => {
+      const tr = document.createElement('tr');
+      tr.dataset.orderId = order.id;
+
+      // ID
+      const tdId = document.createElement('td');
+      const idSpan = document.createElement('span');
+      idSpan.style.color = '#818cf8';
+      idSpan.style.fontWeight = '700';
+      idSpan.textContent = order.id;
+      tdId.appendChild(idSpan);
+      tr.appendChild(tdId);
+
+      // Cliente + email
+      const tdCustomer = document.createElement('td');
+      tdCustomer.textContent = order.customer;
+      const br = document.createElement('br');
+      tdCustomer.appendChild(br);
+      const emailSpan = document.createElement('span');
+      emailSpan.className = 'text-muted';
+      emailSpan.style.fontSize = '12px';
+      emailSpan.textContent = order.email;
+      tdCustomer.appendChild(emailSpan);
+      tr.appendChild(tdCustomer);
+
+      // Qtd itens
+      const tdItems = document.createElement('td');
+      tdItems.style.color = 'var(--admin-muted)';
+      tdItems.textContent = String(order.items.length);
+      tr.appendChild(tdItems);
+
+      // Total
+      const tdTotal = document.createElement('td');
+      const totalStrong = document.createElement('strong');
+      totalStrong.textContent = ShopNow.money(order.total);
+      tdTotal.appendChild(totalStrong);
+      tr.appendChild(tdTotal);
+
+      // Pagamento
+      const tdPayment = document.createElement('td');
+      tdPayment.style.color = 'var(--admin-muted)';
+      tdPayment.textContent = order.paymentMethod;
+      tr.appendChild(tdPayment);
+
+      // Tipo (emoji estático)
+      const tdType = document.createElement('td');
+      tdType.style.fontSize = '17px';
+      tdType.textContent = order.type === 'pickup' ? '🏪' : '🏠';
+      tr.appendChild(tdType);
+
+      // Status — statusBadge retorna HTML estático do sistema (classes/labels controlados internamente)
+      const tdStatus = document.createElement('td');
+      tdStatus.innerHTML = ShopNow.statusBadge(order.status);
+      tr.appendChild(tdStatus);
+
+      // Data
+      const tdDate = document.createElement('td');
+      tdDate.className = 'text-muted';
+      tdDate.textContent = order.date;
+      tr.appendChild(tdDate);
+
+      tbody.appendChild(tr);
+    });
 
     tbody.querySelectorAll('tr').forEach(row => {
       row.addEventListener('click', () => {

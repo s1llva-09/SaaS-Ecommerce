@@ -20,6 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
     cancels: { bg: 'rgba(239,68,68,.18)',  color: '#f87171', svg: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>' },
   };
 
+  // ---------------------------------------------------------
+  // Renderiza os 4 cards de KPI (Receita, Pedidos, Clientes, Cancelamentos).
+  // period controla qual dataset de receita usar: 'week' ou 'month'.
+  // ---------------------------------------------------------
   function buildKpis(period) {
     const orders = ShopData.orders();
     const revenue = period === 'week'
@@ -35,23 +39,53 @@ document.addEventListener('DOMContentLoaded', () => {
       { key: 'cancels', value: ShopNow.int(cancelled),  label: 'Cancelamentos', trend: '−5.9%', up: false },
     ];
 
-    return cards.map(card => {
+    if (!kpisEl) return;
+    kpisEl.innerHTML = '';
+
+    cards.forEach(card => {
       const icon = KPI_ICONS[card.key];
-      return `
-        <article class="admin-kpi-card">
-          <div class="kpi-header">
-            <div class="kpi-icon" style="background:${icon.bg};color:${icon.color}">${icon.svg}</div>
-            <span class="kpi-trend ${card.up ? 'up' : 'down'}">${card.trend}</span>
-          </div>
-          <div class="kpi-value">${card.value}</div>
-          <p class="kpi-label">${card.label}</p>
-        </article>
-      `;
-    }).join('');
+
+      const article = document.createElement('article');
+      article.className = 'admin-kpi-card';
+
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'kpi-header';
+
+      const iconDiv = document.createElement('div');
+      iconDiv.className = 'kpi-icon';
+      iconDiv.style.background = icon.bg;
+      iconDiv.style.color = icon.color;
+      // icon.svg contém apenas SVG estático definido no código (sem dados do usuário)
+      iconDiv.innerHTML = icon.svg;
+      headerDiv.appendChild(iconDiv);
+
+      const trendSpan = document.createElement('span');
+      trendSpan.className = `kpi-trend ${card.up ? 'up' : 'down'}`;
+      trendSpan.textContent = card.trend;
+      headerDiv.appendChild(trendSpan);
+
+      article.appendChild(headerDiv);
+
+      const valueDiv = document.createElement('div');
+      valueDiv.className = 'kpi-value';
+      valueDiv.textContent = card.value;
+      article.appendChild(valueDiv);
+
+      const labelP = document.createElement('p');
+      labelP.className = 'kpi-label';
+      labelP.textContent = card.label;
+      article.appendChild(labelP);
+
+      kpisEl.appendChild(article);
+    });
   }
 
   let revenueChart = null;
 
+  // ---------------------------------------------------------
+  // Renderiza o gráfico de linha de receita.
+  // Destrói a instância anterior antes de criar para evitar sobreposição.
+  // ---------------------------------------------------------
   function buildRevenueChart(period) {
     if (!revenueCanvas || !window.Chart) return;
     const data = period === 'week' ? WEEKLY : MONTHLY;
@@ -89,6 +123,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let channelsChart = null;
 
+  // ---------------------------------------------------------
+  // Renderiza o donut de canais de venda + legenda abaixo do gráfico.
+  // Destrói a instância anterior antes de criar.
+  // ---------------------------------------------------------
   function buildChannelsChart() {
     if (!channelsCanvas || !window.Chart) return;
     const channels = ShopData.channels();
@@ -120,29 +158,68 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const legendEl = document.querySelector('[data-channels-legend]');
     if (legendEl) {
-      legendEl.innerHTML = channels.map(c => `
-        <div class="chart-legend__item">
-          <span class="chart-legend__label">
-            <span class="chart-legend__dot" style="background:${c.color}"></span>
-            ${c.label}
-          </span>
-          <span class="chart-legend__pct">${c.value}%</span>
-        </div>
-      `).join('');
+      legendEl.innerHTML = '';
+      channels.forEach(c => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'chart-legend__item';
+
+        const labelSpan = document.createElement('span');
+        labelSpan.className = 'chart-legend__label';
+
+        const dot = document.createElement('span');
+        dot.className = 'chart-legend__dot';
+        dot.style.background = c.color;
+        labelSpan.appendChild(dot);
+
+        const labelText = document.createTextNode(c.label);
+        labelSpan.appendChild(labelText);
+
+        itemDiv.appendChild(labelSpan);
+
+        const pctSpan = document.createElement('span');
+        pctSpan.className = 'chart-legend__pct';
+        pctSpan.textContent = `${c.value}%`;
+        itemDiv.appendChild(pctSpan);
+
+        legendEl.appendChild(itemDiv);
+      });
     }
   }
 
+  // Últimos 5 pedidos — tabela de pedidos recentes no dashboard.
   if (recentEl) {
-    recentEl.innerHTML = ShopData.orders().slice(0, 5).map(order => `
-      <tr>
-        <td><span style="color:#818cf8;font-weight:700">${order.id}</span></td>
-        <td>${order.customer}</td>
-        <td><strong>${ShopNow.money(order.total)}</strong></td>
-        <td>${ShopNow.statusBadge(order.status)}</td>
-      </tr>
-    `).join('');
+    recentEl.innerHTML = '';
+    ShopData.orders().slice(0, 5).forEach(order => {
+      const tr = document.createElement('tr');
+
+      const tdId = document.createElement('td');
+      const idSpan = document.createElement('span');
+      idSpan.style.color = '#818cf8';
+      idSpan.style.fontWeight = '700';
+      idSpan.textContent = order.id;
+      tdId.appendChild(idSpan);
+      tr.appendChild(tdId);
+
+      const tdCustomer = document.createElement('td');
+      tdCustomer.textContent = order.customer;
+      tr.appendChild(tdCustomer);
+
+      const tdTotal = document.createElement('td');
+      const totalStrong = document.createElement('strong');
+      totalStrong.textContent = ShopNow.money(order.total);
+      tdTotal.appendChild(totalStrong);
+      tr.appendChild(tdTotal);
+
+      const tdStatus = document.createElement('td');
+      // statusBadge retorna HTML estático (só classes/labels do sistema, sem dados do usuário)
+      tdStatus.innerHTML = ShopNow.statusBadge(order.status);
+      tr.appendChild(tdStatus);
+
+      recentEl.appendChild(tr);
+    });
   }
 
+  // Atualiza o título e subtítulo do gráfico conforme o período selecionado.
   function setChartTitle(period) {
     const titleEl = document.querySelector('[data-revenue-title]');
     if (titleEl) {
@@ -160,9 +237,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentPeriod = 'week';
 
+  // Orquestra a atualização de todos os componentes ao trocar de período.
   function update(period) {
     currentPeriod = period;
-    if (kpisEl) kpisEl.innerHTML = buildKpis(period);
+    buildKpis(period);
     buildRevenueChart(period);
     setChartTitle(period);
   }

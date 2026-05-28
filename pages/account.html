@@ -58,6 +58,20 @@
     </div>
   </main>
 
+  <!-- Overlay do drawer -->
+  <div class="od-overlay" data-od-overlay></div>
+
+  <!-- Drawer de detalhe do pedido -->
+  <aside class="od-drawer" data-od-drawer aria-hidden="true">
+    <div class="od-drawer__header">
+      <button class="od-close" data-od-close aria-label="Fechar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+      <span data-od-title>Detalhe do pedido</span>
+    </div>
+    <div class="od-drawer__body" data-od-body></div>
+  </aside>
+
   <script src="../js/data.js"></script>
   <script src="../js/ui/common.js"></script>
   <script src="../js/ui/store-account.js"></script>

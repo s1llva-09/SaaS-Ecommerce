@@ -76,14 +76,38 @@
       { label: 'Saídas',  value: expense, valueCls: 'cash-negative', iconBg: 'rgba(239,68,68,.15)', iconColor: '#ef4444', icon: ICONS.down },
     ];
 
-    document.querySelector('[data-cash-summary]').innerHTML = cards.map(c => `
-      <article class="admin-card">
-        <div class="finance-card-icon" style="background:${c.iconBg};color:${c.iconColor}">${c.icon}</div>
-        <p class="cash-label">${c.label}</p>
-        <div class="cash-value ${c.valueCls}">${ShopNow.money(c.value)}</div>
-        <p class="cash-meta">${label}</p>  <!-- ex: "Semana" embaixo do valor -->
-      </article>
-    `).join('');
+    const summaryEl = document.querySelector('[data-cash-summary]');
+    summaryEl.innerHTML = '';
+
+    cards.forEach(c => {
+      const article = document.createElement('article');
+      article.className = 'admin-card';
+
+      const iconDiv = document.createElement('div');
+      iconDiv.className = 'finance-card-icon';
+      iconDiv.style.background = c.iconBg;
+      iconDiv.style.color = c.iconColor;
+      // ICONS contém apenas SVGs estáticos definidos no código (sem dados do usuário)
+      iconDiv.innerHTML = c.icon;
+      article.appendChild(iconDiv);
+
+      const labelP = document.createElement('p');
+      labelP.className = 'cash-label';
+      labelP.textContent = c.label;
+      article.appendChild(labelP);
+
+      const valueDiv = document.createElement('div');
+      valueDiv.className = `cash-value ${c.valueCls}`;
+      valueDiv.textContent = ShopNow.money(c.value);
+      article.appendChild(valueDiv);
+
+      const metaP = document.createElement('p');
+      metaP.className = 'cash-meta';
+      metaP.textContent = label; // ex: "Semana" embaixo do valor
+      article.appendChild(metaP);
+
+      summaryEl.appendChild(article);
+    });
   }
 
   // ---------------------------------------------------------
@@ -94,26 +118,68 @@
     const tbody  = document.querySelector('[data-admin-cashflow]');
     const sorted = [...entries].sort((a, b) => b.date.localeCompare(a.date));
 
+    tbody.innerHTML = '';
+
     if (!sorted.length) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--admin-muted)">Nenhuma movimentação neste período</td></tr>`;
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 5;
+      td.style.textAlign = 'center';
+      td.style.padding = '32px';
+      td.style.color = 'var(--admin-muted)';
+      td.textContent = 'Nenhuma movimentação neste período';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
       return;
     }
 
-    tbody.innerHTML = sorted.map(e => `
-      <tr>
-        <td><span class="text-muted" style="font-size:12px">${e.id}</span></td>
-        <td>
-          ${e.description}
-          <br><span class="text-muted" style="font-size:12px">${e.category}</span>
-        </td>
-        <td>${e.paymentMethod}</td>
-        <td><span class="text-muted" style="font-size:12px">${e.date}</span></td>
-        <!-- + verde para entrada, − vermelho para saída -->
-        <td class="${e.type === 'income' ? 'cash-income' : 'cash-expense'}">
-          ${e.type === 'income' ? '+' : '−'} ${ShopNow.money(e.amount)}
-        </td>
-      </tr>
-    `).join('');
+    sorted.forEach(e => {
+      const tr = document.createElement('tr');
+
+      // Coluna ID
+      const tdId = document.createElement('td');
+      const idSpan = document.createElement('span');
+      idSpan.className = 'text-muted';
+      idSpan.style.fontSize = '12px';
+      idSpan.textContent = e.id;
+      tdId.appendChild(idSpan);
+      tr.appendChild(tdId);
+
+      // Coluna Descrição + Categoria
+      const tdDesc = document.createElement('td');
+      const descText = document.createTextNode(e.description);
+      tdDesc.appendChild(descText);
+      const br = document.createElement('br');
+      tdDesc.appendChild(br);
+      const catSpan = document.createElement('span');
+      catSpan.className = 'text-muted';
+      catSpan.style.fontSize = '12px';
+      catSpan.textContent = e.category;
+      tdDesc.appendChild(catSpan);
+      tr.appendChild(tdDesc);
+
+      // Coluna Pagamento
+      const tdPayment = document.createElement('td');
+      tdPayment.textContent = e.paymentMethod;
+      tr.appendChild(tdPayment);
+
+      // Coluna Data
+      const tdDate = document.createElement('td');
+      const dateSpan = document.createElement('span');
+      dateSpan.className = 'text-muted';
+      dateSpan.style.fontSize = '12px';
+      dateSpan.textContent = e.date;
+      tdDate.appendChild(dateSpan);
+      tr.appendChild(tdDate);
+
+      // Coluna Valor (+ verde para entrada, − vermelho para saída)
+      const tdAmount = document.createElement('td');
+      tdAmount.className = e.type === 'income' ? 'cash-income' : 'cash-expense';
+      tdAmount.textContent = `${e.type === 'income' ? '+' : '−'} ${ShopNow.money(e.amount)}`;
+      tr.appendChild(tdAmount);
+
+      tbody.appendChild(tr);
+    });
   }
 
   // ---------------------------------------------------------

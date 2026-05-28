@@ -8,32 +8,114 @@ document.addEventListener('DOMContentLoaded', () => {
   const checkoutForm = document.querySelector('[data-checkout-form]');
   const confirmation = document.querySelector('[data-confirmation]');
 
+  // ---------------------------------------------------------
+  // Resumo do pedido — lista itens com qtd e preço + subtotal/frete/total.
+  // Frete grátis para compras acima de R$ 299.
+  // ---------------------------------------------------------
   if (checkoutSummary) {
     const items = ShopNow.cartItems();
     const subtotal = ShopNow.cartTotal();
     const shipping = subtotal >= 299 ? 0 : 24.9;
     const total = subtotal + shipping;
     checkoutSummary.style.padding = '22px';
-    checkoutSummary.innerHTML = `
-      <h2 style="margin:0 0 16px;font-size:16px;font-weight:900">Resumo do pedido</h2>
-      <div style="display:grid;gap:10px;margin-bottom:16px">
-        ${items.map(item => `
-          <div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;color:#6b7280">
-            <span>${item.qty}x ${item.product.name}</span>
-            <span style="font-weight:700;color:var(--text);white-space:nowrap">${ShopNow.money(item.product.price * item.qty)}</span>
-          </div>`).join('')}
-      </div>
-      <div style="border-top:1px solid var(--line);padding-top:12px;display:grid;gap:8px">
-        <div class="summary-row"><span>Subtotal</span><span style="font-weight:700">${ShopNow.money(subtotal)}</span></div>
-        <div class="summary-row"><span>Frete</span><span style="font-weight:700;color:${shipping === 0 ? 'var(--green)' : 'inherit'}">${shipping === 0 ? 'Grátis' : ShopNow.money(shipping, true)}</span></div>
-        <div style="display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid var(--line)">
-          <span style="font-weight:900;font-size:15px">Total</span>
-          <strong style="font-size:20px;color:var(--brand)">${ShopNow.money(total, true)}</strong>
-        </div>
-      </div>
-    `;
+
+    checkoutSummary.innerHTML = '';
+
+    const title = document.createElement('h2');
+    title.style.margin = '0 0 16px';
+    title.style.fontSize = '16px';
+    title.style.fontWeight = '900';
+    title.textContent = 'Resumo do pedido';
+    checkoutSummary.appendChild(title);
+
+    const itemsGrid = document.createElement('div');
+    itemsGrid.style.display = 'grid';
+    itemsGrid.style.gap = '10px';
+    itemsGrid.style.marginBottom = '16px';
+
+    items.forEach(item => {
+      const rowDiv = document.createElement('div');
+      rowDiv.style.display = 'flex';
+      rowDiv.style.justifyContent = 'space-between';
+      rowDiv.style.gap = '8px';
+      rowDiv.style.fontSize = '13px';
+      rowDiv.style.color = '#6b7280';
+
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = `${item.qty}x ${item.product.name}`;
+      rowDiv.appendChild(nameSpan);
+
+      const priceSpan = document.createElement('span');
+      priceSpan.style.fontWeight = '700';
+      priceSpan.style.color = 'var(--text)';
+      priceSpan.style.whiteSpace = 'nowrap';
+      priceSpan.textContent = ShopNow.money(item.product.price * item.qty);
+      rowDiv.appendChild(priceSpan);
+
+      itemsGrid.appendChild(rowDiv);
+    });
+    checkoutSummary.appendChild(itemsGrid);
+
+    const totalsDiv = document.createElement('div');
+    totalsDiv.style.borderTop = '1px solid var(--line)';
+    totalsDiv.style.paddingTop = '12px';
+    totalsDiv.style.display = 'grid';
+    totalsDiv.style.gap = '8px';
+
+    // Subtotal
+    const subtotalRow = document.createElement('div');
+    subtotalRow.className = 'summary-row';
+    const subtotalLabel = document.createElement('span');
+    subtotalLabel.textContent = 'Subtotal';
+    subtotalRow.appendChild(subtotalLabel);
+    const subtotalValue = document.createElement('span');
+    subtotalValue.style.fontWeight = '700';
+    subtotalValue.textContent = ShopNow.money(subtotal);
+    subtotalRow.appendChild(subtotalValue);
+    totalsDiv.appendChild(subtotalRow);
+
+    // Frete
+    const shippingRow = document.createElement('div');
+    shippingRow.className = 'summary-row';
+    const shippingLabel = document.createElement('span');
+    shippingLabel.textContent = 'Frete';
+    shippingRow.appendChild(shippingLabel);
+    const shippingValue = document.createElement('span');
+    shippingValue.style.fontWeight = '700';
+    if (shipping === 0) {
+      shippingValue.style.color = 'var(--green)';
+      shippingValue.textContent = 'Grátis';
+    } else {
+      shippingValue.textContent = ShopNow.money(shipping, true);
+    }
+    shippingRow.appendChild(shippingValue);
+    totalsDiv.appendChild(shippingRow);
+
+    // Total
+    const totalRow = document.createElement('div');
+    totalRow.style.display = 'flex';
+    totalRow.style.justifyContent = 'space-between';
+    totalRow.style.paddingTop = '10px';
+    totalRow.style.borderTop = '1px solid var(--line)';
+    const totalLabel = document.createElement('span');
+    totalLabel.style.fontWeight = '900';
+    totalLabel.style.fontSize = '15px';
+    totalLabel.textContent = 'Total';
+    totalRow.appendChild(totalLabel);
+    const totalValue = document.createElement('strong');
+    totalValue.style.fontSize = '20px';
+    totalValue.style.color = 'var(--brand)';
+    totalValue.textContent = ShopNow.money(total, true);
+    totalRow.appendChild(totalValue);
+    totalsDiv.appendChild(totalRow);
+
+    checkoutSummary.appendChild(totalsDiv);
   }
 
+  // ---------------------------------------------------------
+  // Formulário de checkout — ao submeter, salva o pedido no
+  // localStorage, limpa o carrinho e redireciona à confirmação.
+  // ---------------------------------------------------------
   if (checkoutForm) {
     checkoutForm.addEventListener('submit', event => {
       event.preventDefault();
@@ -55,16 +137,50 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ---------------------------------------------------------
+  // Página de confirmação — lê o pedido salvo no localStorage
+  // e exibe ID, total e botões de ação.
+  // ---------------------------------------------------------
   if (confirmation) {
     const order = JSON.parse(localStorage.getItem('shopnow-last-order') || '{}');
-    confirmation.innerHTML = `
-      <h1>Pedido confirmado</h1>
-      <p class="text-muted">Seu pedido ${order.id || '#12999'} foi registrado com sucesso.</p>
-      <p><strong>Total:</strong> ${ShopNow.money(order.total || 0)}</p>
-      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px">
-        <a class="btn btn-primary" href="../index.html">Continuar comprando</a>
-        <a class="btn btn-ghost" href="account.html">Ver pedidos</a>
-      </div>
-    `;
+
+    confirmation.innerHTML = '';
+
+    const h1 = document.createElement('h1');
+    h1.textContent = 'Pedido confirmado';
+    confirmation.appendChild(h1);
+
+    const descP = document.createElement('p');
+    descP.className = 'text-muted';
+    descP.textContent = `Seu pedido ${order.id || '#12999'} foi registrado com sucesso.`;
+    confirmation.appendChild(descP);
+
+    const totalP = document.createElement('p');
+    const totalStrong = document.createElement('strong');
+    totalStrong.textContent = 'Total:';
+    totalP.appendChild(totalStrong);
+    totalP.appendChild(document.createTextNode(` ${ShopNow.money(order.total || 0)}`));
+    confirmation.appendChild(totalP);
+
+    const actionsDiv = document.createElement('div');
+    actionsDiv.style.display = 'flex';
+    actionsDiv.style.gap = '10px';
+    actionsDiv.style.justifyContent = 'center';
+    actionsDiv.style.flexWrap = 'wrap';
+    actionsDiv.style.marginTop = '22px';
+
+    const continueLink = document.createElement('a');
+    continueLink.className = 'btn btn-primary';
+    continueLink.href = '../index.html';
+    continueLink.textContent = 'Continuar comprando';
+    actionsDiv.appendChild(continueLink);
+
+    const ordersLink = document.createElement('a');
+    ordersLink.className = 'btn btn-ghost';
+    ordersLink.href = 'account.html';
+    ordersLink.textContent = 'Ver pedidos';
+    actionsDiv.appendChild(ordersLink);
+
+    confirmation.appendChild(actionsDiv);
   }
 });
