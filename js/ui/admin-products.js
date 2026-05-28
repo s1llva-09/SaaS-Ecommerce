@@ -72,6 +72,18 @@ document.addEventListener('DOMContentLoaded', () => {
             </select>
           </div>
         </div>
+        <div class="admin-form-grid-2">
+          <div>
+            <label class="admin-field-label">Cores</label>
+            <input class="admin-field" type="text" placeholder="Preto, Branco, Azul">
+            <small style="color:var(--admin-muted);font-size:11px">Separadas por vírgula</small>
+          </div>
+          <div>
+            <label class="admin-field-label">Tamanhos</label>
+            <input class="admin-field" type="text" placeholder="P, M, G, GG">
+            <small style="color:var(--admin-muted);font-size:11px">Separados por vírgula</small>
+          </div>
+        </div>
       </div>
       <div class="admin-modal__footer">
         <button class="btn-admin-cancel" data-modal-close>Cancelar</button>

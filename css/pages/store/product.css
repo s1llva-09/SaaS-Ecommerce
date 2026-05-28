@@ -51,6 +51,25 @@
   padding: 8px 12px;
   background: #fff;
   font-weight: 700;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+
+.variant-pill:hover:not(.is-selected) {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.variant-pill.is-selected {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: #fff;
+}
+
+.btn:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 @media (max-width: 860px) {

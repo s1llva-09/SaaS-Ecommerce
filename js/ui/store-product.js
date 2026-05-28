@@ -137,5 +137,36 @@ document.addEventListener('DOMContentLoaded', () => {
   buyBtn.textContent = 'Comprar agora';
   aside.appendChild(buyBtn);
 
+  // ---------------------------------------------------------
+  // Seleção de variações — cada .variant-row é um grupo independente
+  // (ex: uma row de cores, outra de tamanhos). Clicar num pill marca
+  // .is-selected nele e remove dos demais da mesma row.
+  // Os botões de compra ficam desabilitados até que todas as rows
+  // tenham pelo menos um pill selecionado.
+  // ---------------------------------------------------------
+  const variantRows = aside.querySelectorAll('.variant-row');
+
+  function checkVariants() {
+    const allSelected = [...variantRows].every(row => row.querySelector('.is-selected'));
+    addBtn.disabled = !allSelected;
+    buyBtn.disabled = !allSelected;
+  }
+
+  variantRows.forEach(row => {
+    row.addEventListener('click', e => {
+      const pill = e.target.closest('.variant-pill');
+      if (!pill) return;
+      row.querySelectorAll('.variant-pill').forEach(b => b.classList.remove('is-selected'));
+      pill.classList.add('is-selected');
+      checkVariants();
+    });
+  });
+
+  // Começa bloqueado se o produto exige seleção de variação
+  if (variantRows.length) {
+    addBtn.disabled = true;
+    buyBtn.disabled = true;
+  }
+
   mount.appendChild(aside);
 });
