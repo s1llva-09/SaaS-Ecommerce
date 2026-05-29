@@ -100,15 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusBar = document.createElement('div');
     statusBar.className = 'order-drawer__status-bar';
     const statusSpan = document.createElement('span');
-    statusSpan.style.display = 'block';
-    statusSpan.style.padding = '10px';
-    statusSpan.style.borderRadius = '10px';
-    statusSpan.style.textAlign = 'center';
-    statusSpan.style.fontWeight = '900';
-    statusSpan.style.fontSize = '13px';
+    statusSpan.className = 'drawer-status-label';
     statusSpan.style.background = sc.bg;
     statusSpan.style.color = sc.text;
-    statusSpan.style.letterSpacing = '.04em';
     statusSpan.textContent = cfg.label;
     statusBar.appendChild(statusSpan);
     drawer.appendChild(statusBar);
@@ -167,7 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
     totalLabel.textContent = 'Total';
     totalDiv.appendChild(totalLabel);
     const totalStrong = document.createElement('strong');
-    totalStrong.style.color = 'var(--admin-text)';
     totalStrong.textContent = ShopNow.money(order.total);
     totalDiv.appendChild(totalStrong);
     itemsSection.appendChild(totalDiv);
@@ -305,8 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const label = filter.textContent.trim();
         filter.textContent = label;
         const countSpan = document.createElement('span');
-        countSpan.style.opacity = '.65';
-        countSpan.style.fontSize = '12px';
+        countSpan.className = 'filter-chip-count';
         countSpan.textContent = String(count);
         filter.appendChild(document.createTextNode(' '));
         filter.appendChild(countSpan);
@@ -341,8 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // ID
       const tdId = document.createElement('td');
       const idSpan = document.createElement('span');
-      idSpan.style.color = '#818cf8';
-      idSpan.style.fontWeight = '700';
+      idSpan.className = 'order-id';
       idSpan.textContent = order.id;
       tdId.appendChild(idSpan);
       tr.appendChild(tdId);
@@ -353,15 +344,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const br = document.createElement('br');
       tdCustomer.appendChild(br);
       const emailSpan = document.createElement('span');
-      emailSpan.className = 'text-muted';
-      emailSpan.style.fontSize = '12px';
+      emailSpan.className = 'text-muted text-sm';
       emailSpan.textContent = order.email;
       tdCustomer.appendChild(emailSpan);
       tr.appendChild(tdCustomer);
 
       // Qtd itens
       const tdItems = document.createElement('td');
-      tdItems.style.color = 'var(--admin-muted)';
+      tdItems.className = 'text-muted';
       tdItems.textContent = String(order.items.length);
       tr.appendChild(tdItems);
 
@@ -374,13 +364,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Pagamento
       const tdPayment = document.createElement('td');
-      tdPayment.style.color = 'var(--admin-muted)';
+      tdPayment.className = 'text-muted';
       tdPayment.textContent = order.paymentMethod;
       tr.appendChild(tdPayment);
 
       // Tipo (emoji estático)
       const tdType = document.createElement('td');
-      tdType.style.fontSize = '17px';
+      tdType.className = 'table-emoji';
       tdType.textContent = order.type === 'pickup' ? '🏪' : '🏠';
       tr.appendChild(tdType);
 

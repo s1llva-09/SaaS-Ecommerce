@@ -96,10 +96,17 @@
   margin: 0;
 }
 
+.admin-card__subtitle {
+  margin: -10px 0 12px;
+  font-size: 12px;
+}
+
 /* Charts */
 .chart-box {
   height: 230px;
 }
+
+.chart-box--sm { height: 180px; }
 
 .chart-legend {
   display: grid;

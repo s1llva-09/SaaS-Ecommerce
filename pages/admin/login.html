@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - ShopNow Admin</title>
+  <link rel="stylesheet" href="../../css/index.css">
+</head>
+<body class="admin-page login-shell" data-root="../../">
+
+  <div class="admin-card login-card">
+
+    <div class="login-brand">
+      <span class="admin-brand__mark login-brand__mark">S</span>
+      <div>
+        <strong class="login-brand__name">ShopNow</strong>
+        <span class="text-muted login-brand__sub">Admin Panel</span>
+      </div>
+    </div>
+
+    <h2 class="login-title">Bem-vindo de volta</h2>
+    <p class="text-muted login-subtitle">Entre com suas credenciais de administrador</p>
+
+    <form data-login-form class="login-form">
+      <input class="admin-field" type="text" placeholder="Usuário" data-login-user required autocomplete="username">
+      <input class="admin-field" type="password" placeholder="Senha" data-login-pass required autocomplete="current-password">
+      <p data-login-error class="login-error"></p>
+      <button class="btn-admin-create login-btn" type="submit">Entrar</button>
+    </form>
+
+    <p class="text-muted login-hint">
+      Credenciais: <strong>admin</strong> / <strong>admin123</strong>
+    </p>
+
+  </div>
+
+  <script src="../../js/ui/admin-auth.js"></script>
+</body>
+</html>

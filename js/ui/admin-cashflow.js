@@ -124,9 +124,7 @@
       const tr = document.createElement('tr');
       const td = document.createElement('td');
       td.colSpan = 5;
-      td.style.textAlign = 'center';
-      td.style.padding = '32px';
-      td.style.color = 'var(--admin-muted)';
+      td.className = 'table-empty-cell';
       td.textContent = 'Nenhuma movimentação neste período';
       tr.appendChild(td);
       tbody.appendChild(tr);
@@ -139,8 +137,7 @@
       // Coluna ID
       const tdId = document.createElement('td');
       const idSpan = document.createElement('span');
-      idSpan.className = 'text-muted';
-      idSpan.style.fontSize = '12px';
+      idSpan.className = 'text-muted text-sm';
       idSpan.textContent = e.id;
       tdId.appendChild(idSpan);
       tr.appendChild(tdId);
@@ -152,8 +149,7 @@
       const br = document.createElement('br');
       tdDesc.appendChild(br);
       const catSpan = document.createElement('span');
-      catSpan.className = 'text-muted';
-      catSpan.style.fontSize = '12px';
+      catSpan.className = 'text-muted text-sm';
       catSpan.textContent = e.category;
       tdDesc.appendChild(catSpan);
       tr.appendChild(tdDesc);
@@ -166,8 +162,7 @@
       // Coluna Data
       const tdDate = document.createElement('td');
       const dateSpan = document.createElement('span');
-      dateSpan.className = 'text-muted';
-      dateSpan.style.fontSize = '12px';
+      dateSpan.className = 'text-muted text-sm';
       dateSpan.textContent = e.date;
       tdDate.appendChild(dateSpan);
       tr.appendChild(tdDate);

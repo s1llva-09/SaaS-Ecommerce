@@ -164,17 +164,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (outOfStock) {
         const badge = document.createElement('span');
-        badge.className = 'admin-product-card__badge';
-        badge.style.background = '#dc2626';
-        badge.style.color = '#fff';
+        badge.className = 'admin-product-card__badge admin-product-card__badge--danger';
         badge.textContent = 'Sem estoque';
         imgDiv.appendChild(badge);
       }
       if (lowStock) {
         const badge = document.createElement('span');
-        badge.className = 'admin-product-card__badge';
-        badge.style.background = '#d97706';
-        badge.style.color = '#fff';
+        badge.className = 'admin-product-card__badge admin-product-card__badge--warning';
         badge.textContent = 'Baixo estoque';
         imgDiv.appendChild(badge);
       }
@@ -182,52 +178,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Categoria
       const categoryP = document.createElement('p');
-      categoryP.className = 'text-muted';
-      categoryP.style.margin = '0 0 4px';
-      categoryP.style.fontSize = '12px';
+      categoryP.className = 'text-muted admin-product-card__category';
       categoryP.textContent = product.category;
       article.appendChild(categoryP);
 
       // Nome
       const nameStrong = document.createElement('strong');
-      nameStrong.style.fontSize = '14px';
-      nameStrong.style.lineHeight = '1.3';
+      nameStrong.className = 'admin-product-card__name';
       nameStrong.textContent = product.name;
       article.appendChild(nameStrong);
 
       // Preço + badge de quantidade
       const priceRow = document.createElement('div');
-      priceRow.style.display = 'flex';
-      priceRow.style.alignItems = 'center';
-      priceRow.style.justifyContent = 'space-between';
-      priceRow.style.marginTop = '8px';
+      priceRow.className = 'admin-product-card__price-row';
 
       const priceDiv = document.createElement('div');
       const priceStrong = document.createElement('strong');
-      priceStrong.style.fontSize = '15px';
+      priceStrong.className = 'admin-product-card__price-value';
       priceStrong.textContent = ShopNow.money(product.price);
       priceDiv.appendChild(priceStrong);
 
       if (product.originalPrice) {
         const oldPriceSpan = document.createElement('span');
-        oldPriceSpan.style.fontSize = '11px';
-        oldPriceSpan.style.textDecoration = 'line-through';
-        oldPriceSpan.style.color = 'var(--admin-muted)';
-        oldPriceSpan.style.marginLeft = '4px';
+        oldPriceSpan.className = 'admin-product-card__old-price';
         oldPriceSpan.textContent = ShopNow.money(product.originalPrice);
         priceDiv.appendChild(oldPriceSpan);
       }
       priceRow.appendChild(priceDiv);
 
       const stockBadge = document.createElement('span');
-      stockBadge.className = 'badge';
+      stockBadge.className = 'badge badge--sm';
       stockBadge.style.background = outOfStock
         ? 'rgba(220,38,38,.18)'
         : lowStock
           ? 'rgba(217,119,6,.18)'
           : 'rgba(22,163,74,.18)';
       stockBadge.style.color = color;
-      stockBadge.style.fontSize = '11px';
       stockBadge.textContent = `${product.stock} un.`;
       priceRow.appendChild(stockBadge);
 

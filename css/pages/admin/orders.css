@@ -300,3 +300,21 @@
 .btn-cancel-order:hover {
   background: rgba(248, 113, 113, .08);
 }
+
+/* Utilitários da tabela de pedidos */
+.order-id           { color: #818cf8; font-weight: 700; }
+.text-sm            { font-size: 12px; }
+.table-emoji        { font-size: 17px; }
+.table-empty-cell   { text-align: center; padding: 32px; color: var(--admin-muted); }
+.filter-chip-count  { opacity: .65; font-size: 12px; }
+
+/* Status colorido no topo do drawer */
+.drawer-status-label {
+  display: block;
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: .04em;
+}

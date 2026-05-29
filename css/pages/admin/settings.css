@@ -9,6 +9,8 @@
   gap: 16px;
 }
 
+.admin-input--full { width: 100%; }
+
 @media (max-width: 900px) {
   .settings-grid {
     grid-template-columns: 1fr;

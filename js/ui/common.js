@@ -141,22 +141,19 @@ productCard(product) {
 
   if (discount) {
     const b = document.createElement('span');
-    b.className = 'badge badge-red';
-    b.style.cssText = 'position:absolute;top:12px;left:12px;background:#ff5a00;color:#fff';
+    b.className = 'badge badge-product-discount';
     b.textContent = `-${discount}%`;
     imageLink.appendChild(b);
   }
   if (lowStock) {
     const b = document.createElement('span');
-    b.className = 'badge';
-    b.style.cssText = 'position:absolute;top:12px;right:12px;background:#ff8a00;color:#fff';
+    b.className = 'badge badge-product-low-stock';
     b.textContent = `Últimas ${product.stock} un.`;
     imageLink.appendChild(b);
   }
   if (product.stock === 0) {
     const b = document.createElement('span');
-    b.className = 'badge';
-    b.style.cssText = 'position:absolute;top:12px;right:12px;background:#334155;color:#fff';
+    b.className = 'badge badge-product-no-stock';
     b.textContent = 'Sem estoque';
     imageLink.appendChild(b);
   }

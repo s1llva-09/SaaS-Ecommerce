@@ -8,6 +8,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 42px;
   align-items: start;
+  margin-top: 18px;
 }
 
 .product-gallery {
@@ -71,6 +72,10 @@
   cursor: not-allowed;
   pointer-events: none;
 }
+
+.card-empty       { padding: 32px; text-align: center; }
+.buybox-btn       { width: 100%; margin-top: 14px; }
+.buybox-btn-ghost { width: 100%; margin-top: 10px; }
 
 @media (max-width: 860px) {
   .product-detail {

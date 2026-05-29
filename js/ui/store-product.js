@@ -13,8 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!product) {
     mount.innerHTML = '';
     const notFound = document.createElement('div');
-    notFound.className = 'card';
-    notFound.style.padding = '32px';
+    notFound.className = 'card card-empty';
     notFound.textContent = 'Produto nao encontrado.';
     mount.appendChild(notFound);
     return;
@@ -123,8 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const addBtn = document.createElement('button');
   addBtn.className = 'btn btn-primary';
   addBtn.dataset.addCart = product.id;
-  addBtn.style.width = '100%';
-  addBtn.style.marginTop = '14px';
+  addBtn.className = 'btn btn-primary buybox-btn';
   addBtn.textContent = 'Adicionar ao carrinho';
   aside.appendChild(addBtn);
 
@@ -132,8 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const buyBtn = document.createElement('button');
   buyBtn.className = 'btn btn-ghost';
   buyBtn.dataset.buyNow = product.id;
-  buyBtn.style.width = '100%';
-  buyBtn.style.marginTop = '10px';
+  buyBtn.className = 'btn btn-ghost buybox-btn-ghost';
   buyBtn.textContent = 'Comprar agora';
   aside.appendChild(buyBtn);
 

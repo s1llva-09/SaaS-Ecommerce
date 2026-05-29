@@ -114,10 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!products.length) {
       const emptyDiv = document.createElement('div');
-      emptyDiv.className = 'card';
-      emptyDiv.style.padding = '32px';
-      emptyDiv.style.textAlign = 'center';
-      emptyDiv.style.gridColumn = '1/-1';
+      emptyDiv.className = 'card grid-empty-state';
       emptyDiv.textContent = 'Nenhum produto encontrado para esse filtro.';
       grid.appendChild(emptyDiv);
       return;
@@ -158,15 +155,13 @@ function productListItem(product) {
 
   if (discount) {
     const b = document.createElement('span');
-    b.className = 'badge badge-red';
-    b.style.cssText = 'position:absolute;top:8px;left:8px;background:#ff5a00;color:#fff';
+    b.className = 'badge badge-list-discount';
     b.textContent = `-${discount}%`;
     imgLink.appendChild(b);
   }
   if (product.stock === 0) {
     const b = document.createElement('span');
-    b.className = 'badge';
-    b.style.cssText = 'position:absolute;top:8px;right:8px;background:#334155;color:#fff';
+    b.className = 'badge badge-list-no-stock';
     b.textContent = 'Sem estoque';
     imgLink.appendChild(b);
   }

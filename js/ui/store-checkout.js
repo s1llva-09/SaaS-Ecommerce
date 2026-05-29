@@ -17,38 +17,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const subtotal = ShopNow.cartTotal();
     const shipping = subtotal >= 299 ? 0 : 24.9;
     const total = subtotal + shipping;
-    checkoutSummary.style.padding = '22px';
-
     checkoutSummary.innerHTML = '';
 
     const title = document.createElement('h2');
-    title.style.margin = '0 0 16px';
-    title.style.fontSize = '16px';
-    title.style.fontWeight = '900';
+    title.className = 'checkout-summary__title';
     title.textContent = 'Resumo do pedido';
     checkoutSummary.appendChild(title);
 
     const itemsGrid = document.createElement('div');
-    itemsGrid.style.display = 'grid';
-    itemsGrid.style.gap = '10px';
-    itemsGrid.style.marginBottom = '16px';
+    itemsGrid.className = 'checkout-summary__items';
 
     items.forEach(item => {
       const rowDiv = document.createElement('div');
-      rowDiv.style.display = 'flex';
-      rowDiv.style.justifyContent = 'space-between';
-      rowDiv.style.gap = '8px';
-      rowDiv.style.fontSize = '13px';
-      rowDiv.style.color = '#6b7280';
+      rowDiv.className = 'checkout-summary__item';
 
       const nameSpan = document.createElement('span');
       nameSpan.textContent = `${item.qty}x ${item.product.name}`;
       rowDiv.appendChild(nameSpan);
 
       const priceSpan = document.createElement('span');
-      priceSpan.style.fontWeight = '700';
-      priceSpan.style.color = 'var(--text)';
-      priceSpan.style.whiteSpace = 'nowrap';
+      priceSpan.className = 'checkout-summary__item-price';
       priceSpan.textContent = ShopNow.money(item.product.price * item.qty);
       rowDiv.appendChild(priceSpan);
 
@@ -57,10 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     checkoutSummary.appendChild(itemsGrid);
 
     const totalsDiv = document.createElement('div');
-    totalsDiv.style.borderTop = '1px solid var(--line)';
-    totalsDiv.style.paddingTop = '12px';
-    totalsDiv.style.display = 'grid';
-    totalsDiv.style.gap = '8px';
+    totalsDiv.className = 'checkout-summary__totals';
 
     // Subtotal
     const subtotalRow = document.createElement('div');
@@ -69,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     subtotalLabel.textContent = 'Subtotal';
     subtotalRow.appendChild(subtotalLabel);
     const subtotalValue = document.createElement('span');
-    subtotalValue.style.fontWeight = '700';
+    subtotalValue.className = 'checkout-summary__row-value';
     subtotalValue.textContent = ShopNow.money(subtotal);
     subtotalRow.appendChild(subtotalValue);
     totalsDiv.appendChild(subtotalRow);
@@ -81,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     shippingLabel.textContent = 'Frete';
     shippingRow.appendChild(shippingLabel);
     const shippingValue = document.createElement('span');
-    shippingValue.style.fontWeight = '700';
+    shippingValue.className = 'checkout-summary__row-value';
     if (shipping === 0) {
       shippingValue.style.color = 'var(--green)';
       shippingValue.textContent = 'Grátis';
@@ -93,18 +78,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Total
     const totalRow = document.createElement('div');
-    totalRow.style.display = 'flex';
-    totalRow.style.justifyContent = 'space-between';
-    totalRow.style.paddingTop = '10px';
-    totalRow.style.borderTop = '1px solid var(--line)';
+    totalRow.className = 'checkout-summary__total-row';
     const totalLabel = document.createElement('span');
-    totalLabel.style.fontWeight = '900';
-    totalLabel.style.fontSize = '15px';
+    totalLabel.className = 'checkout-summary__total-label';
     totalLabel.textContent = 'Total';
     totalRow.appendChild(totalLabel);
     const totalValue = document.createElement('strong');
-    totalValue.style.fontSize = '20px';
-    totalValue.style.color = 'var(--brand)';
+    totalValue.className = 'checkout-summary__total-value';
     totalValue.textContent = ShopNow.money(total, true);
     totalRow.appendChild(totalValue);
     totalsDiv.appendChild(totalRow);

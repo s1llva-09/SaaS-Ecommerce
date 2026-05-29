@@ -10,6 +10,8 @@
   margin-bottom: 24px;
 }
 
+.account-orders-title { margin-bottom: 16px; }
+
 .account-avatar {
   display: grid;
   place-items: center;

@@ -45,7 +45,10 @@
   border-radius: 12px;
   color: #64748b;
   background: transparent;
+  position: relative;
 }
+
+.mt-16 { margin-top: 16px; }
 
 .icon-btn:hover {
   background: #f4f4ff;
@@ -112,6 +115,8 @@
   font-size: 12px;
   font-weight: 800;
 }
+
+.badge--sm { font-size: 11px; }
 
 .badge-green { background: var(--green-soft); color: var(--green); }
 .badge-red { background: var(--red-soft); color: var(--red); }

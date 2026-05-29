@@ -194,8 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const tdId = document.createElement('td');
       const idSpan = document.createElement('span');
-      idSpan.style.color = '#818cf8';
-      idSpan.style.fontWeight = '700';
+      idSpan.className = 'order-id';
       idSpan.textContent = order.id;
       tdId.appendChild(idSpan);
       tr.appendChild(tdId);
