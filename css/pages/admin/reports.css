@@ -1,16 +1,62 @@
 /* ============================================================
    ADMIN: RELATORIOS
-   Graficos comparativos e resumo mensal.
+   KPIs, gráficos, top produtos e exportação CSV.
    ============================================================ */
 
+/* Linha de cabeçalho: abas de período à esquerda, botão à direita */
+.reports-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+/* Grade de 4 KPIs no topo */
+.reports-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* Cabeçalho interno do card de gráfico (título + subtotal) */
+.reports-chart-header {
+  margin-bottom: 16px;
+}
+
+/* Botão de exportar CSV */
+.btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid var(--admin-line);
+  background: var(--admin-panel-2);
+  color: var(--admin-muted);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: border-color .15s, color .15s;
+}
+
+.btn-export:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+/* Grade de 2 colunas para os cards inferiores */
 .reports-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
+@media (max-width: 1100px) {
+  .reports-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 900px) {
-  .reports-grid {
-    grid-template-columns: 1fr;
-  }
+  .reports-grid { grid-template-columns: 1fr; }
 }

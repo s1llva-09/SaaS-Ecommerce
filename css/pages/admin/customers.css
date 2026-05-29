@@ -9,3 +9,62 @@
   gap: 12px;
   margin-bottom: 16px;
 }
+
+/* Drawer lateral de detalhe do cliente */
+.customer-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 340px;
+  height: 100vh;
+  background: var(--admin-panel);
+  border-left: 1px solid var(--admin-line);
+  overflow-y: auto;
+  z-index: 400;
+  transform: translateX(100%);
+  transition: transform .25s ease;
+  padding: 0;
+}
+
+.customer-drawer.is-open {
+  transform: translateX(0);
+}
+
+.customer-drawer__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 22px 22px 16px;
+  border-bottom: 1px solid var(--admin-line);
+}
+
+.customer-drawer__name {
+  font-size: 17px;
+  font-weight: 900;
+  margin-bottom: 3px;
+}
+
+.customer-drawer__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--admin-line);
+}
+
+.customer-drawer__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.customer-drawer__stat span {
+  font-size: 11px;
+}
+
+.customer-drawer__body {
+  padding: 18px 22px;
+  display: grid;
+  gap: 10px;
+}

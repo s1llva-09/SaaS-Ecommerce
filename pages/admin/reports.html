@@ -77,16 +77,48 @@
         </div>
       </header>
       <section class="admin-content">
-        <div class="reports-grid">
+
+        <!-- Cabeçalho: filtros de período + botão exportar -->
+        <div class="reports-header">
+          <div class="period-tabs">
+            <button class="period-tab is-active" data-report-period="week">Semana</button>
+            <button class="period-tab" data-report-period="month">Mês</button>
+            <button class="period-tab" data-report-period="quarter">Trimestre</button>
+            <button class="period-tab" data-report-period="year">Ano</button>
+          </div>
+          <button class="btn-export" data-export-csv>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportar CSV
+          </button>
+        </div>
+
+        <!-- KPIs -->
+        <div class="reports-kpi-grid" data-reports-kpis></div>
+
+        <!-- Gráfico de linha de receita -->
+        <article class="admin-card mt-16">
+          <div class="reports-chart-header">
+            <div>
+              <h2 class="admin-card__title" data-reports-chart-title>Receita — últimos 7 dias</h2>
+              <p class="admin-card__subtitle text-muted" data-reports-chart-sub></p>
+            </div>
+          </div>
+          <div class="chart-box"><canvas id="reportsRevenueChart"></canvas></div>
+        </article>
+
+        <!-- Top produtos + Distribuição por categoria -->
+        <div class="reports-grid mt-16">
           <article class="admin-card">
-            <h2 class="admin-card__title">Receita mensal</h2>
-            <div class="chart-box"><canvas id="monthlyChart"></canvas></div>
+            <h2 class="admin-card__title">Top produtos</h2>
+            <table class="admin-table" data-top-products></table>
           </article>
           <article class="admin-card">
-            <h2 class="admin-card__title">Resumo</h2>
-            <p class="text-muted">Área preparada para comparativos, exportação e filtros por período.</p>
+            <h2 class="admin-card__title">Receita por categoria</h2>
+            <div class="chart-box chart-box--sm"><canvas id="reportsCategoryChart"></canvas></div>
+            <div class="chart-legend" data-reports-category-legend></div>
           </article>
         </div>
+
       </section>
     </main>
   </div>

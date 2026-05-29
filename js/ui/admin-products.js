@@ -1,6 +1,6 @@
 // ============================================================
 // UI ADMIN: PRODUTOS
-// Grade com badges/estoque/SKU e modal de novo produto.
+// Grade com badges/estoque/SKU e modal de criar/editar produto.
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,64 +9,57 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!grid) return;
 
   // ---------------------------------------------------------
-  // Modal "Novo Produto" — estrutura estática injetada via innerHTML.
-  // Não contém dados do usuário: todos os campos são inputs vazios.
-  // O select de categorias é preenchido depois via createElement.
+  // Modal — data-image-section é preenchido pelo carrossel.
+  // Campos têm data-field para serem lidos/preenchidos por openModal().
   // ---------------------------------------------------------
   const overlay = document.createElement('div');
   overlay.className = 'admin-modal-overlay is-hidden';
   overlay.innerHTML = `
     <div class="admin-modal">
       <div class="admin-modal__head">
-        <span class="admin-modal__title">Novo Produto</span>
+        <span class="admin-modal__title" data-modal-title>Novo Produto</span>
         <button class="admin-modal__close" data-modal-close>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
       </div>
       <div class="admin-modal__body">
-        <div class="image-upload-area">
-          <div class="image-upload-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          </div>
-          <p>Clique para fazer upload de imagens</p>
-          <small>PNG, JPG até 10MB cada</small>
-        </div>
+        <div data-image-section></div>
         <div>
           <label class="admin-field-label">Nome do produto *</label>
-          <input class="admin-field" type="text" placeholder="Nome do produto">
+          <input class="admin-field" type="text" placeholder="Nome do produto" data-field="name">
         </div>
         <div>
           <label class="admin-field-label">Descrição</label>
-          <textarea class="admin-textarea" placeholder="Descrição do produto"></textarea>
+          <textarea class="admin-textarea" placeholder="Descrição do produto" data-field="description"></textarea>
         </div>
         <div class="admin-form-grid-2">
           <div>
             <label class="admin-field-label">Categoria</label>
-            <select class="admin-field" data-category-select></select>
+            <select class="admin-field" data-category-select data-field="category"></select>
           </div>
           <div>
             <label class="admin-field-label">SKU *</label>
-            <input class="admin-field" type="text" placeholder="SKU-001">
+            <input class="admin-field" type="text" placeholder="SKU-001" data-field="sku">
           </div>
         </div>
         <div class="admin-form-grid-2">
           <div>
             <label class="admin-field-label">Preço de venda (R$) *</label>
-            <input class="admin-field" type="number" min="0" step="0.01" placeholder="0,00">
+            <input class="admin-field" type="number" min="0" step="0.01" placeholder="0,00" data-field="price">
           </div>
           <div>
             <label class="admin-field-label">Preço original (R$)</label>
-            <input class="admin-field" type="number" min="0" step="0.01" placeholder="0,00">
+            <input class="admin-field" type="number" min="0" step="0.01" placeholder="0,00" data-field="originalPrice">
           </div>
         </div>
         <div class="admin-form-grid-2">
           <div>
-            <label class="admin-field-label">Estoque inicial *</label>
-            <input class="admin-field" type="number" min="0" value="0">
+            <label class="admin-field-label">Estoque *</label>
+            <input class="admin-field" type="number" min="0" value="0" data-field="stock">
           </div>
           <div>
             <label class="admin-field-label">Status</label>
-            <select class="admin-field">
+            <select class="admin-field" data-field="status">
               <option>Ativo</option>
               <option>Inativo</option>
             </select>
@@ -75,13 +68,13 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="admin-form-grid-2">
           <div>
             <label class="admin-field-label">Cores</label>
-            <input class="admin-field" type="text" placeholder="Preto, Branco, Azul">
-            <small style="color:var(--admin-muted);font-size:11px">Separadas por vírgula</small>
+            <input class="admin-field" type="text" placeholder="Preto, Branco, Azul" data-field="colors">
+            <small class="admin-field-hint">Separadas por vírgula</small>
           </div>
           <div>
             <label class="admin-field-label">Tamanhos</label>
-            <input class="admin-field" type="text" placeholder="P, M, G, GG">
-            <small style="color:var(--admin-muted);font-size:11px">Separados por vírgula</small>
+            <input class="admin-field" type="text" placeholder="P, M, G, GG" data-field="sizes">
+            <small class="admin-field-hint">Separados por vírgula</small>
           </div>
         </div>
       </div>
@@ -101,21 +94,231 @@ document.addEventListener('DOMContentLoaded', () => {
     categorySelect.appendChild(option);
   });
 
+  // ---------------------------------------------------------
+  // Carrossel de imagens — estado local do modal.
+  // carouselImages: array de { src: string } (base64 ou URL).
+  // carouselIndex: índice da imagem exibida no momento.
+  // ---------------------------------------------------------
+  let carouselImages = [];
+  let carouselIndex  = 0;
+
+  // Input de arquivo oculto — dispara seleção múltipla de imagens
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+  fileInput.multiple = true;
+  fileInput.style.display = 'none';
+  document.body.appendChild(fileInput);
+
+  // Lê cada arquivo selecionado como base64 e adiciona ao carrossel
+  fileInput.addEventListener('change', () => {
+    Array.from(fileInput.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        carouselImages.push({ src: e.target.result });
+        renderImageSection();
+      };
+      reader.readAsDataURL(file);
+    });
+    fileInput.value = '';
+  });
+
+  const imageSection = overlay.querySelector('[data-image-section]');
+
+  // ---------------------------------------------------------
+  // renderImageSection() — reconstrói a área de imagem.
+  // Sem imagens: exibe o placeholder de upload.
+  // Com imagens: exibe carrossel com navegação e thumbnails.
+  // ---------------------------------------------------------
+  function renderImageSection() {
+    imageSection.innerHTML = '';
+
+    if (!carouselImages.length) {
+      // Placeholder de upload
+      const area = document.createElement('div');
+      area.className = 'image-upload-area';
+      area.innerHTML = `
+        <div class="image-upload-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <p>Clique para fazer upload de imagens</p>
+        <small>PNG, JPG até 10MB cada</small>
+      `;
+      area.addEventListener('click', () => fileInput.click());
+      imageSection.appendChild(area);
+      return;
+    }
+
+    const carousel = document.createElement('div');
+    carousel.className = 'product-carousel';
+
+    // Visualização principal
+    const mainDiv = document.createElement('div');
+    mainDiv.className = 'product-carousel__main';
+
+    const mainImg = document.createElement('img');
+    mainImg.src = carouselImages[carouselIndex].src;
+    mainImg.alt = 'Imagem do produto';
+    mainDiv.appendChild(mainImg);
+
+    // Setas de navegação (só aparecem com mais de 1 imagem)
+    if (carouselImages.length > 1) {
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'product-carousel__nav product-carousel__nav--prev';
+      prevBtn.type = 'button';
+      prevBtn.innerHTML = '&#8249;';
+      prevBtn.addEventListener('click', () => {
+        carouselIndex = (carouselIndex - 1 + carouselImages.length) % carouselImages.length;
+        renderImageSection();
+      });
+
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'product-carousel__nav product-carousel__nav--next';
+      nextBtn.type = 'button';
+      nextBtn.innerHTML = '&#8250;';
+      nextBtn.addEventListener('click', () => {
+        carouselIndex = (carouselIndex + 1) % carouselImages.length;
+        renderImageSection();
+      });
+
+      mainDiv.appendChild(prevBtn);
+      mainDiv.appendChild(nextBtn);
+    }
+
+    carousel.appendChild(mainDiv);
+
+    // Faixa de thumbnails
+    const thumbsDiv = document.createElement('div');
+    thumbsDiv.className = 'product-carousel__thumbs';
+
+    carouselImages.forEach((imgData, i) => {
+      const thumb = document.createElement('div');
+      thumb.className = 'product-carousel__thumb' + (i === carouselIndex ? ' is-active' : '');
+
+      const thumbImg = document.createElement('img');
+      thumbImg.src = imgData.src;
+      thumbImg.alt = `Imagem ${i + 1}`;
+      thumb.appendChild(thumbImg);
+
+      // Botão de remover imagem
+      const delBtn = document.createElement('button');
+      delBtn.className = 'product-carousel__thumb-del';
+      delBtn.type = 'button';
+      delBtn.textContent = '×';
+      delBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        carouselImages.splice(i, 1);
+        if (carouselIndex >= carouselImages.length) carouselIndex = Math.max(0, carouselImages.length - 1);
+        renderImageSection();
+      });
+      thumb.appendChild(delBtn);
+
+      // Clicar no thumb seleciona a imagem
+      thumb.addEventListener('click', () => {
+        carouselIndex = i;
+        renderImageSection();
+      });
+
+      thumbsDiv.appendChild(thumb);
+    });
+
+    // Botão de adicionar mais imagens
+    const addBtn = document.createElement('button');
+    addBtn.className = 'product-carousel__add';
+    addBtn.type = 'button';
+    addBtn.textContent = '+';
+    addBtn.title = 'Adicionar imagem';
+    addBtn.addEventListener('click', () => fileInput.click());
+    thumbsDiv.appendChild(addBtn);
+
+    carousel.appendChild(thumbsDiv);
+    imageSection.appendChild(carousel);
+  }
+
+  // ---------------------------------------------------------
+  // editingId guarda o id do produto em edição.
+  // null = modo criação, string = modo edição.
+  // ---------------------------------------------------------
+  let editingId = null;
+
+  const modalTitle = overlay.querySelector('[data-modal-title]');
+  const submitBtn  = overlay.querySelector('[data-modal-submit]');
+
+  // ---------------------------------------------------------
+  // openModal(product) — abre o modal no modo correto.
+  // Sem argumento: limpa campos e carrossel (novo produto).
+  // Com produto: preenche campos e carrega imagem existente.
+  // ---------------------------------------------------------
+  function openModal(product = null) {
+    editingId = product ? product.id : null;
+
+    // Reinicia o carrossel — se for edição, pré-carrega a imagem atual
+    carouselImages = product?.image ? [{ src: product.image }] : [];
+    carouselIndex  = 0;
+    renderImageSection();
+
+    // Ajusta título e botão conforme o modo
+    modalTitle.textContent = product ? 'Editar Produto'    : 'Novo Produto';
+    submitBtn.textContent  = product ? 'Salvar alterações' : 'Criar produto';
+
+    // Preenche ou limpa cada campo pelo atributo data-field
+    overlay.querySelectorAll('[data-field]').forEach(field => {
+      const key = field.dataset.field;
+      if (!product) {
+        field.value = field.tagName === 'INPUT' && field.type === 'number' ? '0' : '';
+        return;
+      }
+      if (key === 'colors') field.value = product.colors ? product.colors.join(', ') : '';
+      else if (key === 'sizes') field.value = product.sizes ? product.sizes.join(', ') : '';
+      else field.value = product[key] ?? '';
+    });
+
+    overlay.classList.remove('is-hidden');
+  }
+
+  // ---------------------------------------------------------
+  // Submit — cria ou atualiza o produto no array mock.
+  // Em produção, trocar pelo POST/PATCH ao Supabase Storage + DB.
+  // ---------------------------------------------------------
+  submitBtn.addEventListener('click', () => {
+    if (editingId) {
+      const products = ShopData.products();
+      const idx = products.findIndex(p => p.id === editingId);
+      if (idx !== -1) {
+        overlay.querySelectorAll('[data-field]').forEach(field => {
+          const key = field.dataset.field;
+          if (key === 'colors' || key === 'sizes') {
+            const arr = field.value.split(',').map(v => v.trim()).filter(Boolean);
+            products[idx][key] = arr.length ? arr : undefined;
+          } else if (field.type === 'number') {
+            products[idx][key] = Number(field.value) || 0;
+          } else {
+            products[idx][key] = field.value;
+          }
+        });
+        // Persiste a primeira imagem do carrossel (se houver nova)
+        if (carouselImages.length) products[idx].image = carouselImages[0].src;
+      }
+      ShopNow.toast('Produto atualizado com sucesso!');
+      render();
+    } else {
+      ShopNow.toast('Produto criado com sucesso!');
+    }
+    overlay.classList.add('is-hidden');
+  });
+
   overlay.querySelectorAll('[data-modal-close]').forEach(btn => {
     btn.addEventListener('click', () => overlay.classList.add('is-hidden'));
-  });
-  overlay.querySelector('[data-modal-submit]').addEventListener('click', () => {
-    ShopNow.toast('Produto criado com sucesso!');
-    overlay.classList.add('is-hidden');
   });
   overlay.addEventListener('click', e => {
     if (e.target === overlay) overlay.classList.add('is-hidden');
   });
 
+  // Botão "Novo Produto" abre no modo criação
   const newBtn = document.querySelector('[data-new-product]');
-  newBtn?.addEventListener('click', () => overlay.classList.remove('is-hidden'));
+  newBtn?.addEventListener('click', () => openModal(null));
 
-  // ---- Product card ----
+  // ---- Helpers de card ----
   // Retorna cor CSS conforme nível de estoque: vermelho (0), amarelo (≤5), verde (>5).
   function stockColor(stock) {
     if (stock === 0) return '#dc2626';
@@ -142,17 +345,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     products.forEach(product => {
       const outOfStock = product.stock === 0;
-      const lowStock = product.stock > 0 && product.stock <= 5;
-      const discount = product.originalPrice
-        ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-        : 0;
+      const lowStock   = product.stock > 0 && product.stock <= 5;
       const color = stockColor(product.stock);
-      const pct = stockPct(product.stock);
+      const pct   = stockPct(product.stock);
 
       const article = document.createElement('article');
       article.className = 'admin-product-card admin-card';
+      article.dataset.editProduct = product.id;
 
-      // Imagem + badges de estoque
       const imgDiv = document.createElement('div');
       imgDiv.className = 'admin-product-card__img';
 
@@ -176,19 +376,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       article.appendChild(imgDiv);
 
-      // Categoria
       const categoryP = document.createElement('p');
       categoryP.className = 'text-muted admin-product-card__category';
       categoryP.textContent = product.category;
       article.appendChild(categoryP);
 
-      // Nome
       const nameStrong = document.createElement('strong');
       nameStrong.className = 'admin-product-card__name';
       nameStrong.textContent = product.name;
       article.appendChild(nameStrong);
 
-      // Preço + badge de quantidade
       const priceRow = document.createElement('div');
       priceRow.className = 'admin-product-card__price-row';
 
@@ -208,18 +405,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const stockBadge = document.createElement('span');
       stockBadge.className = 'badge badge--sm';
-      stockBadge.style.background = outOfStock
-        ? 'rgba(220,38,38,.18)'
-        : lowStock
-          ? 'rgba(217,119,6,.18)'
-          : 'rgba(22,163,74,.18)';
+      stockBadge.style.background = outOfStock ? 'rgba(220,38,38,.18)' : lowStock ? 'rgba(217,119,6,.18)' : 'rgba(22,163,74,.18)';
       stockBadge.style.color = color;
       stockBadge.textContent = `${product.stock} un.`;
       priceRow.appendChild(stockBadge);
 
       article.appendChild(priceRow);
 
-      // Barra de estoque
       const barDiv = document.createElement('div');
       barDiv.className = 'admin-product-card__stock-bar';
       const barFill = document.createElement('div');
@@ -229,15 +421,32 @@ document.addEventListener('DOMContentLoaded', () => {
       barDiv.appendChild(barFill);
       article.appendChild(barDiv);
 
-      // SKU
       const skuP = document.createElement('p');
       skuP.className = 'admin-product-card__sku';
       skuP.textContent = `SKU: ${product.sku || '—'}`;
       article.appendChild(skuP);
 
+      const editBtn = document.createElement('button');
+      editBtn.className = 'admin-product-card__edit-btn';
+      editBtn.textContent = 'Editar';
+      article.appendChild(editBtn);
+
       grid.appendChild(article);
     });
   }
+
+  // ---------------------------------------------------------
+  // Delegação de clique na grade — abre o modal de edição
+  // ao clicar no botão "Editar" de qualquer card.
+  // ---------------------------------------------------------
+  grid.addEventListener('click', e => {
+    const btn = e.target.closest('.admin-product-card__edit-btn');
+    if (!btn) return;
+    const card = btn.closest('[data-edit-product]');
+    if (!card) return;
+    const product = ShopData.products().find(p => p.id === card.dataset.editProduct);
+    if (product) openModal(product);
+  });
 
   search?.addEventListener('input', render);
   render();
