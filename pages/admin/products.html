@@ -77,17 +77,38 @@
         </div>
       </header>
       <section class="admin-content">
-        <div class="admin-products-header">
-          <div class="admin-products-search">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input type="search" data-admin-product-search placeholder="Buscar produto, SKU...">
-          </div>
-          <button class="btn-new-product" data-new-product>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Novo Produto
-          </button>
+        <!-- Tabs -->
+        <div class="admin-products-tabs">
+          <button class="admin-products-tab is-active" data-products-tab="products">Produtos</button>
+          <button class="admin-products-tab" data-products-tab="categories">Categorias</button>
         </div>
-        <div class="admin-products-grid" data-admin-products></div>
+
+        <!-- Painel: Produtos -->
+        <div data-products-panel="products">
+          <div class="admin-products-header">
+            <div class="admin-products-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="search" data-admin-product-search placeholder="Buscar produto, SKU...">
+            </div>
+            <button class="btn-new-product" data-new-product>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Novo Produto
+            </button>
+          </div>
+          <div class="admin-products-grid" data-admin-products></div>
+        </div>
+
+        <!-- Painel: Categorias -->
+        <div data-products-panel="categories" class="is-hidden">
+          <div class="categories-toolbar">
+            <p class="text-muted" style="font-size:13px;">Categorias disponíveis para vincular aos produtos.</p>
+            <button class="btn-new-product" data-new-category>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nova Categoria
+            </button>
+          </div>
+          <div class="categories-grid" data-categories-list></div>
+        </div>
       </section>
     </main>
   </div>

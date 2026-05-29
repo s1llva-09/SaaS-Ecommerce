@@ -7,9 +7,16 @@
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.Chart) return;
 
-  // Instâncias dos gráficos — guardadas para destruir antes de recriar
   let revenueChart  = null;
   let categoryChart = null;
+
+  // Tendências mock por período (índice = [receita, pedidos, ticket, clientes])
+  const PERIOD_TRENDS = {
+    week:    ['+8%', '+3%', '+5%', '+2%'],
+    month:   ['+14%', '+9%', '-3%', '+11%'],
+    quarter: ['+22%', '+18%', '+3%', '+15%'],
+    year:    ['+31%', '+25%', '+5%', '+20%'],
+  };
 
   // ---------------------------------------------------------
   // revenueData(period) — retorna os pontos do gráfico de linha
@@ -90,9 +97,12 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     kpisEl.innerHTML = '';
+    const trends = PERIOD_TRENDS[period] || [];
 
-    cards.forEach(card => {
-      const icon = ICONS[card.key];
+    cards.forEach((card, i) => {
+      const icon  = ICONS[card.key];
+      const trend = trends[i];
+      const isUp  = trend && !trend.startsWith('-');
 
       const article = document.createElement('article');
       article.className = 'admin-kpi-card';
@@ -102,10 +112,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const iconDiv = document.createElement('div');
       iconDiv.className = 'kpi-icon';
-      iconDiv.style.background = icon.bg;   // dinâmico: cor por tipo de KPI
+      iconDiv.style.background = icon.bg;
       iconDiv.style.color = icon.color;
-      iconDiv.innerHTML = icon.svg;         // SVG estático do código
+      iconDiv.innerHTML = icon.svg;
       headerDiv.appendChild(iconDiv);
+
+      if (trend) {
+        const trendSpan = document.createElement('span');
+        trendSpan.className = `kpi-trend ${isUp ? 'up' : 'down'}`;
+        trendSpan.textContent = `${isUp ? '↑' : '↓'} ${trend}`;
+        headerDiv.appendChild(trendSpan);
+      }
       article.appendChild(headerDiv);
 
       const valueDiv = document.createElement('div');
@@ -238,10 +255,20 @@ document.addEventListener('DOMContentLoaded', () => {
       labelSpan.appendChild(document.createTextNode(label));
       item.appendChild(labelSpan);
 
+      const rightDiv = document.createElement('div');
+      rightDiv.className = 'chart-legend__right';
+
       const pctSpan = document.createElement('span');
       pctSpan.className = 'chart-legend__pct';
       pctSpan.textContent = `${Math.round((value / total) * 100)}%`;
-      item.appendChild(pctSpan);
+
+      const valSpan = document.createElement('span');
+      valSpan.className = 'chart-legend__val';
+      valSpan.textContent = ShopNow.money(value);
+
+      rightDiv.appendChild(pctSpan);
+      rightDiv.appendChild(valSpan);
+      item.appendChild(rightDiv);
 
       legendEl.appendChild(item);
     });
@@ -268,20 +295,40 @@ document.addEventListener('DOMContentLoaded', () => {
     thead.appendChild(headerRow);
     tableEl.appendChild(thead);
 
-    // Linhas com os top 5
+    const tops = topProducts(5);
+    const maxRevenue = tops[0]?.revenue || 1;
+
     const tbody = document.createElement('tbody');
-    topProducts(5).forEach(p => {
+    tops.forEach((p, idx) => {
       const tr = document.createElement('tr');
 
+      // Rank
+      const tdRank = document.createElement('td');
+      tdRank.className = 'top-rank';
+      tdRank.textContent = `#${idx + 1}`;
+      tr.appendChild(tdRank);
+
+      // Nome + barra de progresso
       const tdName = document.createElement('td');
-      tdName.textContent = p.name;
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = p.name;
+      tdName.appendChild(nameSpan);
+      const bar = document.createElement('div');
+      bar.className = 'top-bar';
+      const fill = document.createElement('div');
+      fill.className = 'top-bar__fill';
+      fill.style.width = `${Math.round((p.revenue / maxRevenue) * 100)}%`;
+      bar.appendChild(fill);
+      tdName.appendChild(bar);
       tr.appendChild(tdName);
 
+      // Qtd
       const tdQty = document.createElement('td');
       tdQty.className = 'text-muted';
-      tdQty.textContent = ShopNow.int(p.qty);
+      tdQty.textContent = `${ShopNow.int(p.qty)} un.`;
       tr.appendChild(tdQty);
 
+      // Receita
       const tdRev = document.createElement('td');
       const strong = document.createElement('strong');
       strong.textContent = ShopNow.money(p.revenue);
@@ -316,14 +363,129 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------
+  // buildPaymentMethods() — barras horizontais por método de
+  // pagamento, contando a frequência nos pedidos mock.
+  // ---------------------------------------------------------
+  function buildPaymentMethods() {
+    const container = document.querySelector('[data-payment-methods]');
+    if (!container) return;
+
+    const map = {};
+    ShopData.orders().forEach(o => { map[o.paymentMethod] = (map[o.paymentMethod] || 0) + 1; });
+    const total   = Object.values(map).reduce((s, v) => s + v, 0);
+    const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
+    const COLORS  = { Cartão: '#818cf8', PIX: '#34d399', Boleto: '#fbbf24', TED: '#f87171', Dinheiro: '#60a5fa' };
+
+    container.innerHTML = '';
+    entries.forEach(([method, count]) => {
+      const pct   = Math.round((count / total) * 100);
+      const color = COLORS[method] || '#818cf8';
+      const row   = document.createElement('div');
+      row.className = 'report-bar-row';
+
+      const meta = document.createElement('div');
+      meta.className = 'report-bar-meta';
+      const dot = document.createElement('span');
+      dot.className = 'report-bar-dot';
+      dot.style.background = color;
+      const name = document.createElement('span');
+      name.textContent = method;
+      const badge = document.createElement('span');
+      badge.className = 'badge badge-blue';
+      badge.textContent = `${count} pedido${count !== 1 ? 's' : ''}`;
+      meta.appendChild(dot);
+      meta.appendChild(name);
+      meta.appendChild(badge);
+
+      const barWrap = document.createElement('div');
+      barWrap.className = 'report-bar-track';
+      const fill = document.createElement('div');
+      fill.className = 'report-bar-fill';
+      fill.style.cssText = `width:${pct}%; background:${color}`;
+      barWrap.appendChild(fill);
+
+      const pctLabel = document.createElement('span');
+      pctLabel.className = 'report-bar-pct';
+      pctLabel.textContent = `${pct}%`;
+
+      row.appendChild(meta);
+      row.appendChild(barWrap);
+      row.appendChild(pctLabel);
+      container.appendChild(row);
+    });
+  }
+
+  // ---------------------------------------------------------
+  // buildOrdersStatus() — barras horizontais por status dos pedidos.
+  // ---------------------------------------------------------
+  function buildOrdersStatus() {
+    const container = document.querySelector('[data-orders-status]');
+    if (!container) return;
+
+    const STATUS_LABELS = {
+      pending:   { label: 'Pendente',  color: '#f59e0b' },
+      paid:      { label: 'Pago',      color: '#60a5fa' },
+      shipped:   { label: 'Enviado',   color: '#818cf8' },
+      ready:     { label: 'Retirada',  color: '#818cf8' },
+      delivered: { label: 'Entregue',  color: '#34d399' },
+      cancelled: { label: 'Cancelado', color: '#f87171' },
+    };
+
+    const map = {};
+    ShopData.orders().forEach(o => { map[o.status] = (map[o.status] || 0) + 1; });
+    const total   = Object.values(map).reduce((s, v) => s + v, 0);
+    const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
+
+    container.innerHTML = '';
+    entries.forEach(([status, count]) => {
+      const cfg   = STATUS_LABELS[status] || { label: status, color: '#818cf8' };
+      const pct   = Math.round((count / total) * 100);
+      const row   = document.createElement('div');
+      row.className = 'report-bar-row';
+
+      const meta = document.createElement('div');
+      meta.className = 'report-bar-meta';
+      const dot = document.createElement('span');
+      dot.className = 'report-bar-dot';
+      dot.style.background = cfg.color;
+      const name = document.createElement('span');
+      name.textContent = cfg.label;
+      const badge = document.createElement('span');
+      badge.className = 'badge badge-blue';
+      badge.textContent = `${count}`;
+      meta.appendChild(dot);
+      meta.appendChild(name);
+      meta.appendChild(badge);
+
+      const barWrap = document.createElement('div');
+      barWrap.className = 'report-bar-track';
+      const fill = document.createElement('div');
+      fill.className = 'report-bar-fill';
+      fill.style.cssText = `width:${pct}%; background:${cfg.color}`;
+      barWrap.appendChild(fill);
+
+      const pctLabel = document.createElement('span');
+      pctLabel.className = 'report-bar-pct';
+      pctLabel.textContent = `${pct}%`;
+
+      row.appendChild(meta);
+      row.appendChild(barWrap);
+      row.appendChild(pctLabel);
+      container.appendChild(row);
+    });
+  }
+
+  // ---------------------------------------------------------
   // update(period) — orquestra todos os componentes da página.
   // Chamado na carga inicial e sempre que o período muda.
   // ---------------------------------------------------------
   function update(period) {
     buildKpis(period);
     buildRevenueChart(period);
-    buildTopProducts();   // top produtos não muda com o período (dados globais)
-    buildCategoryChart(); // idem para categorias
+    buildTopProducts();
+    buildCategoryChart();
+    buildPaymentMethods();
+    buildOrdersStatus();
   }
 
   // Ouve o clique nos botões de período

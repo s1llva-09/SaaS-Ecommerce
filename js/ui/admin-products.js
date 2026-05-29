@@ -450,4 +450,236 @@ document.addEventListener('DOMContentLoaded', () => {
 
   search?.addEventListener('input', render);
   render();
+
+  // ---------------------------------------------------------
+  // rebuildCategorySelect() — sincroniza o select do modal de
+  // produto sempre que categorias são adicionadas/alteradas.
+  // ---------------------------------------------------------
+  function rebuildCategorySelect() {
+    const current = categorySelect.value;
+    categorySelect.innerHTML = '';
+    ShopData.categories().forEach(c => {
+      const option = document.createElement('option');
+      option.textContent = c.name;
+      categorySelect.appendChild(option);
+    });
+    categorySelect.value = current;
+  }
+
+  // ---------------------------------------------------------
+  // Tab switching — Produtos / Categorias.
+  // ---------------------------------------------------------
+  document.querySelectorAll('[data-products-tab]').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('[data-products-tab]').forEach(t => t.classList.remove('is-active'));
+      tab.classList.add('is-active');
+      document.querySelectorAll('[data-products-panel]').forEach(panel => {
+        panel.classList.toggle('is-hidden', panel.dataset.productsPanel !== tab.dataset.productsTab);
+      });
+    });
+  });
+
+  // ---------------------------------------------------------
+  // Modal de categorias — criar / editar.
+  // ---------------------------------------------------------
+  const catOverlay = document.createElement('div');
+  catOverlay.className = 'admin-modal-overlay is-hidden';
+  catOverlay.innerHTML = `
+    <div class="admin-modal">
+      <div class="admin-modal__head">
+        <span class="admin-modal__title" data-cat-modal-title>Nova Categoria</span>
+        <button class="admin-modal__close" data-cat-close>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="admin-modal__body">
+        <div>
+          <label class="admin-field-label">Imagem da categoria</label>
+          <div class="cat-img-area" data-cat-img-area>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p>Clique para fazer upload</p>
+            <small>PNG, JPG até 10MB</small>
+          </div>
+        </div>
+        <div class="admin-form-grid-2">
+          <div>
+            <label class="admin-field-label">Ícone (emoji)</label>
+            <input class="admin-field" type="text" data-cat-icon placeholder="Ex: 💻" maxlength="2">
+          </div>
+          <div>
+            <label class="admin-field-label">Nome *</label>
+            <input class="admin-field" type="text" data-cat-name placeholder="Ex: Eletrônicos" required>
+          </div>
+        </div>
+      </div>
+      <div class="admin-modal__footer">
+        <button class="btn-admin-cancel" data-cat-close>Cancelar</button>
+        <button class="btn-admin-create" data-cat-submit>Criar categoria</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(catOverlay);
+
+  // Input de arquivo dedicado para imagem de categoria
+  const catFileInput = document.createElement('input');
+  catFileInput.type = 'file';
+  catFileInput.accept = 'image/*';
+  catFileInput.style.display = 'none';
+  document.body.appendChild(catFileInput);
+
+  let catCurrentImage = null;
+  const catImgArea = catOverlay.querySelector('[data-cat-img-area]');
+
+  function renderCatImgArea() {
+    catImgArea.innerHTML = '';
+    if (catCurrentImage) {
+      const img = document.createElement('img');
+      img.src = catCurrentImage;
+      img.className = 'cat-img-preview';
+      catImgArea.appendChild(img);
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'cat-img-remove';
+      removeBtn.innerHTML = '&times;';
+      removeBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        catCurrentImage = null;
+        renderCatImgArea();
+      });
+      catImgArea.appendChild(removeBtn);
+    } else {
+      catImgArea.innerHTML = `
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <p>Clique para fazer upload</p>
+        <small>PNG, JPG até 10MB</small>
+      `;
+    }
+  }
+
+  catImgArea.addEventListener('click', () => catFileInput.click());
+
+  catFileInput.addEventListener('change', () => {
+    const file = catFileInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => { catCurrentImage = e.target.result; renderCatImgArea(); };
+    reader.readAsDataURL(file);
+    catFileInput.value = '';
+  });
+
+  catOverlay.querySelectorAll('[data-cat-close]').forEach(btn => {
+    btn.addEventListener('click', () => catOverlay.classList.add('is-hidden'));
+  });
+  catOverlay.addEventListener('click', e => {
+    if (e.target === catOverlay) catOverlay.classList.add('is-hidden');
+  });
+
+  let editingCatName = null;
+
+  function openCategoryModal(cat = null) {
+    editingCatName = cat ? cat.name : null;
+    catCurrentImage = cat?.image || null;
+    catOverlay.querySelector('[data-cat-modal-title]').textContent = cat ? 'Editar Categoria' : 'Nova Categoria';
+    catOverlay.querySelector('[data-cat-submit]').textContent = cat ? 'Salvar alterações' : 'Criar categoria';
+    catOverlay.querySelector('[data-cat-icon]').value = cat?.icon || '';
+    catOverlay.querySelector('[data-cat-name]').value = cat?.name || '';
+    renderCatImgArea();
+    catOverlay.classList.remove('is-hidden');
+    catOverlay.querySelector('[data-cat-name]').focus();
+  }
+
+  catOverlay.querySelector('[data-cat-submit]').addEventListener('click', () => {
+    const name = catOverlay.querySelector('[data-cat-name]').value.trim();
+    if (!name) { ShopNow.toast('Informe o nome da categoria', 'error'); return; }
+    const icon = catOverlay.querySelector('[data-cat-icon]').value.trim();
+    const updates = { name, icon, image: catCurrentImage || undefined };
+
+    if (editingCatName) {
+      ShopData.updateCategory(editingCatName, updates);
+      ShopNow.toast('Categoria atualizada com sucesso', 'success');
+    } else {
+      ShopData.addCategory({ ...updates, count: 0 });
+      ShopNow.toast('Categoria criada com sucesso', 'success');
+    }
+    catOverlay.classList.add('is-hidden');
+    renderCategories();
+    rebuildCategorySelect();
+  });
+
+  document.querySelector('[data-new-category]')?.addEventListener('click', () => openCategoryModal(null));
+
+  // ---------------------------------------------------------
+  // renderCategories() — tabela de categorias com editar/excluir.
+  // ---------------------------------------------------------
+  const catTbody = document.querySelector('[data-categories-list]');
+
+  function renderCategories() {
+    catTbody.innerHTML = '';
+    ShopData.categories().forEach(cat => {
+      const card = document.createElement('article');
+      card.className = 'cat-card';
+
+      // Área de imagem / emoji / placeholder vazio
+      const imgArea = document.createElement('div');
+      imgArea.className = 'cat-card__img-area';
+      if (cat.image) {
+        const img = document.createElement('img');
+        img.src = cat.image;
+        img.className = 'cat-card__img';
+        img.alt = cat.name;
+        imgArea.appendChild(img);
+      } else if (cat.icon) {
+        const emoji = document.createElement('span');
+        emoji.className = 'cat-card__emoji';
+        emoji.textContent = cat.icon;
+        imgArea.appendChild(emoji);
+      } else {
+        imgArea.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.25"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+      }
+      card.appendChild(imgArea);
+
+      // Corpo: nome + contagem
+      const body = document.createElement('div');
+      body.className = 'cat-card__body';
+
+      const nameEl = document.createElement('p');
+      nameEl.className = 'cat-card__name';
+      nameEl.textContent = cat.name;
+
+      const countEl = document.createElement('p');
+      countEl.className = 'cat-card__count';
+      countEl.textContent = `${cat.count} produto${cat.count !== 1 ? 's' : ''}`;
+
+      body.appendChild(nameEl);
+      body.appendChild(countEl);
+      card.appendChild(body);
+
+      // Ações
+      const actions = document.createElement('div');
+      actions.className = 'cat-card__actions';
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'cat-edit-btn';
+      editBtn.textContent = 'Editar';
+      editBtn.addEventListener('click', () => openCategoryModal(cat));
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'cat-del-btn';
+      delBtn.textContent = 'Excluir';
+      delBtn.addEventListener('click', () => {
+        ShopData.deleteCategory(cat.name);
+        renderCategories();
+        rebuildCategorySelect();
+        ShopNow.toast(`Categoria "${cat.name}" excluída`, 'success');
+      });
+
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+      card.appendChild(actions);
+
+      catTbody.appendChild(card);
+    });
+  }
+
+  renderCategories();
 });

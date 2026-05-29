@@ -68,3 +68,26 @@
   display: grid;
   gap: 10px;
 }
+
+/* Seção de status no drawer */
+.customer-drawer__status-section {
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--admin-line);
+}
+
+.customer-status-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.customer-status-row .admin-field {
+  flex: 1;
+}
+
+.customer-status-save {
+  height: 42px;
+  padding: 0 16px;
+  flex-shrink: 0;
+}

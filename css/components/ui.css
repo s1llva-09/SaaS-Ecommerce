@@ -163,3 +163,4 @@
 .badge-indigo { background: var(--brand-soft); color: var(--brand); }
 .text-muted { color: var(--muted); }
 .text-brand { color: var(--brand); }
+.is-hidden { display: none !important; }

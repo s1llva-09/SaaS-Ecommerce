@@ -125,6 +125,42 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     drawer.appendChild(stats);
 
+    // Status da conta
+    const statusSection = document.createElement('div');
+    statusSection.className = 'customer-drawer__status-section';
+
+    const statusLbl = document.createElement('p');
+    statusLbl.className = 'drawer-section__label';
+    statusLbl.textContent = 'Status da conta';
+    statusSection.appendChild(statusLbl);
+
+    const statusRow = document.createElement('div');
+    statusRow.className = 'customer-status-row';
+
+    const statusSelect = document.createElement('select');
+    statusSelect.className = 'admin-field';
+    [{ value: 'active', label: 'Ativo' }, { value: 'inactive', label: 'Inativo' }].forEach(({ value, label }) => {
+      const opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = label;
+      if (value === customer.status) opt.selected = true;
+      statusSelect.appendChild(opt);
+    });
+
+    const saveStatusBtn = document.createElement('button');
+    saveStatusBtn.className = 'btn-admin-create customer-status-save';
+    saveStatusBtn.textContent = 'Salvar';
+    saveStatusBtn.addEventListener('click', () => {
+      ShopData.updateCustomerStatus(customer.id, statusSelect.value);
+      render();
+      ShopNow.toast('Status atualizado com sucesso', 'success');
+    });
+
+    statusRow.appendChild(statusSelect);
+    statusRow.appendChild(saveStatusBtn);
+    statusSection.appendChild(statusRow);
+    drawer.appendChild(statusSection);
+
     // Histórico de pedidos
     const body = document.createElement('div');
     body.className = 'customer-drawer__body';

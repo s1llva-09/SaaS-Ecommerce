@@ -81,18 +81,18 @@
 .auth-benefit {
   display: flex;
   gap: 14px;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .auth-benefit__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.2);
-  font-size: 20px;
+  backdrop-filter: blur(4px);
   flex-shrink: 0;
 }
 
@@ -418,6 +418,99 @@
   padding-top: 24px;
   border-top: 1px solid #e2e8f0;
   text-align: center;
+}
+
+/* ============================================================
+   BRAND NO AUTH
+   ============================================================ */
+
+.auth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+  text-decoration: none;
+}
+
+/* ============================================================
+   INPUTS COM ÍCONE
+   ============================================================ */
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  color: #94a3b8;
+  pointer-events: none;
+  flex-shrink: 0;
+  z-index: 1;
+  transition: color 0.3s ease;
+}
+
+.input-wrapper:focus-within .input-icon {
+  color: var(--brand);
+}
+
+.field--icon {
+  padding-left: 42px;
+}
+
+/* ============================================================
+   LINHA OPÇÕES DO FORMULÁRIO (lembrar + esqueci senha)
+   ============================================================ */
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* ============================================================
+   BOTÃO LARGURA TOTAL + ÍCONE
+   ============================================================ */
+
+.btn--full {
+  width: 100%;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn--full svg {
+  transition: transform 0.3s ease;
+}
+
+.btn--full:hover svg {
+  transform: translateX(4px);
+}
+
+/* ============================================================
+   SELO DE SEGURANÇA
+   ============================================================ */
+
+.auth-secure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 16px 0 4px;
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.auth-secure svg {
+  color: #64748b;
+  flex-shrink: 0;
 }
 
 /* ============================================================

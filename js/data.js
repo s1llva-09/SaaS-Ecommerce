@@ -114,6 +114,10 @@ const CHANNELS = [
   { label: 'Marketplace', value: 13, color: '#a7f3d0' },
 ];
 
+const _runtimeCashflow = [];
+const _customerStatusOverrides = {};
+const _runtimeCategories = [...CATEGORIES];
+
 const ShopData = {
   provider: 'mock',
   useProvider(providerName, provider) {
@@ -122,9 +126,22 @@ const ShopData = {
   },
   products: () => PRODUCTS,
   orders: () => ORDERS,
-  customers: () => CUSTOMERS,
-  cashflow: () => CASHFLOW,
-  categories: () => CATEGORIES,
+  customers: () => CUSTOMERS.map(c =>
+    _customerStatusOverrides[c.id] ? { ...c, status: _customerStatusOverrides[c.id] } : c
+  ),
+  cashflow: () => [...CASHFLOW, ..._runtimeCashflow],
+  addCashflow(entry) { _runtimeCashflow.push(entry); },
+  updateCustomerStatus(id, status) { _customerStatusOverrides[id] = status; },
+  categories: () => _runtimeCategories,
+  addCategory(cat) { _runtimeCategories.push(cat); },
+  updateCategory(name, updates) {
+    const idx = _runtimeCategories.findIndex(c => c.name === name);
+    if (idx !== -1) Object.assign(_runtimeCategories[idx], updates);
+  },
+  deleteCategory(name) {
+    const idx = _runtimeCategories.findIndex(c => c.name === name);
+    if (idx !== -1) _runtimeCategories.splice(idx, 1);
+  },
   weeklyRevenue: () => WEEKLY_REVENUE,
   monthlyRevenue: () => MONTHLY_REVENUE,
   status: () => STATUS_CONFIG,

@@ -5,7 +5,8 @@
 
 // Envolve tudo em IIFE para não poluir o escopo global
 (function () {
-  let cfChart = null; // instância do Chart.js — guardada para destruir antes de recriar
+  let cfChart = null;
+  let activePeriod = 'week';
 
   // ---------------------------------------------------------
   // getMockToday() — encontra a data mais recente nos dados
@@ -276,10 +277,24 @@
   // render(period) — orquestra os 3 componentes da página.
   // ---------------------------------------------------------
   function render(period) {
+    activePeriod = period;
     const filtered = filterByPeriod(ShopData.cashflow(), period);
     renderSummary(filtered, period);
     renderTable(filtered);
-    renderChart(filtered, period); // passa period para o agrupamento temporal
+    renderChart(filtered, period);
+  }
+
+  // ---------------------------------------------------------
+  // Modal de nova movimentação.
+  // ---------------------------------------------------------
+  function openCfModal() {
+    document.querySelector('[name="cfDate"]').value = getMockToday();
+    document.querySelector('[data-cf-modal-overlay]').classList.remove('is-hidden');
+  }
+
+  function closeCfModal() {
+    document.querySelector('[data-cf-modal-overlay]').classList.add('is-hidden');
+    document.getElementById('cfForm').reset();
   }
 
   // ---------------------------------------------------------
@@ -292,6 +307,35 @@
         btn.classList.add('is-active');
         render(btn.dataset.cfPeriod);
       });
+    });
+
+    document.querySelector('[data-cf-new]').addEventListener('click', openCfModal);
+    document.querySelector('[data-cf-modal-close]').addEventListener('click', closeCfModal);
+    document.querySelector('[data-cf-modal-cancel]').addEventListener('click', closeCfModal);
+    document.querySelector('[data-cf-modal-overlay]').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeCfModal();
+    });
+
+    document.getElementById('cfForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const amount = parseFloat(fd.get('cfAmount'));
+      if (!amount || amount <= 0) return;
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      ShopData.addCashflow({
+        id: `CF_${Date.now()}`,
+        type: fd.get('cfType'),
+        description: fd.get('cfDesc').trim(),
+        category: fd.get('cfCategory'),
+        amount,
+        date: `${fd.get('cfDate')} ${hh}:${mm}`,
+        paymentMethod: fd.get('cfPayment'),
+      });
+      closeCfModal();
+      render(activePeriod);
+      ShopNow.toast('Movimentação registrada com sucesso', 'success');
     });
 
     render('week');

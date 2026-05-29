@@ -22,12 +22,12 @@ const NOTIFICATIONS = [
 ];
 
 // -----------------------------------------------------------
-// ÍCONES por tipo (emoji simples — pode trocar por SVG)
+// ÍCONES por tipo — SVGs consistentes entre plataformas
 // -----------------------------------------------------------
 const NOTIF_ICONS = {
-  order:   '🛒',
-  stock:   '⚠️',
-  payment: '✅',
+  order:   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>`,
+  stock:   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  payment: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
 };
 
 // -----------------------------------------------------------
@@ -77,36 +77,52 @@ document.addEventListener('DOMContentLoaded', () => {
   // Chamada sempre que os dados mudam (ex: ao limpar)
   // ---------------------------------------------------------
   function render() {
-    const unread = NOTIFICATIONS.filter(n => n.unread);
+    const unreadCount = NOTIFICATIONS.filter(n => n.unread).length;
 
-    // Ponto vermelho no sino: aparece só se houver não lidas
-    dot.style.display = unread.length ? '' : 'none';
+    if (dot) dot.style.display = unreadCount ? '' : 'none';
 
     panel.innerHTML = '';
 
+    // Header sempre presente
+    const header = document.createElement('div');
+    header.className = 'notif-header';
+
+    const titleGroup = document.createElement('div');
+    titleGroup.className = 'notif-header__title';
+    const titleSpan = document.createElement('span');
+    titleSpan.textContent = 'Notificações';
+    titleGroup.appendChild(titleSpan);
+    if (unreadCount > 0) {
+      const badge = document.createElement('span');
+      badge.className = 'notif-count-badge';
+      badge.textContent = unreadCount;
+      titleGroup.appendChild(badge);
+    }
+    header.appendChild(titleGroup);
+
+    if (NOTIFICATIONS.length > 0) {
+      const clearBtn = document.createElement('button');
+      clearBtn.className = 'notif-clear-btn';
+      clearBtn.textContent = 'Limpar tudo';
+      clearBtn.addEventListener('click', () => { NOTIFICATIONS.length = 0; render(); });
+      header.appendChild(clearBtn);
+    }
+    panel.appendChild(header);
+
+    // Estado vazio
     if (!NOTIFICATIONS.length) {
       const emptyDiv = document.createElement('div');
       emptyDiv.className = 'notif-empty';
-      emptyDiv.textContent = 'Nenhuma notificação';
+      emptyDiv.innerHTML = `
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <p>Tudo em dia!</p>
+        <span>Nenhuma notificação pendente</span>
+      `;
       panel.appendChild(emptyDiv);
       return;
     }
 
-    const header = document.createElement('div');
-    header.className = 'notif-header';
-
-    const headerTitle = document.createElement('span');
-    headerTitle.textContent = 'Notificações';
-    header.appendChild(headerTitle);
-
-    const clearBtn = document.createElement('button');
-    clearBtn.className = 'notif-clear-btn';
-    clearBtn.dataset.notifClear = '';
-    clearBtn.textContent = 'Limpar tudo';
-    header.appendChild(clearBtn);
-
-    panel.appendChild(header);
-
+    // Lista
     const ul = document.createElement('ul');
     ul.className = 'notif-list';
 
@@ -116,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const iconDiv = document.createElement('div');
       iconDiv.className = `notif-icon notif-icon--${n.type}`;
-      iconDiv.textContent = NOTIF_ICONS[n.type];
+      iconDiv.innerHTML = NOTIF_ICONS[n.type];
       li.appendChild(iconDiv);
 
       const bodyDiv = document.createElement('div');
@@ -127,23 +143,43 @@ document.addEventListener('DOMContentLoaded', () => {
       textP.textContent = n.text;
       bodyDiv.appendChild(textP);
 
+      const metaDiv = document.createElement('div');
+      metaDiv.className = 'notif-meta';
       const timeSpan = document.createElement('span');
       timeSpan.className = 'notif-time';
       timeSpan.textContent = n.time;
-      bodyDiv.appendChild(timeSpan);
+      metaDiv.appendChild(timeSpan);
+      if (n.unread) {
+        const unreadDot = document.createElement('span');
+        unreadDot.className = 'notif-unread-dot';
+        metaDiv.appendChild(unreadDot);
+      }
+      bodyDiv.appendChild(metaDiv);
 
       li.appendChild(bodyDiv);
+
+      // Clicar numa notificação não lida a marca como lida
+      if (n.unread) {
+        li.addEventListener('click', () => { n.unread = false; render(); });
+      }
+
       ul.appendChild(li);
     });
 
     panel.appendChild(ul);
 
-    // Botão limpar só existe após a construção acima, então ouve aqui
-    panel.querySelector('[data-notif-clear]')?.addEventListener('click', () => {
-      NOTIFICATIONS.length = 0;
-      render();
-    })
-  } // ← fecha render()
+    // Footer: marcar todas como lidas
+    if (unreadCount > 0) {
+      const footer = document.createElement('div');
+      footer.className = 'notif-footer';
+      const markAllBtn = document.createElement('button');
+      markAllBtn.className = 'notif-mark-all-btn';
+      markAllBtn.textContent = 'Marcar todas como lidas';
+      markAllBtn.addEventListener('click', () => { NOTIFICATIONS.forEach(n => n.unread = false); render(); });
+      footer.appendChild(markAllBtn);
+      panel.appendChild(footer);
+    }
+  }
 
   // Abre/fecha ao clicar no sino
   btn.addEventListener('click', e => {
