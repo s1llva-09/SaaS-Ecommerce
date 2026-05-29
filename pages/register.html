@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="../imgs/favicon.svg" type="image/svg+xml">
+  <title>Criar Conta - ShopNow</title>
+  <meta name="description" content="Crie sua conta ShopNow e comece a comprar">
+  <link rel="stylesheet" href="../css/index.css">
+  <link rel="stylesheet" href="../css/pages/auth.css">
+</head>
+<body class="page auth-page">
+  <div class="auth-container">
+    <div class="auth-welcome">
+      <div class="auth-welcome__content">
+        <a href="../index.html" class="store-brand" style="gap: 12px; margin-bottom: 40px;">
+          <span class="store-brand__mark">S</span>
+          <span>ShopNow</span>
+        </a>
+
+        <h1>Junte-se a nós!</h1>
+        <p>Crie sua conta e comece a aproveitar as melhores compras online.</p>
+
+        <div class="auth-benefits">
+          <div class="auth-benefit">
+            <span class="auth-benefit__icon">🎁</span>
+            <div>
+              <strong>Frete Grátis</strong>
+              <p>Em compras acima de R$ 299</p>
+            </div>
+          </div>
+          <div class="auth-benefit">
+            <span class="auth-benefit__icon">💳</span>
+            <div>
+              <strong>Parcelamento</strong>
+              <p>Até 12x sem juros</p>
+            </div>
+          </div>
+          <div class="auth-benefit">
+            <span class="auth-benefit__icon">🔒</span>
+            <div>
+              <strong>Compra Segura</strong>
+              <p>Dados protegidos 100%</p>
+            </div>
+          </div>
+          <div class="auth-benefit">
+            <span class="auth-benefit__icon">📦</span>
+            <div>
+              <strong>Devolução Fácil</strong>
+              <p>30 dias para devolver</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="auth-footer">
+          <p>Já tem uma conta?</p>
+          <a href="login.html" class="auth-footer__link">Fazer login</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-form-container">
+      <div class="auth-form">
+        <h2>Criar Conta</h2>
+        <p class="auth-form__subtitle">Preencha seus dados abaixo</p>
+
+        <form id="registerForm" class="form">
+          <div class="form-group">
+            <label for="name" class="form-label">Nome Completo</label>
+            <input type="text" id="name" name="name" class="field" placeholder="Seu nome completo" required>
+          </div>
+
+          <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" id="email" name="email" class="field" placeholder="seu@email.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">Senha</label>
+            <div class="password-field">
+              <input type="password" id="password" name="password" class="field password-input" placeholder="Pelo menos 8 caracteres" minlength="8" required>
+              <button type="button" class="password-toggle" aria-label="Mostrar/esconder senha" data-toggle-password>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            <small style="color: #94a3b8; margin-top: 4px;">Mínimo 8 caracteres, com números e letras</small>
+          </div>
+
+          <div class="form-group">
+            <label for="confirm-password" class="form-label">Confirmar Senha</label>
+            <div class="password-field">
+              <input type="password" id="confirm-password" name="confirm-password" class="field password-input" placeholder="Repita sua senha" required>
+              <button type="button" class="password-toggle" aria-label="Mostrar/esconder senha" data-toggle-password>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <label class="form-checkbox" style="margin-top: 12px;">
+            <input type="checkbox" name="newsletter" id="newsletter">
+            <span>Desejo receber ofertas e novidades por email</span>
+          </label>
+
+          <div class="form-terms">
+            <label class="form-checkbox">
+              <input type="checkbox" name="terms" id="terms" required>
+              <span>
+                Concordo com os
+                <a href="#" class="text-brand">Termos de Serviço</a> e
+                <a href="#" class="text-brand">Política de Privacidade</a>
+              </span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 24px;">
+            Criar Conta
+          </button>
+        </form>
+
+        <p class="auth-form__footer">
+          Já tem conta? <a href="login.html" class="text-brand">Fazer login</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/ui/auth.js"></script>
+</body>
+</html>
