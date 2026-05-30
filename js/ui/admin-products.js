@@ -446,26 +446,47 @@ document.addEventListener('DOMContentLoaded', () => {
       skuP.textContent = `SKU: ${product.sku || '—'}`;
       article.appendChild(skuP);
 
+      const buttonsDiv = document.createElement('div');
+      buttonsDiv.className = 'admin-product-card__actions';
+
       const editBtn = document.createElement('button');
       editBtn.className = 'admin-product-card__edit-btn';
       editBtn.textContent = 'Editar';
-      article.appendChild(editBtn);
+      buttonsDiv.appendChild(editBtn);
 
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'admin-product-card__delete-btn';
+      deleteBtn.textContent = 'Deletar';
+      buttonsDiv.appendChild(deleteBtn);
+
+      article.appendChild(buttonsDiv);
       grid.appendChild(article);
     });
   }
 
   // ---------------------------------------------------------
-  // Delegação de clique na grade — abre o modal de edição
-  // ao clicar no botão "Editar" de qualquer card.
+  // Delegação de clique na grade — editar ou deletar
   // ---------------------------------------------------------
   grid.addEventListener('click', e => {
-    const btn = e.target.closest('.admin-product-card__edit-btn');
-    if (!btn) return;
-    const card = btn.closest('[data-edit-product]');
+    const editBtn = e.target.closest('.admin-product-card__edit-btn');
+    const deleteBtn = e.target.closest('.admin-product-card__delete-btn');
+    const card = e.target.closest('[data-edit-product]');
     if (!card) return;
+
     const product = ShopData.products().find(p => p.id === card.dataset.editProduct);
-    if (product) openModal(product);
+    if (!product) return;
+
+    if (editBtn) {
+      openModal(product);
+    } else if (deleteBtn) {
+      // Modal de confirmação
+      const confirmed = confirm(`Tem certeza que quer deletar "${product.name}"?`);
+      if (confirmed) {
+        ShopData.deleteProduct(product.id);
+        ShopNow.toast('✓ Produto deletado!');
+        render();
+      }
+    }
   });
 
   search?.addEventListener('input', render);

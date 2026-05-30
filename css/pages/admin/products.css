@@ -322,22 +322,43 @@
   margin-top: 4px;
 }
 
-.admin-product-card__edit-btn {
-  width: 100%;
-  margin-top: 10px;
-  padding: 7px;
+.admin-product-card__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.admin-product-card__edit-btn,
+.admin-product-card__delete-btn {
+  flex: 1;
+  padding: 8px 12px;
   border-radius: 8px;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+
+.admin-product-card__edit-btn {
   color: var(--brand);
   border: 1px solid var(--admin-line);
   background: var(--admin-panel-2);
-  transition: border-color .15s, background .15s;
 }
 
 .admin-product-card__edit-btn:hover {
   border-color: var(--brand);
   background: rgba(88, 56, 244, .08);
+}
+
+.admin-product-card__delete-btn {
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  background: #fee2e2;
+}
+
+.admin-product-card__delete-btn:hover {
+  background: #fca5a5;
+  border-color: #f87171;
 }
 
 .admin-field-hint {

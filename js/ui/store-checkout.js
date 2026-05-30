@@ -8,247 +8,205 @@ document.addEventListener('DOMContentLoaded', () => {
   const checkoutForm = document.querySelector('[data-checkout-form]');
   const confirmation = document.querySelector('[data-confirmation]');
 
-  // ---------------------------------------------------------
-  // Resumo do pedido — lista itens com qtd e preço + subtotal/frete/total.
-  // Frete grátis para compras acima de R$ 299.
-  // ---------------------------------------------------------
-  if (checkoutSummary) {
+  if (checkoutSummary) renderCheckoutSummary(checkoutSummary);
+  if (checkoutForm) bindCheckoutForm(checkoutForm);
+  if (confirmation) renderConfirmation(confirmation);
+});
+
+function renderCheckoutSummary(container) {
+  const items = ShopNow.cartItems();
+  const subtotal = ShopNow.cartTotal();
+  const shipping = subtotal >= 299 ? 0 : 24.9;
+  const total = subtotal + shipping;
+  container.innerHTML = '';
+
+  const title = document.createElement('h2');
+  title.className = 'checkout-summary__title';
+  title.textContent = 'Resumo do pedido';
+  container.appendChild(title);
+
+  const itemsGrid = document.createElement('div');
+  itemsGrid.className = 'checkout-summary__items';
+  items.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'checkout-summary__item';
+
+    const name = document.createElement('span');
+    name.textContent = `${item.qty}x ${item.product.name}`;
+    row.appendChild(name);
+
+    const price = document.createElement('span');
+    price.className = 'checkout-summary__item-price';
+    price.textContent = ShopNow.money(item.product.price * item.qty);
+    row.appendChild(price);
+
+    itemsGrid.appendChild(row);
+  });
+  container.appendChild(itemsGrid);
+
+  const totals = document.createElement('div');
+  totals.className = 'checkout-summary__totals';
+  totals.appendChild(summaryRow('Subtotal', ShopNow.money(subtotal)));
+  totals.appendChild(summaryRow('Frete', shipping === 0 ? 'Grátis' : ShopNow.money(shipping, true), shipping === 0));
+
+  const totalRow = document.createElement('div');
+  totalRow.className = 'checkout-summary__total-row';
+  totalRow.innerHTML = `<span class="checkout-summary__total-label">Total</span><strong class="checkout-summary__total-value">${ShopNow.money(total, true)}</strong>`;
+  totals.appendChild(totalRow);
+  container.appendChild(totals);
+}
+
+function summaryRow(label, value, isFree = false) {
+  const row = document.createElement('div');
+  row.className = 'summary-row';
+  const labelSpan = document.createElement('span');
+  labelSpan.textContent = label;
+  const valueSpan = document.createElement('span');
+  valueSpan.className = 'checkout-summary__row-value';
+  if (isFree) valueSpan.style.color = 'var(--green)';
+  valueSpan.textContent = value;
+  row.appendChild(labelSpan);
+  row.appendChild(valueSpan);
+  return row;
+}
+
+function bindCheckoutForm(checkoutForm) {
+  checkoutForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const formData = new FormData(checkoutForm);
     const items = ShopNow.cartItems();
     const subtotal = ShopNow.cartTotal();
     const shipping = subtotal >= 299 ? 0 : 24.9;
-    const total = subtotal + shipping;
-    checkoutSummary.innerHTML = '';
+    const paymentOptions = [...document.querySelectorAll('[data-payment-option]')];
+    const activePaymentIndex = Math.max(0, paymentOptions.findIndex(option => option.classList.contains('is-active')));
+    const paymentMethod = ['Cartão', 'PIX', 'Boleto'][activePaymentIndex] || 'Cartão';
 
-    const title = document.createElement('h2');
-    title.className = 'checkout-summary__title';
-    title.textContent = 'Resumo do pedido';
-    checkoutSummary.appendChild(title);
+    const order = {
+      id: `#${Math.floor(13000 + Math.random() * 900)}`,
+      customer: formData.get('customerName') || '',
+      email: formData.get('email') || '',
+      items: items.map(item => ({
+        name: item.product.name,
+        qty: item.qty,
+        price: item.product.price,
+      })),
+      total: subtotal + shipping,
+      paymentMethod,
+      type: 'delivery',
+      status: 'pending',
+      date: new Date().toISOString().slice(0, 10),
+      city: checkoutForm.querySelector('[data-cep-city]')?.value || '',
+    };
 
-    const itemsGrid = document.createElement('div');
-    itemsGrid.className = 'checkout-summary__items';
+    ShopData.addOrder(order);
+    localStorage.setItem('shopnow-last-order', JSON.stringify(order));
+    ShopNow.clearCart();
+    window.location.href = 'confirmation.html';
+  });
 
-    items.forEach(item => {
-      const rowDiv = document.createElement('div');
-      rowDiv.className = 'checkout-summary__item';
-
-      const nameSpan = document.createElement('span');
-      nameSpan.textContent = `${item.qty}x ${item.product.name}`;
-      rowDiv.appendChild(nameSpan);
-
-      const priceSpan = document.createElement('span');
-      priceSpan.className = 'checkout-summary__item-price';
-      priceSpan.textContent = ShopNow.money(item.product.price * item.qty);
-      rowDiv.appendChild(priceSpan);
-
-      itemsGrid.appendChild(rowDiv);
+  document.querySelectorAll('[data-payment-option]').forEach(option => {
+    option.addEventListener('click', () => {
+      document.querySelectorAll('[data-payment-option]').forEach(item => item.classList.remove('is-active'));
+      option.classList.add('is-active');
     });
-    checkoutSummary.appendChild(itemsGrid);
+  });
 
-    const totalsDiv = document.createElement('div');
-    totalsDiv.className = 'checkout-summary__totals';
+  bindCepLookup(checkoutForm);
+}
 
-    // Subtotal
-    const subtotalRow = document.createElement('div');
-    subtotalRow.className = 'summary-row';
-    const subtotalLabel = document.createElement('span');
-    subtotalLabel.textContent = 'Subtotal';
-    subtotalRow.appendChild(subtotalLabel);
-    const subtotalValue = document.createElement('span');
-    subtotalValue.className = 'checkout-summary__row-value';
-    subtotalValue.textContent = ShopNow.money(subtotal);
-    subtotalRow.appendChild(subtotalValue);
-    totalsDiv.appendChild(subtotalRow);
+function bindCepLookup(checkoutForm) {
+  const cepInput = checkoutForm.querySelector('[data-cep-input]');
+  const cepStatus = checkoutForm.querySelector('[data-cep-status]');
+  const cepStreet = checkoutForm.querySelector('[data-cep-street]');
+  const cepDistrict = checkoutForm.querySelector('[data-cep-district]');
+  const cepCity = checkoutForm.querySelector('[data-cep-city]');
+  const cepState = checkoutForm.querySelector('[data-cep-state]');
 
-    // Frete
-    const shippingRow = document.createElement('div');
-    shippingRow.className = 'summary-row';
-    const shippingLabel = document.createElement('span');
-    shippingLabel.textContent = 'Frete';
-    shippingRow.appendChild(shippingLabel);
-    const shippingValue = document.createElement('span');
-    shippingValue.className = 'checkout-summary__row-value';
-    if (shipping === 0) {
-      shippingValue.style.color = 'var(--green)';
-      shippingValue.textContent = 'Grátis';
-    } else {
-      shippingValue.textContent = ShopNow.money(shipping, true);
-    }
-    shippingRow.appendChild(shippingValue);
-    totalsDiv.appendChild(shippingRow);
-
-    // Total
-    const totalRow = document.createElement('div');
-    totalRow.className = 'checkout-summary__total-row';
-    const totalLabel = document.createElement('span');
-    totalLabel.className = 'checkout-summary__total-label';
-    totalLabel.textContent = 'Total';
-    totalRow.appendChild(totalLabel);
-    const totalValue = document.createElement('strong');
-    totalValue.className = 'checkout-summary__total-value';
-    totalValue.textContent = ShopNow.money(total, true);
-    totalRow.appendChild(totalValue);
-    totalsDiv.appendChild(totalRow);
-
-    checkoutSummary.appendChild(totalsDiv);
+  function clearAddress() {
+    [cepStreet, cepDistrict, cepCity, cepState].forEach(el => {
+      if (!el) return;
+      el.value = '';
+      el.disabled = true;
+    });
   }
 
-  // ---------------------------------------------------------
-  // Formulário de checkout — ao submeter, salva o pedido no
-  // localStorage, limpa o carrinho e redireciona à confirmação.
-  // ---------------------------------------------------------
-  if (checkoutForm) {
-    checkoutForm.addEventListener('submit', event => {
-      event.preventDefault();
-      const formData = new FormData(checkoutForm);
-      const items = ShopNow.cartItems();
-      const subtotal = ShopNow.cartTotal();
-      const shipping = subtotal >= 299 ? 0 : 24.9;
-      const paymentOptions = [...document.querySelectorAll('[data-payment-option]')];
-      const activePaymentIndex = Math.max(0, paymentOptions.findIndex(option => option.classList.contains('is-active')));
-      const paymentMethod = ['Cartão', 'PIX', 'Boleto'][activePaymentIndex] || 'Cartão';
+  function fillAddress(data) {
+    cepStreet.value = data.logradouro || '';
+    cepDistrict.value = data.bairro || '';
+    cepCity.value = data.localidade || '';
+    cepState.value = data.uf || '';
+    [cepStreet, cepDistrict, cepCity, cepState].forEach(el => { el.disabled = false; });
+    cepStatus.textContent = 'Endereço encontrado';
+    cepStatus.style.color = 'var(--green)';
+  }
 
-      const order = {
-        id: `#${Math.floor(13000 + Math.random() * 900)}`,
-        customer: formData.get('customerName') || '',
-        email: formData.get('email') || '',
-        items: items.map(item => ({
-          name: item.product.name,
-          qty: item.qty,
-          price: item.product.price,
-        })),
-        total: subtotal + shipping,
-        paymentMethod,
-        type: 'delivery',
-        status: 'pending',
-        date: new Date().toISOString().slice(0, 10),
-        city: checkoutForm.querySelector('[data-cep-city]')?.value || '',
-      };
-      ShopData.addOrder(order);
-      localStorage.setItem('shopnow-last-order', JSON.stringify(order));
-      ShopNow.clearCart();
-      window.location.href = 'confirmation.html';
-    });
+  cepInput?.addEventListener('input', () => {
+    let value = cepInput.value.replace(/\D/g, '').slice(0, 8);
+    if (value.length > 5) value = `${value.slice(0, 5)}-${value.slice(5)}`;
+    cepInput.value = value;
 
-    document.querySelectorAll('[data-payment-option]').forEach(option => {
-      option.addEventListener('click', () => {
-        document.querySelectorAll('[data-payment-option]').forEach(item => item.classList.remove('is-active'));
-        option.classList.add('is-active');
-      });
-    });
-
-    // ---------------------------------------------------------
-    // Validação de CEP via ViaCEP — formata o input enquanto o
-    // usuário digita e consulta a API ao completar os 8 dígitos.
-    // Preenche logradouro, bairro, cidade e UF automaticamente.
-    // Os campos de endereço ficam disabled até um CEP válido.
-    // ---------------------------------------------------------
-    const cepInput    = checkoutForm.querySelector('[data-cep-input]');
-    const cepStatus   = checkoutForm.querySelector('[data-cep-status]');
-    const cepStreet   = checkoutForm.querySelector('[data-cep-street]');
-    const cepDistrict = checkoutForm.querySelector('[data-cep-district]');
-    const cepCity     = checkoutForm.querySelector('[data-cep-city]');
-    const cepState    = checkoutForm.querySelector('[data-cep-state]');
-
-    // Limpa e desabilita os campos de endereço
-    function clearAddress() {
-      [cepStreet, cepDistrict, cepCity, cepState].forEach(el => {
-        el.value = '';
-        el.disabled = true;
-      });
-    }
-
-    // Preenche os campos com os dados retornados pela ViaCEP e habilita edição
-    function fillAddress(data) {
-      cepStreet.value   = data.logradouro || '';
-      cepDistrict.value = data.bairro     || '';
-      cepCity.value     = data.localidade || '';
-      cepState.value    = data.uf         || '';
-      [cepStreet, cepDistrict, cepCity, cepState].forEach(el => el.disabled = false);
-      cepStatus.textContent = '✓ Endereço encontrado';
-      cepStatus.style.color = 'var(--green)';
-    }
-
-    cepInput?.addEventListener('input', () => {
-      // Formata enquanto digita: 12345-678
-      let v = cepInput.value.replace(/\D/g, '').slice(0, 8);
-      if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5);
-      cepInput.value = v;
-
-      const digits = v.replace(/\D/g, '');
-
-      // Menos de 8 dígitos: limpa tudo sem chamar a API
-      if (digits.length < 8) {
-        clearAddress();
-        cepStatus.textContent = '';
-        return;
-      }
-
-      // 8 dígitos completos: consulta a API
-      cepStatus.textContent = 'Buscando...';
-      cepStatus.style.color = 'var(--muted)';
+    const digits = value.replace(/\D/g, '');
+    if (digits.length < 8) {
       clearAddress();
+      cepStatus.textContent = '';
+      return;
+    }
 
-      fetch(`https://viacep.com.br/ws/${digits}/json/`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.erro) {
-            cepStatus.textContent = 'CEP não encontrado';
-            cepStatus.style.color = 'var(--red)';
-          } else {
-            fillAddress(data);
-          }
-        })
-        .catch(() => {
-          cepStatus.textContent = 'Erro ao buscar CEP';
+    cepStatus.textContent = 'Buscando...';
+    cepStatus.style.color = 'var(--muted)';
+    clearAddress();
+
+    fetch(`https://viacep.com.br/ws/${digits}/json/`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.erro) {
+          cepStatus.textContent = 'CEP não encontrado';
           cepStatus.style.color = 'var(--red)';
-        });
-    });
-  }
+        } else {
+          fillAddress(data);
+        }
+      })
+      .catch(() => {
+        cepStatus.textContent = 'Erro ao buscar CEP';
+        cepStatus.style.color = 'var(--red)';
+      });
+  });
+}
 
-  // ---------------------------------------------------------
-  // Página de confirmação — lê o pedido salvo no localStorage
-  // e exibe ID, total e botões de ação.
-  // ---------------------------------------------------------
-  if (confirmation) {
-    const order = JSON.parse(localStorage.getItem('shopnow-last-order') || '{}');
+function renderConfirmation(container) {
+  const order = JSON.parse(localStorage.getItem('shopnow-last-order') || '{}');
+  container.innerHTML = '';
 
-    confirmation.innerHTML = '';
+  const title = document.createElement('h1');
+  title.textContent = 'Pedido confirmado';
+  container.appendChild(title);
 
-    const h1 = document.createElement('h1');
-    h1.textContent = 'Pedido confirmado';
-    confirmation.appendChild(h1);
+  const desc = document.createElement('p');
+  desc.className = 'text-muted';
+  desc.textContent = `Seu pedido ${order.id || '#12999'} foi registrado com sucesso.`;
+  container.appendChild(desc);
 
-    const descP = document.createElement('p');
-    descP.className = 'text-muted';
-    descP.textContent = `Seu pedido ${order.id || '#12999'} foi registrado com sucesso.`;
-    confirmation.appendChild(descP);
+  const total = document.createElement('p');
+  const label = document.createElement('strong');
+  label.textContent = 'Total:';
+  total.appendChild(label);
+  total.appendChild(document.createTextNode(` ${ShopNow.money(order.total || 0)}`));
+  container.appendChild(total);
 
-    const totalP = document.createElement('p');
-    const totalStrong = document.createElement('strong');
-    totalStrong.textContent = 'Total:';
-    totalP.appendChild(totalStrong);
-    totalP.appendChild(document.createTextNode(` ${ShopNow.money(order.total || 0)}`));
-    confirmation.appendChild(totalP);
+  const actions = document.createElement('div');
+  actions.style.cssText = 'display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px';
 
-    const actionsDiv = document.createElement('div');
-    actionsDiv.style.display = 'flex';
-    actionsDiv.style.gap = '10px';
-    actionsDiv.style.justifyContent = 'center';
-    actionsDiv.style.flexWrap = 'wrap';
-    actionsDiv.style.marginTop = '22px';
+  const continueLink = document.createElement('a');
+  continueLink.className = 'btn btn-primary';
+  continueLink.href = '../index.html';
+  continueLink.textContent = 'Continuar comprando';
+  actions.appendChild(continueLink);
 
-    const continueLink = document.createElement('a');
-    continueLink.className = 'btn btn-primary';
-    continueLink.href = '../index.html';
-    continueLink.textContent = 'Continuar comprando';
-    actionsDiv.appendChild(continueLink);
+  const ordersLink = document.createElement('a');
+  ordersLink.className = 'btn btn-ghost';
+  ordersLink.href = 'account.html';
+  ordersLink.textContent = 'Ver pedidos';
+  actions.appendChild(ordersLink);
 
-    const ordersLink = document.createElement('a');
-    ordersLink.className = 'btn btn-ghost';
-    ordersLink.href = 'account.html';
-    ordersLink.textContent = 'Ver pedidos';
-    actionsDiv.appendChild(ordersLink);
-
-    confirmation.appendChild(actionsDiv);
-  }
-});
+  container.appendChild(actions);
+}

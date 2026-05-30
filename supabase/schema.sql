@@ -97,6 +97,35 @@ create table if not exists public.promotions (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.users (
+  id text primary key,
+  email text unique not null,
+  name text not null,
+  phone text,
+  password_hash text not null,
+  status text default 'active',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.password_resets (
+  id text primary key,
+  user_email text not null,
+  token text unique not null,
+  expires_at timestamptz not null,
+  used boolean default false,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.email_verifications (
+  id text primary key,
+  user_email text not null,
+  code text not null,
+  verified boolean default false,
+  expires_at timestamptz not null,
+  created_at timestamptz not null default now()
+);
+
 alter table public.products enable row level security;
 alter table public.orders enable row level security;
 alter table public.customers enable row level security;
@@ -105,6 +134,9 @@ alter table public.cashflow enable row level security;
 alter table public.coupons enable row level security;
 alter table public.promotions enable row level security;
 alter table public.store_settings enable row level security;
+alter table public.users enable row level security;
+alter table public.password_resets enable row level security;
+alter table public.email_verifications enable row level security;
 
 drop policy if exists "shopnow public read products" on public.products;
 drop policy if exists "shopnow public write products" on public.products;
@@ -122,6 +154,12 @@ drop policy if exists "shopnow public read promotions" on public.promotions;
 drop policy if exists "shopnow public write promotions" on public.promotions;
 drop policy if exists "shopnow public read store_settings" on public.store_settings;
 drop policy if exists "shopnow public write store_settings" on public.store_settings;
+drop policy if exists "shopnow public read users" on public.users;
+drop policy if exists "shopnow public write users" on public.users;
+drop policy if exists "shopnow public read password_resets" on public.password_resets;
+drop policy if exists "shopnow public write password_resets" on public.password_resets;
+drop policy if exists "shopnow public read email_verifications" on public.email_verifications;
+drop policy if exists "shopnow public write email_verifications" on public.email_verifications;
 
 create policy "shopnow public read products" on public.products for select using (true);
 create policy "shopnow public write products" on public.products for all using (true) with check (true);
@@ -146,3 +184,12 @@ create policy "shopnow public write promotions" on public.promotions for all usi
 
 create policy "shopnow public read store_settings" on public.store_settings for select using (true);
 create policy "shopnow public write store_settings" on public.store_settings for all using (true) with check (true);
+
+create policy "shopnow public read users" on public.users for select using (true);
+create policy "shopnow public write users" on public.users for all using (true) with check (true);
+
+create policy "shopnow public read password_resets" on public.password_resets for select using (true);
+create policy "shopnow public write password_resets" on public.password_resets for all using (true) with check (true);
+
+create policy "shopnow public read email_verifications" on public.email_verifications for select using (true);
+create policy "shopnow public write email_verifications" on public.email_verifications for all using (true) with check (true);

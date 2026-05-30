@@ -59,6 +59,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     confirmBtn.addEventListener('click', () => {
       ShopData.deletePromotion(promoId);
+      const timestamp = new Date().toISOString();
+      localStorage.setItem('admin-promotions-update', timestamp);
+      window.dispatchEvent(new CustomEvent('admin:promotions:updated', { detail: { action: 'delete', timestamp } }));
       renderTable();
       cleanup();
     });
@@ -234,6 +237,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           active,
         });
       }
+
+      const timestamp = new Date().toISOString();
+      localStorage.setItem('admin-promotions-update', timestamp);
+      window.dispatchEvent(new CustomEvent('admin:promotions:updated', { detail: { action: editingPromoId ? 'update' : 'add', timestamp } }));
 
       renderTable();
       closeModal();

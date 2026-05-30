@@ -5,59 +5,74 @@
 
 .product-detail {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 42px;
+  grid-template-columns: minmax(0, 1.08fr) minmax(360px, .92fr);
+  gap: 28px;
   align-items: start;
   margin-top: 18px;
 }
 
 .product-gallery {
   overflow: hidden;
+  background: #fff;
 }
 
 .product-gallery img {
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
-  background: #f3f4f6;
+  background: #eef3f7;
 }
 
 .product-buybox {
+  position: sticky;
+  top: 92px;
   padding: 24px;
 }
 
 .product-buybox h1 {
-  margin: 8px 0;
-  font-size: clamp(28px, 4vw, 42px);
-  line-height: 1.08;
+  margin: 14px 0 10px;
+  color: var(--text);
+  font-size: 36px;
+  line-height: 1.12;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.product-buybox h3 {
+  margin: 22px 0 8px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 900;
 }
 
 .price-xl {
-  margin: 18px 0;
+  margin: 20px 0 10px;
   color: var(--brand);
   font-size: 34px;
   font-weight: 900;
+  line-height: 1;
 }
 
 .variant-row {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 10px 0 18px;
+  margin: 10px 0 4px;
 }
 
 .variant-pill {
+  min-height: 38px;
   border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 8px 12px;
+  border-radius: var(--radius);
+  padding: 0 13px;
   background: #fff;
-  font-weight: 700;
-  cursor: pointer;
-  transition: border-color .15s, background .15s, color .15s;
+  color: var(--text);
+  font-weight: 760;
+  transition: border-color .18s ease, background .18s ease, color .18s ease;
 }
 
 .variant-pill:hover:not(.is-selected) {
-  border-color: var(--brand);
+  border-color: var(--brand-line);
   color: var(--brand);
 }
 
@@ -67,18 +82,27 @@
   color: #fff;
 }
 
-.btn:disabled {
-  opacity: .45;
-  cursor: not-allowed;
-  pointer-events: none;
+.card-empty {
+  padding: 34px;
+  text-align: center;
 }
 
-.card-empty       { padding: 32px; text-align: center; }
-.buybox-btn       { width: 100%; margin-top: 14px; }
-.buybox-btn-ghost { width: 100%; margin-top: 10px; }
+.buybox-btn,
+.buybox-btn-ghost {
+  width: 100%;
+  margin-top: 12px;
+}
 
 @media (max-width: 860px) {
   .product-detail {
     grid-template-columns: 1fr;
+  }
+
+  .product-buybox {
+    position: static;
+  }
+
+  .product-buybox h1 {
+    font-size: 30px;
   }
 }

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="../imgs/favicon.svg" type="image/svg+xml">
+  <title>Confirmando Email - ShopNow</title>
+  <link rel="stylesheet" href="../css/index.css">
+  <style>
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        linear-gradient(90deg, rgba(17, 24, 39, .76), rgba(17, 24, 39, .58)),
+        url("https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=1400&q=82") center/cover;
+    }
+
+    .confirm-container {
+      width: min(500px, 100%);
+      padding: 34px;
+      border: 1px solid rgba(255, 255, 255, .72);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .confirm-icon {
+      width: 72px;
+      height: 72px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 22px;
+      border-radius: var(--radius);
+      background: var(--brand-soft);
+      color: var(--brand);
+    }
+
+    .confirm-icon svg {
+      width: 42px;
+      height: 42px;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid #dfe7ef;
+      border-top-color: var(--brand);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .confirm-title {
+      margin: 0 0 10px;
+      color: var(--text);
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1.15;
+    }
+
+    .confirm-message {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .confirm-status {
+      margin-bottom: 22px;
+      border-radius: var(--radius);
+      padding: 13px 14px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .confirm-status.loading {
+      background: var(--brand-soft);
+      color: var(--brand);
+    }
+
+    .confirm-status.success {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .confirm-status.error {
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .confirm-action {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="confirm-container">
+    <div class="confirm-icon">
+      <div class="spinner" id="spinner"></div>
+      <svg id="success-icon" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 6 9 17l-5-5"></path>
+      </svg>
+      <svg id="error-icon" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M15 9 9 15"></path>
+        <path d="M9 9l6 6"></path>
+      </svg>
+    </div>
+
+    <h1 class="confirm-title" id="title">Confirmando seu email</h1>
+    <p class="confirm-message" id="message">Aguarde enquanto validamos seu email.</p>
+
+    <div class="confirm-status loading" id="status">Processando confirmação...</div>
+
+    <div class="confirm-action" id="actions">
+      <button class="btn btn-primary" disabled>Aguarde...</button>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://nnkokgtplnuhmhlqarba.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ua29rZ3RwbG51aG1obHFhcmJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMjk3MjUsImV4cCI6MjA5NDgwNTcyNX0.2nf1eytsNVNAAi4FymsmTSQEnwpzokGRXV6Lbp7k0pU';
+
+    async function confirmEmail() {
+      const titleEl = document.getElementById('title');
+      const messageEl = document.getElementById('message');
+      const statusEl = document.getElementById('status');
+      const actionsEl = document.getElementById('actions');
+      const spinnerEl = document.getElementById('spinner');
+      const successIconEl = document.getElementById('success-icon');
+      const errorIconEl = document.getElementById('error-icon');
+
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      const type = params.get('type');
+
+      if (!token || type !== 'email') {
+        showError('Link inválido', 'O link de confirmação é inválido ou expirou.', 'Link inválido');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/auth/v1/verify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({ type: 'email', token }),
+        });
+
+        if (!response.ok) throw new Error('Falha na validação');
+
+        const data = await response.json();
+
+        titleEl.textContent = 'Email confirmado';
+        messageEl.textContent = 'Seu email foi confirmado com sucesso. Você já pode fazer login.';
+        statusEl.textContent = 'Email confirmado com sucesso';
+        statusEl.className = 'confirm-status success';
+        spinnerEl.style.display = 'none';
+        successIconEl.style.display = 'block';
+
+        if (data.session) {
+          localStorage.setItem('supabase_token', data.session.access_token);
+          localStorage.setItem('user', JSON.stringify({
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.user_metadata?.name || 'Usuário',
+          }));
+        }
+
+        actionsEl.innerHTML = `
+          <a href="login.html" class="btn btn-primary">Ir para login</a>
+          <a href="../index.html" class="btn btn-ghost">Ir para loja</a>
+        `;
+
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 3000);
+      } catch (error) {
+        console.error('Erro:', error);
+        showError('Erro na confirmação', 'Houve um erro ao confirmar seu email. O link pode ter expirado.', 'Erro na confirmação');
+      }
+
+      function showError(title, message, status) {
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+        statusEl.textContent = status;
+        statusEl.className = 'confirm-status error';
+        spinnerEl.style.display = 'none';
+        errorIconEl.style.display = 'block';
+        actionsEl.innerHTML = `
+          <a href="register.html" class="btn btn-primary">Tentar novamente</a>
+          <a href="../index.html" class="btn btn-ghost">Ir para loja</a>
+        `;
+      }
+    }
+
+    confirmEmail();
+  </script>
+</body>
+</html>

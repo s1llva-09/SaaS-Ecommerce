@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (benefitBar) {
     const benefitItems = benefitBar.querySelectorAll('div');
     if (benefitItems[0]) {
-      benefitItems[0].innerHTML = `<span>▱</span> ${freeShippingText}`;
+      benefitItems[0].innerHTML = `<span aria-hidden="true">✓</span> ${freeShippingText}`;
     }
   }
 

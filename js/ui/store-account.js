@@ -13,17 +13,106 @@ document.addEventListener('DOMContentLoaded', () => {
   const logoutBtn = document.querySelector('[data-logout-btn]');
 
   // ---------------------------------------------------------
+  // Carrega dados do usuário logado
+  // ---------------------------------------------------------
+  const user = ShopNow.getUser();
+  if (!user) {
+    window.location.href = `${ShopNow.root()}pages/register.html`;
+    throw new Error('Usuário não autenticado');
+  }
+
+  const userAvatar = document.querySelector('[data-user-avatar]');
+  const userName = document.querySelector('[data-user-name]');
+  const userEmail = document.querySelector('[data-user-email]');
+
+  if (userAvatar && user.name) {
+    const initials = user.name.split(' ').slice(0, 2).map(p => p[0]?.toUpperCase()).join('');
+    userAvatar.textContent = initials;
+  }
+  if (userName) userName.textContent = user.name || 'Usuário';
+  if (userEmail) userEmail.textContent = user.email || '';
+
+  // ---------------------------------------------------------
   // Atualiza informações do perfil
   // ---------------------------------------------------------
   const ordersCount = document.querySelector('[data-orders-count]');
   const spentTotal = document.querySelector('[data-spent-total]');
 
   if (ordersCount && spentTotal) {
-    const orders = ShopData.orders();
-    const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
-    ordersCount.textContent = orders.length;
+    const userOrders = ShopData.orders().filter(order => order.userId === user.id);
+    const totalSpent = userOrders.reduce((sum, order) => sum + order.total, 0);
+    ordersCount.textContent = userOrders.length;
     spentTotal.textContent = ShopNow.money(totalSpent);
   }
+
+  // ---------------------------------------------------------
+  // Modal de editar perfil
+  // ---------------------------------------------------------
+  const editProfileBtn = document.querySelector('[data-edit-profile-btn]');
+  const editProfileOverlay = document.querySelector('[data-edit-profile-overlay]');
+  const editProfileModal = document.querySelector('[data-edit-profile-modal]');
+  const editProfileForm = document.querySelector('[data-edit-profile-form]');
+  const editProfileCancel = document.querySelector('[data-edit-profile-cancel]');
+
+  function openEditProfileModal() {
+    if (editProfileForm) {
+      editProfileForm.querySelector('[name="name"]').value = user.name || '';
+      editProfileForm.querySelector('[name="email"]').value = user.email || '';
+      editProfileForm.querySelector('[name="phone"]').value = user.phone || '';
+    }
+    editProfileOverlay?.classList.add('is-open');
+    editProfileModal?.classList.add('is-open');
+    editProfileOverlay?.setAttribute('aria-hidden', 'false');
+    editProfileModal?.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeEditProfileModal() {
+    editProfileOverlay?.classList.remove('is-open');
+    editProfileModal?.classList.remove('is-open');
+    editProfileOverlay?.setAttribute('aria-hidden', 'true');
+    editProfileModal?.setAttribute('aria-hidden', 'true');
+  }
+
+  if (editProfileBtn) {
+    editProfileBtn.addEventListener('click', openEditProfileModal);
+  }
+
+  if (editProfileCancel) {
+    editProfileCancel.addEventListener('click', closeEditProfileModal);
+  }
+
+  if (editProfileOverlay) {
+    editProfileOverlay.addEventListener('click', closeEditProfileModal);
+  }
+
+  if (editProfileForm) {
+    editProfileForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const updatedUser = {
+        name: editProfileForm.querySelector('[name="name"]').value,
+        email: editProfileForm.querySelector('[name="email"]').value,
+        phone: editProfileForm.querySelector('[name="phone"]').value,
+      };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+
+      // Atualiza a exibição
+      if (userAvatar && updatedUser.name) {
+        const initials = updatedUser.name.split(' ').slice(0, 2).map(p => p[0]?.toUpperCase()).join('');
+        userAvatar.textContent = initials;
+      }
+      if (userName) userName.textContent = updatedUser.name;
+      if (userEmail) userEmail.textContent = updatedUser.email;
+
+      closeEditProfileModal();
+      ShopNow.toast('✓ Perfil atualizado com sucesso!');
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && editProfileModal?.getAttribute('aria-hidden') === 'false') {
+      closeEditProfileModal();
+    }
+  });
 
   // ---------------------------------------------------------
   // Logout com Modal
@@ -78,7 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Renderiza os cards de pedidos
   // ---------------------------------------------------------
   list.innerHTML = '';
-  ShopData.orders().forEach(order => {
+  const userOrders = ShopData.orders().filter(order => order.userId === user.id);
+  userOrders.forEach(order => {
     const article = document.createElement('article');
     article.className = 'order-card card';
     article.style.cursor = 'pointer';
@@ -119,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Abre o drawer ao clicar em um card
   // ---------------------------------------------------------
   function openDrawer(orderId) {
-    const order = ShopData.orders().find(o => o.id === orderId);
+    const order = userOrders.find(o => o.id === orderId);
     if (!order) return;
 
     // Título do drawer

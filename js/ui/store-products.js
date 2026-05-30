@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sortSelect = document.querySelector('[data-products-sort]');
   const viewButtons = document.querySelectorAll('[data-view]');
 
-  if (!grid) return;
+  if (!grid || !category) return;
 
   let minRating = 0;
   let searchQuery = '';
@@ -37,42 +37,47 @@ document.addEventListener('DOMContentLoaded', () => {
     if (breadcrumb) breadcrumb.textContent = `"${searchQuery}"`;
   }
 
-  if (categoryList) {
+  renderCategoryFilter();
+  render();
+
+  function renderCategoryFilter() {
+    if (!categoryList) return;
     categoryList.innerHTML = '';
 
-    // Botão "Todas"
-    const allBtn = document.createElement('button');
-    allBtn.className = 'category-filter__item' + (!category.value ? ' is-active' : '');
-    allBtn.type = 'button';
-    allBtn.dataset.category = '';
-
-    const allIconSpan = document.createElement('span');
-    allIconSpan.textContent = '🏷️ Todas';
-    allBtn.appendChild(allIconSpan);
-
-    const allCountStrong = document.createElement('strong');
-    allCountStrong.textContent = ShopNow.int(ShopData.products().length);
-    allBtn.appendChild(allCountStrong);
-
+    const allBtn = createCategoryButton({
+      name: 'Todas',
+      count: ShopData.products().length,
+      active: !category.value,
+      value: '',
+    });
     categoryList.appendChild(allBtn);
 
-    // Botões por categoria
     ShopData.categories().forEach(item => {
-      const btn = document.createElement('button');
-      btn.className = 'category-filter__item' + (category.value === item.name ? ' is-active' : '');
-      btn.type = 'button';
-      btn.dataset.category = item.name;
-
-      const iconSpan = document.createElement('span');
-      iconSpan.textContent = `${item.icon} ${item.name}`;
-      btn.appendChild(iconSpan);
-
-      const countStrong = document.createElement('strong');
-      countStrong.textContent = ShopNow.int(item.count);
-      btn.appendChild(countStrong);
-
-      categoryList.appendChild(btn);
+      categoryList.appendChild(createCategoryButton({
+        name: item.name,
+        icon: item.icon,
+        count: item.count,
+        active: category.value === item.name,
+        value: item.name,
+      }));
     });
+  }
+
+  function createCategoryButton(item) {
+    const btn = document.createElement('button');
+    btn.className = 'category-filter__item' + (item.active ? ' is-active' : '');
+    btn.type = 'button';
+    btn.dataset.category = item.value;
+
+    const label = document.createElement('span');
+    label.textContent = item.icon ? `${item.icon} ${item.name}` : item.name;
+    btn.appendChild(label);
+
+    const number = document.createElement('strong');
+    number.textContent = ShopNow.int(item.count || 0);
+    btn.appendChild(number);
+
+    return btn;
   }
 
   function sortProducts(products) {
@@ -109,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (priceMax) priceMax.textContent = ShopNow.money(Number(price.value));
 
     grid.className = viewMode === 'list' ? 'product-list' : 'product-grid';
-
     grid.innerHTML = '';
 
     if (!products.length) {
@@ -120,116 +124,102 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // ---------------------------------------------------------
-    // Renderiza os cards conforme o modo de visualização:
-    //   'list' → productListItem() — layout horizontal com descrição
-    //   'grid' → ShopNow.productCard() — card compacto com imagem
-    // Ambas retornam elementos DOM (não strings), logo appendChild.
-    // ---------------------------------------------------------
-    if (viewMode === 'list') {
-      products.forEach(p => {
-        grid.appendChild(productListItem(p));
-      });
-    } else {
-      products.forEach(p => {
-        grid.appendChild(ShopNow.productCard(p));
-      });
+    products.forEach(product => {
+      grid.appendChild(viewMode === 'list' ? productListItem(product) : ShopNow.productCard(product));
+    });
+  }
+
+  function productListItem(product) {
+    const discount = ShopNow.discount(product);
+    const article = document.createElement('article');
+    article.className = 'product-list-item card';
+
+    const imgLink = document.createElement('a');
+    imgLink.className = 'product-list-item__image';
+    imgLink.href = ShopNow.productUrl(product.id);
+
+    const img = document.createElement('img');
+    img.src = product.image;
+    img.alt = product.name;
+    img.loading = 'lazy';
+    imgLink.appendChild(img);
+
+    if (discount) {
+      const badge = document.createElement('span');
+      badge.className = 'badge badge-list-discount';
+      badge.textContent = `-${discount}%`;
+      imgLink.appendChild(badge);
     }
+    if (product.stock === 0) {
+      const badge = document.createElement('span');
+      badge.className = 'badge badge-list-no-stock';
+      badge.textContent = 'Sem estoque';
+      imgLink.appendChild(badge);
+    }
+    article.appendChild(imgLink);
+
+    const body = document.createElement('div');
+    body.className = 'product-list-item__body';
+
+    const cat = document.createElement('div');
+    cat.className = 'product-card__category';
+    cat.textContent = product.category;
+    body.appendChild(cat);
+
+    const nameLink = document.createElement('a');
+    nameLink.href = ShopNow.productUrl(product.id);
+    const name = document.createElement('h3');
+    name.className = 'product-card__name';
+    name.textContent = product.name;
+    nameLink.appendChild(name);
+    body.appendChild(nameLink);
+
+    const rating = document.createElement('p');
+    rating.className = 'product-card__rating';
+    rating.innerHTML = ShopNow.stars(product.rating);
+    const reviews = document.createElement('em');
+    reviews.textContent = ` (${ShopNow.int(product.reviews)})`;
+    rating.appendChild(reviews);
+    body.appendChild(rating);
+
+    const desc = document.createElement('p');
+    desc.className = 'product-list-item__desc';
+    desc.textContent = product.description || '';
+    body.appendChild(desc);
+    article.appendChild(body);
+
+    const footer = document.createElement('div');
+    footer.className = 'product-list-item__footer';
+
+    if (product.originalPrice) {
+      const oldPrice = document.createElement('div');
+      oldPrice.className = 'product-card__old-price';
+      oldPrice.textContent = ShopNow.money(product.originalPrice);
+      footer.appendChild(oldPrice);
+    }
+
+    const currentPrice = document.createElement('div');
+    currentPrice.className = 'product-card__price';
+    currentPrice.textContent = ShopNow.money(product.price);
+    footer.appendChild(currentPrice);
+
+    if (product.stock > 0) {
+      const addBtn = document.createElement('button');
+      addBtn.className = 'btn btn-primary product-card__add';
+      addBtn.dataset.addCart = product.id;
+      addBtn.type = 'button';
+      addBtn.textContent = '+ Carrinho';
+      footer.appendChild(addBtn);
+    } else {
+      const badge = document.createElement('span');
+      badge.className = 'badge badge-red';
+      badge.textContent = 'Sem estoque';
+      footer.appendChild(badge);
+    }
+
+    article.appendChild(footer);
+    return article;
   }
-
-function productListItem(product) {
-  const discount = ShopNow.discount(product);
-
-  const article = document.createElement('article');
-  article.className = 'product-list-item card';
-
-  const imgLink = document.createElement('a');
-  imgLink.className = 'product-list-item__image';
-  imgLink.href = ShopNow.productUrl(product.id);
-
-  const img = document.createElement('img');
-  img.src = product.image;
-  img.alt = product.name;
-  img.loading = 'lazy';
-  imgLink.appendChild(img);
-
-  if (discount) {
-    const b = document.createElement('span');
-    b.className = 'badge badge-list-discount';
-    b.textContent = `-${discount}%`;
-    imgLink.appendChild(b);
-  }
-  if (product.stock === 0) {
-    const b = document.createElement('span');
-    b.className = 'badge badge-list-no-stock';
-    b.textContent = 'Sem estoque';
-    imgLink.appendChild(b);
-  }
-  article.appendChild(imgLink);
-
-  const bodyDiv = document.createElement('div');
-  bodyDiv.className = 'product-list-item__body';
-
-  const catDiv = document.createElement('div');
-  catDiv.className = 'product-card__category';
-  catDiv.textContent = product.category;
-  bodyDiv.appendChild(catDiv);
-
-  const nameLink = document.createElement('a');
-  nameLink.href = ShopNow.productUrl(product.id);
-  const nameH3 = document.createElement('h3');
-  nameH3.className = 'product-card__name';
-  nameH3.textContent = product.name;
-  nameLink.appendChild(nameH3);
-  bodyDiv.appendChild(nameLink);
-
-  const ratingP = document.createElement('p');
-  ratingP.className = 'product-card__rating';
-  ratingP.innerHTML = ShopNow.stars(product.rating);
-  const em = document.createElement('em');
-  em.textContent = ` (${ShopNow.int(product.reviews)})`;
-  ratingP.appendChild(em);
-  bodyDiv.appendChild(ratingP);
-
-  const descP = document.createElement('p');
-  descP.className = 'product-list-item__desc';
-  descP.textContent = product.description || '';
-  bodyDiv.appendChild(descP);
-
-  article.appendChild(bodyDiv);
-
-  const footerDiv = document.createElement('div');
-  footerDiv.className = 'product-list-item__footer';
-
-  if (product.originalPrice) {
-    const oldPrice = document.createElement('div');
-    oldPrice.className = 'product-card__old-price';
-    oldPrice.textContent = ShopNow.money(product.originalPrice);
-    footerDiv.appendChild(oldPrice);
-  }
-
-  const priceDiv = document.createElement('div');
-  priceDiv.className = 'product-card__price';
-  priceDiv.textContent = ShopNow.money(product.price);
-  footerDiv.appendChild(priceDiv);
-
-  if (product.stock > 0) {
-    const addBtn = document.createElement('button');
-    addBtn.className = 'btn btn-primary product-card__add';
-    addBtn.dataset.addCart = product.id;
-    addBtn.type = 'button';
-    addBtn.textContent = '+ Carrinho';
-    footerDiv.appendChild(addBtn);
-  } else {
-    const badge = document.createElement('span');
-    badge.className = 'badge badge-red';
-    badge.textContent = 'Sem estoque';
-    footerDiv.appendChild(badge);
-  }
-
-  article.appendChild(footerDiv);
-  return article;
-}
 
   categoryList?.addEventListener('click', event => {
     const button = event.target.closest('[data-category]');
@@ -239,7 +229,7 @@ function productListItem(product) {
     categoryList.querySelectorAll('[data-category]').forEach(item => {
       item.classList.toggle('is-active', item.dataset.category === category.value);
     });
-    if (titleEl) titleEl.textContent = selected || 'Todos os Produtos';
+    if (titleEl) titleEl.textContent = selected || 'Todos os produtos';
     if (breadcrumb) breadcrumb.textContent = selected || 'Produtos';
     render();
   });
@@ -258,7 +248,7 @@ function productListItem(product) {
   viewButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       viewMode = btn.dataset.view;
-      viewButtons.forEach(b => b.classList.toggle('is-active', b.dataset.view === viewMode));
+      viewButtons.forEach(button => button.classList.toggle('is-active', button.dataset.view === viewMode));
       render();
     });
   });
@@ -268,6 +258,4 @@ function productListItem(product) {
     control.addEventListener('input', render);
     control.addEventListener('change', render);
   });
-
-  render();
 });

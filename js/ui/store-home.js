@@ -1,111 +1,158 @@
 // ============================================================
-// UI: HOME DA LOJA
-// Preenche categorias, produtos em destaque, ofertas e countdown.
+// UI: HOME - Renderiza categorias, produtos em destaque e ofertas
 // ============================================================
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await ShopData.ready();
+document.addEventListener('DOMContentLoaded', () => {
+  ShopData.ready().then(() => {
+    renderCategories();
+    renderFeaturedProducts();
+    renderOfferProducts();
+    startCountdown();
+  });
 
-  const categories = document.querySelector('[data-categories]');
-  const featured = document.querySelector('[data-featured-products]');
-  const offers = document.querySelector('[data-offer-products]');
-
-  // ---------------------------------------------------------
-  // Categorias — gera um link por categoria.
-  // Usa createElement + textContent para evitar XSS:
-  // category.name e category.icon vêm do catálogo interno,
-  // mas em produção podem ser editados pelo admin — tratar como dado.
-  // href usa encodeURIComponent para escapar caracteres especiais na URL.
-  // ---------------------------------------------------------
-  if (categories) {
-    categories.innerHTML = '';
-    ShopData.categories().forEach(category => {
-      const a = document.createElement('a');
-      a.className = 'category-card card';
-      a.href = `pages/products.html?category=${encodeURIComponent(category.name)}`;
-
-      const iconSpan = document.createElement('span');
-      iconSpan.className = 'category-card__icon';
-      iconSpan.textContent = category.icon;
-      a.appendChild(iconSpan);
-
-      const nameStrong = document.createElement('strong');
-      nameStrong.textContent = category.name;
-      a.appendChild(nameStrong);
-
-      categories.appendChild(a);
-    });
+  function renderProductCard(product) {
+    return ShopNow.productCard(product);
   }
 
-  // ---------------------------------------------------------
-  // Produtos em destaque — até 8 produtos com estoque.
-  // ShopNow.productCard() retorna um elemento DOM (não string),
-  // por isso usamos appendChild em vez de insertAdjacentHTML.
-  // ---------------------------------------------------------
-  if (featured) {
-    featured.innerHTML = '';
-    ShopData.products()
-      .filter(product => product.stock > 0)
-      .slice(0, 8)
-      .forEach(product => {
-        featured.appendChild(ShopNow.productCard(product));
-      });
-  }
+  function renderCategories() {
+    const categoriesGrid = document.querySelector('[data-categories]');
+    if (!categoriesGrid) return;
 
-  // ---------------------------------------------------------
-  // Ofertas — produtos com promoções ativas.
-  // Carrega promoções do banco de dados e renderiza produtos com desconto.
-  // ---------------------------------------------------------
-  if (offers) {
-    offers.innerHTML = '';
-    const promotions = ShopData.promotions().filter(p => p.active && new Date(p.endDate) > new Date());
-    const products = ShopData.products();
-    const productMap = Object.fromEntries(products.map(p => [p.id, p]));
-
-    promotions.slice(0, 4).forEach(promo => {
-      const product = productMap[promo.productId];
-      if (!product) return;
-
-      const discountedProduct = {
-        ...product,
-        originalPrice: product.price,
-        price: Math.round(product.price * (1 - promo.discountPercentage / 100) * 100) / 100,
-        badge: `${promo.discountPercentage}% OFF`,
-      };
-
-      offers.appendChild(ShopNow.productCard(discountedProduct));
-    });
-  }
-
-  const hEl = document.querySelector('[data-countdown-h]');
-  const mEl = document.querySelector('[data-countdown-m]');
-  const sEl = document.querySelector('[data-countdown-s]');
-  if (!hEl || !mEl || !sEl) return;
-
-  function tick() {
-    const promotions = ShopData.promotions().filter(p => p.active);
-    if (promotions.length === 0) {
-      hEl.firstChild.textContent = '00';
-      mEl.firstChild.textContent = '00';
-      sEl.firstChild.textContent = '00';
+    const categories = ShopData.categories();
+    if (categories.length === 0) {
+      categoriesGrid.innerHTML = '<p class="grid-empty-state">Nenhuma categoria cadastrada.</p>';
       return;
     }
 
-    const nextExpiry = promotions
-      .map(p => new Date(p.endDate))
-      .reduce((earliest, current) => (current < earliest ? current : earliest));
+    categoriesGrid.innerHTML = '';
+    categories.forEach(category => {
+      const link = document.createElement('a');
+      link.href = `pages/products.html?category=${encodeURIComponent(category.name)}`;
+      link.className = 'category-card card';
 
-    const now = new Date();
-    let diff = Math.max(0, Math.floor((nextExpiry - now) / 1000));
-    const h = Math.floor(diff / 3600);
-    diff -= h * 3600;
-    const m = Math.floor(diff / 60);
-    const s = diff - m * 60;
-    hEl.firstChild.textContent = String(h).padStart(2, '0');
-    mEl.firstChild.textContent = String(m).padStart(2, '0');
-    sEl.firstChild.textContent = String(s).padStart(2, '0');
+      const icon = document.createElement('span');
+      icon.className = 'category-card__icon';
+      icon.setAttribute('aria-hidden', 'true');
+      icon.textContent = category.icon || '•';
+      link.appendChild(icon);
+
+      const text = document.createElement('span');
+      const title = document.createElement('strong');
+      title.textContent = category.name;
+      const count = document.createElement('small');
+      count.textContent = `${category.count || 0} produtos`;
+      text.appendChild(title);
+      text.appendChild(count);
+      link.appendChild(text);
+
+      categoriesGrid.appendChild(link);
+    });
   }
 
-  tick();
-  setInterval(tick, 1000);
+  function renderFeaturedProducts() {
+    const grid = document.querySelector('[data-featured-products]');
+    if (!grid) return;
+
+    const products = ShopData.products().slice(0, 8);
+    if (products.length === 0) {
+      grid.innerHTML = '<p class="grid-empty-state">Nenhum produto cadastrado.</p>';
+      return;
+    }
+
+    grid.innerHTML = '';
+    products.forEach(product => {
+      grid.appendChild(renderProductCard(product));
+    });
+  }
+
+  function getActivePromos() {
+    const now = new Date();
+    return ShopData.promotions().filter(p =>
+      p.active && p.endDate && new Date(p.endDate) > now
+    );
+  }
+
+  function renderOfferProducts() {
+    const section = document.querySelector('.offers-section');
+    const grid = document.querySelector('[data-offer-products]');
+    if (!grid) return;
+
+    const activePromos = getActivePromos();
+
+    if (activePromos.length === 0) {
+      if (section) section.style.display = 'none';
+      return;
+    }
+
+    const allProducts = ShopData.products();
+    const offerProducts = activePromos
+      .map(promo => {
+        const product = allProducts.find(p => p.id === promo.productId);
+        if (!product) return null;
+        const discounted = Math.round(product.price * (1 - promo.discountPercentage / 100) * 100) / 100;
+        return { ...product, originalPrice: product.price, price: discounted };
+      })
+      .filter(Boolean)
+      .slice(0, 8);
+
+    if (offerProducts.length === 0) {
+      if (section) section.style.display = 'none';
+      return;
+    }
+
+    if (section) section.style.display = '';
+    grid.innerHTML = '';
+    offerProducts.forEach(product => {
+      grid.appendChild(renderProductCard(product));
+    });
+  }
+
+  function startCountdown() {
+    const countdownH = document.querySelector('[data-countdown-h]');
+    const countdownM = document.querySelector('[data-countdown-m]');
+    const countdownS = document.querySelector('[data-countdown-s]');
+    const subtitle = document.querySelector('.offers-heading .text-muted');
+
+    if (!countdownH || !countdownM || !countdownS) return;
+
+    const activePromos = getActivePromos();
+    if (activePromos.length === 0) return;
+
+    const target = activePromos.reduce((earliest, p) => {
+      const d = new Date(p.endDate);
+      return d < earliest ? d : earliest;
+    }, new Date(activePromos[0].endDate));
+
+    if (subtitle) {
+      subtitle.textContent = `Só até ${target.toLocaleDateString('pt-BR', {
+        day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+      })}`;
+    }
+
+    let timer;
+
+    function updateCountdown() {
+      const diff = target - new Date();
+
+      if (diff <= 0) {
+        countdownH.innerHTML = '00<small>h</small>';
+        countdownM.innerHTML = '00<small>m</small>';
+        countdownS.innerHTML = '00<small>s</small>';
+        clearInterval(timer);
+        renderOfferProducts();
+        return;
+      }
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      countdownH.innerHTML = `${String(hours).padStart(2, '0')}<small>h</small>`;
+      countdownM.innerHTML = `${String(minutes).padStart(2, '0')}<small>m</small>`;
+      countdownS.innerHTML = `${String(seconds).padStart(2, '0')}<small>s</small>`;
+    }
+
+    updateCountdown();
+    timer = setInterval(updateCountdown, 1000);
+  }
 });

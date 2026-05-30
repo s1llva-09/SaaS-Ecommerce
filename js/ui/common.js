@@ -6,17 +6,22 @@
 const ShopNow = {
   cartKey: 'shopnow-cart',
 
-  // Prefixo de caminho relativo — lê data-root do <body>.
-  // Ex: "" na raiz, "../../" em pages/admin/. Garante que links
-  // funcionem independente do nível de diretório da página.
   root() {
     return document.body.dataset.root || '';
   },
 
-  // Formata número como moeda BRL (ex: R$ 1.290).
-  // cents: true → exibe casas decimais (ex: R$ 24,90).
+  escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[char]));
+  },
+
   money(value, cents = false) {
-    return value.toLocaleString('pt-BR', {
+    return Number(value || 0).toLocaleString('pt-BR', {
       style: 'currency',
       currency: 'BRL',
       minimumFractionDigits: cents ? 2 : 0,
@@ -24,40 +29,30 @@ const ShopNow = {
     });
   },
 
-  // Formata inteiro com separador de milhar PT-BR (ex: 1.290).
   int(value) {
-    return value.toLocaleString('pt-BR');
+    return Number(value || 0).toLocaleString('pt-BR');
   },
 
-  // Calcula percentual de desconto entre originalPrice e price.
-  // Retorna 0 se o produto não tiver preço original cadastrado.
   discount(product) {
     if (!product.originalPrice) return 0;
     return Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
   },
 
-  // Gera 5 estrelas como HTML — apenas ★ e classes do sistema.
-  // Seguro como innerHTML: nenhum dado do usuário é interpolado.
   stars(value) {
     return Array.from({ length: 5 }, (_, index) =>
-      `<span class="${index < Math.round(value) ? 'is-filled' : ''}">★</span>`
+      `<span class="${index < Math.round(value || 0) ? 'is-filled' : ''}">★</span>`
     ).join('');
   },
 
-  // Lê o carrinho do localStorage. Retorna array vazio se não existir.
   cart() {
     return JSON.parse(localStorage.getItem(this.cartKey) || '[]');
   },
 
-  // Persiste o carrinho e dispara a atualização dos badges de contagem.
   saveCart(cart) {
     localStorage.setItem(this.cartKey, JSON.stringify(cart));
     this.updateCartCount();
   },
 
-  // Adiciona qty unidades ao carrinho. Se o produto já está,
-  // incrementa a quantidade em vez de criar nova entrada.
-  // Ignora silenciosamente se o produto não existe ou está sem estoque.
   addToCart(productId, qty = 1) {
     const product = ShopData.products().find(item => item.id === String(productId));
     if (!product || product.stock <= 0) return;
@@ -71,8 +66,6 @@ const ShopNow = {
     this.toast('Produto adicionado ao carrinho');
   },
 
-  // Atualiza a quantidade de um item no carrinho.
-  // O filter(qty > 0) remove o item automaticamente se qty chegar a 0.
   updateQty(productId, qty) {
     const nextQty = Number(qty);
     const cart = this.cart()
@@ -81,26 +74,20 @@ const ShopNow = {
     this.saveCart(cart);
   },
 
-  // Esvazia o carrinho completamente.
   clearCart() {
     this.saveCart([]);
   },
 
-  // Junta os itens do carrinho com os dados completos do produto.
-  // Filtra itens cujo produto não existe mais no catálogo.
   cartItems() {
     return this.cart()
       .map(item => ({ ...item, product: ShopData.products().find(product => product.id === item.id) }))
       .filter(item => item.product);
   },
 
-  // Soma price × qty de todos os itens do carrinho.
   cartTotal() {
     return this.cartItems().reduce((sum, item) => sum + item.product.price * item.qty, 0);
   },
 
-  // Atualiza todos os badges [data-cart-count] na página.
-  // Exibe "9+" se o total ultrapassar 9; oculta o badge se carrinho vazio.
   updateCartCount() {
     const count = this.cart().reduce((sum, item) => sum + item.qty, 0);
     document.querySelectorAll('[data-cart-count]').forEach(node => {
@@ -109,145 +96,131 @@ const ShopNow = {
     });
   },
 
-  // Monta a URL da página de produto a partir do root e do id.
   productUrl(productId) {
     return `${this.root()}pages/product.html?id=${productId}`;
   },
 
-  // ---------------------------------------------------------
-  // productCard(product) — retorna um <article> DOM completo.
-  // Usa createElement + textContent em todos os dados do produto
-  // para evitar XSS. stars() usa innerHTML internamente mas só
-  // com ★ e classes do sistema — sem dados do usuário.
-  // Retorna um elemento DOM, não uma string.
-  // ---------------------------------------------------------
-productCard(product) {
-  const discount = this.discount(product);
-  const installments = product.installments || 1;
-  const lowStock = product.stock > 0 && product.stock <= 3;
+  productCard(product) {
+    const discount = this.discount(product);
+    const installments = product.installments || 1;
+    const lowStock = product.stock > 0 && product.stock <= 3;
 
-  const article = document.createElement('article');
-  article.className = 'product-card card';
+    const article = document.createElement('article');
+    article.className = 'product-card card';
 
-  const imageLink = document.createElement('a');
-  imageLink.className = 'product-card__image';
-  imageLink.href = this.productUrl(product.id);
+    const imageLink = document.createElement('a');
+    imageLink.className = 'product-card__image';
+    imageLink.href = this.productUrl(product.id);
 
-  const img = document.createElement('img');
-  img.src = product.image;
-  img.alt = product.name;
-  img.loading = 'lazy';
-  imageLink.appendChild(img);
+    const img = document.createElement('img');
+    img.src = product.image || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"%3E%3Crect fill="%23eef3f7" width="400" height="400"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="15" fill="%2398a2b3"%3ESem imagem%3C/text%3E%3C/svg%3E';
+    img.alt = product.name;
+    img.loading = 'lazy';
+    imageLink.appendChild(img);
 
-  if (discount) {
-    const b = document.createElement('span');
-    b.className = 'badge badge-product-discount';
-    b.textContent = `-${discount}%`;
-    imageLink.appendChild(b);
-  }
-  if (lowStock) {
-    const b = document.createElement('span');
-    b.className = 'badge badge-product-low-stock';
-    b.textContent = `Últimas ${product.stock} un.`;
-    imageLink.appendChild(b);
-  }
-  if (product.stock === 0) {
-    const b = document.createElement('span');
-    b.className = 'badge badge-product-no-stock';
-    b.textContent = 'Sem estoque';
-    imageLink.appendChild(b);
-  }
-  article.appendChild(imageLink);
+    if (discount) {
+      const badge = document.createElement('span');
+      badge.className = 'badge badge-product-discount';
+      badge.textContent = `-${discount}%`;
+      imageLink.appendChild(badge);
+    }
 
-  const body = document.createElement('div');
-  body.className = 'product-card__body';
+    if (lowStock) {
+      const badge = document.createElement('span');
+      badge.className = 'badge badge-product-low-stock';
+      badge.textContent = `Últimas ${product.stock} un.`;
+      imageLink.appendChild(badge);
+    }
 
-  const bodyLink = document.createElement('a');
-  bodyLink.href = this.productUrl(product.id);
+    if (product.stock === 0) {
+      const badge = document.createElement('span');
+      badge.className = 'badge badge-product-no-stock';
+      badge.textContent = 'Sem estoque';
+      imageLink.appendChild(badge);
+    }
 
-  const catDiv = document.createElement('div');
-  catDiv.className = 'product-card__category';
-  catDiv.textContent = product.category;
-  bodyLink.appendChild(catDiv);
+    article.appendChild(imageLink);
 
-  const nameH3 = document.createElement('h3');
-  nameH3.className = 'product-card__name';
-  nameH3.textContent = product.name;
-  bodyLink.appendChild(nameH3);
+    const body = document.createElement('div');
+    body.className = 'product-card__body';
 
-  // stars() usa apenas ★ e classes do sistema — seguro como innerHTML
-  const ratingP = document.createElement('p');
-  ratingP.className = 'product-card__rating';
-  ratingP.innerHTML = this.stars(product.rating);
-  const em = document.createElement('em');
-  em.textContent = ` (${this.int(product.reviews)})`;
-  ratingP.appendChild(em);
-  bodyLink.appendChild(ratingP);
+    const bodyLink = document.createElement('a');
+    bodyLink.href = this.productUrl(product.id);
 
-  body.appendChild(bodyLink);
+    const category = document.createElement('div');
+    category.className = 'product-card__category';
+    category.textContent = product.category;
+    bodyLink.appendChild(category);
 
-  if (product.originalPrice) {
-    const oldPrice = document.createElement('div');
-    oldPrice.className = 'product-card__old-price';
-    oldPrice.textContent = this.money(product.originalPrice);
-    body.appendChild(oldPrice);
-  }
+    const name = document.createElement('h3');
+    name.className = 'product-card__name';
+    name.textContent = product.name;
+    bodyLink.appendChild(name);
 
-  const footer = document.createElement('div');
-  footer.className = 'product-card__footer';
+    const rating = document.createElement('p');
+    rating.className = 'product-card__rating';
+    rating.innerHTML = this.stars(product.rating);
+    const reviews = document.createElement('em');
+    reviews.textContent = ` (${this.int(product.reviews)})`;
+    rating.appendChild(reviews);
+    bodyLink.appendChild(rating);
+    body.appendChild(bodyLink);
 
-  const priceCol = document.createElement('div');
+    if (product.originalPrice) {
+      const oldPrice = document.createElement('div');
+      oldPrice.className = 'product-card__old-price';
+      oldPrice.textContent = this.money(product.originalPrice);
+      body.appendChild(oldPrice);
+    }
 
-  const priceEl = document.createElement('div');
-  priceEl.className = 'product-card__price';
-  priceEl.textContent = this.money(product.price);
-  priceCol.appendChild(priceEl);
+    const footer = document.createElement('div');
+    footer.className = 'product-card__footer';
 
-  const installP = document.createElement('p');
-  installP.className = 'product-card__installments';
-  installP.textContent = `ou ${installments}x de ${this.money(product.price / installments, true)}`;
-  priceCol.appendChild(installP);
+    const priceCol = document.createElement('div');
+    const price = document.createElement('div');
+    price.className = 'product-card__price';
+    price.textContent = this.money(product.price);
+    priceCol.appendChild(price);
 
-  if (product.badge === 'Retirada disponível') {
-    const pickupP = document.createElement('p');
-    pickupP.className = 'product-card__pickup';
-    pickupP.textContent = '🏪 Retirada disponível';
-    priceCol.appendChild(pickupP);
-  }
+    const install = document.createElement('p');
+    install.className = 'product-card__installments';
+    install.textContent = `ou ${installments}x de ${this.money(product.price / installments, true)}`;
+    priceCol.appendChild(install);
 
-  footer.appendChild(priceCol);
+    if (product.badge === 'Retirada disponível') {
+      const pickup = document.createElement('p');
+      pickup.className = 'product-card__pickup';
+      pickup.textContent = 'Retirada disponível';
+      priceCol.appendChild(pickup);
+    }
 
-  if (product.stock > 0) {
-    const addBtn = document.createElement('button');
-    addBtn.className = 'btn btn-primary product-card__add';
-    addBtn.dataset.addCart = product.id;
-    addBtn.type = 'button';
-    addBtn.textContent = '+ Carrinho';
-    footer.appendChild(addBtn);
-  }
+    footer.appendChild(priceCol);
 
-  body.appendChild(footer);
-  article.appendChild(body);
+    if (product.stock > 0) {
+      const addBtn = document.createElement('button');
+      addBtn.className = 'btn btn-primary product-card__add';
+      addBtn.dataset.addCart = product.id;
+      addBtn.type = 'button';
+      addBtn.textContent = '+ Carrinho';
+      footer.appendChild(addBtn);
+    }
 
-  return article;
-},
-
-  // Retorna um <span class="badge ..."> como string HTML.
-  // Seguro como innerHTML: usa apenas labels e classes do ShopData.status()
-  // — valores controlados internamente, nunca vindos do usuário.
-  statusBadge(status) {
-    const config = ShopData.status()[status] || { label: status, cls: 'badge-blue' };
-    return `<span class="badge ${config.cls}">${config.label}</span>`;
+    body.appendChild(footer);
+    article.appendChild(body);
+    return article;
   },
 
-  // Exibe uma notificação flutuante por 1,8s.
-  // Cria o elemento na primeira chamada e reutiliza nas demais (lazy-init).
+  statusBadge(status) {
+    const config = ShopData.status()[status] || { label: status, cls: 'badge-blue' };
+    return `<span class="badge ${this.escapeHTML(config.cls)}">${this.escapeHTML(config.label)}</span>`;
+  },
+
   toast(message) {
     let toast = document.querySelector('[data-toast]');
     if (!toast) {
       toast = document.createElement('div');
       toast.dataset.toast = '';
-      toast.style.cssText = 'position:fixed;left:50%;bottom:24px;z-index:1000;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:800;box-shadow:0 12px 30px rgba(0,0,0,.18);opacity:0;transition:.2s ease';
+      toast.style.cssText = 'position:fixed;left:50%;bottom:24px;z-index:1000;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:800;box-shadow:0 12px 30px rgba(0,0,0,.18);opacity:0;transition:.2s ease';
       document.body.appendChild(toast);
     }
     toast.textContent = message;
@@ -256,8 +229,6 @@ productCard(product) {
     toast.timer = setTimeout(() => { toast.style.opacity = '0'; }, 1800);
   },
 
-  // Delegação global de cliques para [data-add-cart] e [data-buy-now].
-  // Também ouve submit de todos os formulários [data-store-search].
   bindCommonActions() {
     document.addEventListener('click', event => {
       const addButton = event.target.closest('[data-add-cart]');
@@ -281,9 +252,6 @@ productCard(product) {
     });
   },
 
-  // Controla o overlay de busca: abre, fecha, foco automático e teclas.
-  // Define this.closeSearch() como função real após inicialização
-  // (o stub abaixo evita erros se chamado antes do bind).
   bindSearchOverlay() {
     const overlay = document.querySelector('[data-search-overlay]');
     const toggleBtn = document.querySelector('[data-search-toggle]');
@@ -308,76 +276,62 @@ productCard(product) {
 
     toggleBtn?.addEventListener('click', open);
     closeBtn?.addEventListener('click', close);
-
     overlay.addEventListener('click', event => {
       if (event.target === overlay) close();
     });
-
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape') close();
     });
   },
 
-  // Stub substituído por bindSearchOverlay() em runtime.
   closeSearch() {},
 
-  // Autenticação — lê o usuário do localStorage
   getUser() {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;
   },
 
-  // Iniciais do usuário para o avatar (ex: "Ana Silva" → "AS")
   getInitials() {
     const user = this.getUser();
     if (!user || !user.name) return null;
 
-    const parts = user.name.split(' ').filter(p => p);
-    return parts.slice(0, 2).map(p => p[0]?.toUpperCase()).join('');
+    const parts = user.name.split(' ').filter(Boolean);
+    return parts.slice(0, 2).map(part => part[0]?.toUpperCase()).join('');
   },
 
-  // Logout — remove dados do localStorage
   logout() {
     localStorage.removeItem('user');
     window.location.href = `${this.root()}index.html`;
   },
 
-  // Renderiza categorias dinamicamente no header
   renderCategoriesNav() {
     const nav = document.querySelector('[data-categories-nav]');
     if (!nav) return;
 
     const categories = ShopData.categories();
     const isProductsPage = window.location.pathname.includes('/products.html');
+    const currentCategory = new URLSearchParams(window.location.search).get('category');
 
     nav.innerHTML = '';
 
     const allLink = document.createElement('a');
     allLink.href = `${this.root()}pages/products.html`;
     allLink.textContent = 'Produtos';
-    if (isProductsPage && !new URLSearchParams(window.location.search).get('category')) {
-      allLink.className = 'is-active';
-    }
+    if (isProductsPage && !currentCategory) allLink.className = 'is-active';
     nav.appendChild(allLink);
 
     categories.forEach(cat => {
       const link = document.createElement('a');
       link.href = `${this.root()}pages/products.html?category=${encodeURIComponent(cat.name)}`;
       link.textContent = cat.name;
-
-      const currentCategory = new URLSearchParams(window.location.search).get('category');
-      if (isProductsPage && currentCategory === cat.name) {
-        link.className = 'is-active';
-      }
-
+      if (isProductsPage && currentCategory === cat.name) link.className = 'is-active';
       nav.appendChild(link);
     });
   },
 
-  // Injeta o switcher Loja / Admin no <body> se ainda não existir.
-  // Detecta a página atual pela classe admin-page no <body>.
   injectModeSwitch() {
     if (document.querySelector('[data-mode-switch]')) return;
+    if (document.body.classList.contains('auth-page')) return;
     const isAdmin = document.body.classList.contains('admin-page');
     const root = this.root();
     const switcher = document.createElement('nav');
@@ -387,16 +341,73 @@ productCard(product) {
     const storeLink = document.createElement('a');
     storeLink.className = isAdmin ? '' : 'is-active';
     storeLink.href = `${root}index.html`;
-    storeLink.textContent = '🛒 Loja';
+    storeLink.textContent = 'Loja';
     switcher.appendChild(storeLink);
 
     const adminLink = document.createElement('a');
     adminLink.className = isAdmin ? 'is-active' : '';
     adminLink.href = `${root}pages/admin/dashboard.html`;
-    adminLink.textContent = '⚙️ Admin';
+    adminLink.textContent = 'Admin';
     switcher.appendChild(adminLink);
 
     document.body.appendChild(switcher);
+  },
+
+  injectStoreFooter() {
+    if (document.querySelector('.store-footer')) return;
+    if (document.body.classList.contains('admin-page') || document.body.classList.contains('auth-page')) return;
+
+    const root = this.root();
+    const storeName = ShopData.settings()?.geral?.storeName || 'ShopNow';
+    const safeStoreName = this.escapeHTML(storeName);
+    const footer = document.createElement('footer');
+    footer.className = 'store-footer';
+    footer.innerHTML = `
+      <div class="container">
+        <div class="store-footer__grid">
+          <div>
+            <h3><span class="store-brand__mark">S</span><span>${safeStoreName}</span></h3>
+            <p>Sua loja online com bons produtos, preços claros e uma experiência de compra simples do começo ao fim.</p>
+            <p>Suporte 24/7, compra segura e frete grátis acima de R$ 299.</p>
+          </div>
+          <div>
+            <h4>Loja</h4>
+            <a href="${root}index.html">Home</a>
+            <a href="${root}pages/products.html">Produtos</a>
+            <a href="${root}pages/cart.html">Carrinho</a>
+            <a href="${root}pages/register.html">Criar conta</a>
+          </div>
+          <div>
+            <h4>Atendimento</h4>
+            <a href="${root}pages/account.html">Minha conta</a>
+            <a href="${root}pages/account.html">Meus pedidos</a>
+            <a href="#">Fale conosco</a>
+            <a href="#">Rastrear pedido</a>
+          </div>
+          <div>
+            <h4>Informações</h4>
+            <a href="#">Política de privacidade</a>
+            <a href="#">Termos de uso</a>
+            <a href="#">Política de trocas</a>
+            <a href="#">FAQ</a>
+          </div>
+        </div>
+        <div class="store-footer__bottom">
+          <div>
+            <span>© 2026 ${safeStoreName}. Todos os direitos reservados.</span>
+            <span>CNPJ: 00.000.000/0000-00</span>
+            <span style="color: #34d399;">Loja segura e certificada</span>
+          </div>
+          <div class="store-footer__social">
+            <a href="#">Facebook</a>
+            <a href="#">Instagram</a>
+            <a href="#">WhatsApp</a>
+            <a href="${root}pages/login.html" style="color: #93c5fd; font-weight: 700;">Admin</a>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(footer);
   },
 };
 
@@ -405,9 +416,9 @@ document.addEventListener('DOMContentLoaded', () => {
   ShopNow.bindCommonActions();
   ShopNow.bindSearchOverlay();
   ShopNow.injectModeSwitch();
+  ShopNow.injectStoreFooter();
   ShopNow.renderCategoriesNav();
 
-  // Renderiza o avatar do usuário se estiver logado
   const user = ShopNow.getUser();
   const loginButton = document.querySelector('[data-login-btn]');
 
@@ -415,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const initials = ShopNow.getInitials();
     loginButton.innerHTML = `
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span style="font-size: 12px; font-weight: 700;">${initials || 'US'}</span>
+      <span style="font-size: 12px; font-weight: 800;">${ShopNow.escapeHTML(initials || 'US')}</span>
     `;
     loginButton.href = `${ShopNow.root()}pages/account.html`;
     loginButton.dataset.userProfile = 'true';

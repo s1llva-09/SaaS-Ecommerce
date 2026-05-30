@@ -110,6 +110,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         await new Promise(resolve => setTimeout(resolve, 500));
         hydrateForms();
 
+        // Dispara evento para notificar outras abas/janelas sobre mudanças
+        const timestamp = new Date().toISOString();
+        localStorage.setItem(`admin-settings-update-${formType}`, timestamp);
+        window.dispatchEvent(new CustomEvent('admin:settings:updated', { detail: { formType, data, timestamp } }));
+
         showNotification(`✓ ${formType.charAt(0).toUpperCase() + formType.slice(1)} salvo com sucesso!`);
       } catch (error) {
         console.error('Erro ao salvar:', error);

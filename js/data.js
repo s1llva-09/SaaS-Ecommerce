@@ -149,7 +149,7 @@ async function fetchRows(table) {
 function persist(table, action) {
   action().catch(error => {
     if (error.status === 404) _missingTables.add(table);
-    console.warn(`[ShopData] Falha ao salvar ${table}:`, error);
+    console.warn(`[ShopData] Falha ao salvar ${table}:`, error, error.detail || '');
   });
 }
 
@@ -232,6 +232,7 @@ function productToRow(product) {
 function normalizeOrder(row) {
   return {
     id: String(getValue(row, 'id') ?? ''),
+    userId: getValue(row, 'userId', 'user_id') || '',
     customer: getValue(row, 'customer', 'customer_name', 'cliente') || '',
     email: getValue(row, 'email', 'customer_email') || '',
     items: asArray(getValue(row, 'items', 'itens')),
@@ -711,6 +712,170 @@ const ShopData = {
       comercial: _state.settings.comercial,
       contato: _state.settings.contato,
     }));
+  },
+
+  // ---------------------------------------------------------
+  // Funções de usuário
+  // ---------------------------------------------------------
+  async registerUser(email, name, phone, passwordHash) {
+    const id = `U${Date.now()}`;
+    const user = {
+      id,
+      email: email.toLowerCase(),
+      name,
+      phone: phone || '',
+      password_hash: passwordHash,
+      status: 'active',
+    };
+    await supabaseRequest('users', {
+      method: 'POST',
+      body: user,
+    });
+    return user;
+  },
+
+  async getUserByEmail(email) {
+    try {
+      const data = await supabaseRequest(`users?email=eq.${encodeURIComponent(email.toLowerCase())}`);
+      return Array.isArray(data) && data.length > 0 ? data[0] : null;
+    } catch (error) {
+      console.warn('Erro ao buscar usuário:', error);
+      return null;
+    }
+  },
+
+  async updateUser(userId, updates) {
+    try {
+      await supabaseRequest(`users?id=eq.${userId}`, {
+        method: 'PATCH',
+        body: updates,
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar usuário:', error);
+    }
+  },
+
+  async requestPasswordReset(email) {
+    const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const id = `PR${Date.now()}`;
+
+    try {
+      await supabaseRequest('password_resets', {
+        method: 'POST',
+        body: {
+          id,
+          user_email: email.toLowerCase(),
+          token,
+          expires_at: expiresAt,
+          used: false,
+        },
+      });
+      return token;
+    } catch (error) {
+      console.error('Erro ao criar reset de senha:', error);
+      return null;
+    }
+  },
+
+  async verifyPasswordResetToken(email, token) {
+    try {
+      const data = await supabaseRequest(`password_resets?user_email=eq.${encodeURIComponent(email.toLowerCase())}&token=eq.${token}&used=eq.false`);
+      if (!Array.isArray(data) || data.length === 0) return null;
+
+      const reset = data[0];
+      if (new Date(reset.expires_at) < new Date()) {
+        return null; // Token expirado
+      }
+      return reset;
+    } catch (error) {
+      console.warn('Erro ao verificar token:', error);
+      return null;
+    }
+  },
+
+  async resetPassword(email, token, newPasswordHash) {
+    try {
+      // Marca token como usado
+      await supabaseRequest(`password_resets?user_email=eq.${encodeURIComponent(email.toLowerCase())}&token=eq.${token}`, {
+        method: 'PATCH',
+        body: { used: true },
+      });
+
+      // Atualiza senha do usuário
+      await this.updateUser(
+        (await this.getUserByEmail(email))?.id,
+        { password_hash: newPasswordHash, updated_at: new Date().toISOString() }
+      );
+    } catch (error) {
+      console.error('Erro ao resetar senha:', error);
+    }
+  },
+
+  // ---------------------------------------------------------
+  // Funções de verificação de email
+  // ---------------------------------------------------------
+  generateVerificationCode() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  },
+
+  async createEmailVerification(email) {
+    const code = this.generateVerificationCode();
+    const id = `EV${Date.now()}`;
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    try {
+      await supabaseRequest('email_verifications', {
+        method: 'POST',
+        body: {
+          id,
+          user_email: email.toLowerCase(),
+          code,
+          verified: false,
+          expires_at: expiresAt,
+        },
+      });
+      return code;
+    } catch (error) {
+      console.error('Erro ao criar verificação:', error);
+      return null;
+    }
+  },
+
+  async verifyEmailCode(email, code) {
+    try {
+      const data = await supabaseRequest(
+        `email_verifications?user_email=eq.${encodeURIComponent(email.toLowerCase())}&code=eq.${code}&verified=eq.false`
+      );
+
+      if (!Array.isArray(data) || data.length === 0) {
+        return null;
+      }
+
+      const verification = data[0];
+      if (new Date(verification.expires_at) < new Date()) {
+        return null; // Expirado
+      }
+
+      return verification;
+    } catch (error) {
+      console.warn('Erro ao verificar código:', error);
+      return null;
+    }
+  },
+
+  async markEmailAsVerified(email, code) {
+    try {
+      await supabaseRequest(
+        `email_verifications?user_email=eq.${encodeURIComponent(email.toLowerCase())}&code=eq.${code}`,
+        {
+          method: 'PATCH',
+          body: { verified: true },
+        }
+      );
+    } catch (error) {
+      console.error('Erro ao marcar como verificado:', error);
+    }
   },
 };
 
