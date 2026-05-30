@@ -321,6 +321,59 @@ productCard(product) {
   // Stub substituído por bindSearchOverlay() em runtime.
   closeSearch() {},
 
+  // Autenticação — lê o usuário do localStorage
+  getUser() {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  },
+
+  // Iniciais do usuário para o avatar (ex: "Ana Silva" → "AS")
+  getInitials() {
+    const user = this.getUser();
+    if (!user || !user.name) return null;
+
+    const parts = user.name.split(' ').filter(p => p);
+    return parts.slice(0, 2).map(p => p[0]?.toUpperCase()).join('');
+  },
+
+  // Logout — remove dados do localStorage
+  logout() {
+    localStorage.removeItem('user');
+    window.location.href = `${this.root()}index.html`;
+  },
+
+  // Renderiza categorias dinamicamente no header
+  renderCategoriesNav() {
+    const nav = document.querySelector('[data-categories-nav]');
+    if (!nav) return;
+
+    const categories = ShopData.categories();
+    const isProductsPage = window.location.pathname.includes('/products.html');
+
+    nav.innerHTML = '';
+
+    const allLink = document.createElement('a');
+    allLink.href = `${this.root()}pages/products.html`;
+    allLink.textContent = 'Produtos';
+    if (isProductsPage && !new URLSearchParams(window.location.search).get('category')) {
+      allLink.className = 'is-active';
+    }
+    nav.appendChild(allLink);
+
+    categories.forEach(cat => {
+      const link = document.createElement('a');
+      link.href = `${this.root()}pages/products.html?category=${encodeURIComponent(cat.name)}`;
+      link.textContent = cat.name;
+
+      const currentCategory = new URLSearchParams(window.location.search).get('category');
+      if (isProductsPage && currentCategory === cat.name) {
+        link.className = 'is-active';
+      }
+
+      nav.appendChild(link);
+    });
+  },
+
   // Injeta o switcher Loja / Admin no <body> se ainda não existir.
   // Detecta a página atual pela classe admin-page no <body>.
   injectModeSwitch() {
@@ -352,4 +405,19 @@ document.addEventListener('DOMContentLoaded', () => {
   ShopNow.bindCommonActions();
   ShopNow.bindSearchOverlay();
   ShopNow.injectModeSwitch();
+  ShopNow.renderCategoriesNav();
+
+  // Renderiza o avatar do usuário se estiver logado
+  const user = ShopNow.getUser();
+  const loginButton = document.querySelector('[data-login-btn]');
+
+  if (user && loginButton) {
+    const initials = ShopNow.getInitials();
+    loginButton.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span style="font-size: 12px; font-weight: 700;">${initials || 'US'}</span>
+    `;
+    loginButton.href = `${ShopNow.root()}pages/account.html`;
+    loginButton.dataset.userProfile = 'true';
+  }
 });

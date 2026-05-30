@@ -99,11 +99,31 @@ document.addEventListener('DOMContentLoaded', () => {
   if (checkoutForm) {
     checkoutForm.addEventListener('submit', event => {
       event.preventDefault();
+      const formData = new FormData(checkoutForm);
+      const items = ShopNow.cartItems();
+      const subtotal = ShopNow.cartTotal();
+      const shipping = subtotal >= 299 ? 0 : 24.9;
+      const paymentOptions = [...document.querySelectorAll('[data-payment-option]')];
+      const activePaymentIndex = Math.max(0, paymentOptions.findIndex(option => option.classList.contains('is-active')));
+      const paymentMethod = ['Cartão', 'PIX', 'Boleto'][activePaymentIndex] || 'Cartão';
+
       const order = {
         id: `#${Math.floor(13000 + Math.random() * 900)}`,
-        total: ShopNow.cartTotal(),
-        date: new Date().toISOString(),
+        customer: formData.get('customerName') || '',
+        email: formData.get('email') || '',
+        items: items.map(item => ({
+          name: item.product.name,
+          qty: item.qty,
+          price: item.product.price,
+        })),
+        total: subtotal + shipping,
+        paymentMethod,
+        type: 'delivery',
+        status: 'pending',
+        date: new Date().toISOString().slice(0, 10),
+        city: checkoutForm.querySelector('[data-cep-city]')?.value || '',
       };
+      ShopData.addOrder(order);
       localStorage.setItem('shopnow-last-order', JSON.stringify(order));
       ShopNow.clearCart();
       window.location.href = 'confirmation.html';

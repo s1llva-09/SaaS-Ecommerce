@@ -1,101 +1,12 @@
 // ============================================================
-// SHOPNOW - DADOS MOCKADOS
-// Quando for para Supabase, mantenha a interface ShopData e troque o provider.
+// SHOPNOW - DATA PROVIDER
+// Dados reais via Supabase REST. Sem seeds/mock de produtos.
 // ============================================================
 
-const PRODUCTS = [
-  { id: '1', name: 'MacBook Pro 14"', category: 'Eletrônicos', price: 12999, originalPrice: 15499, image: 'https://images.unsplash.com/photo-1636115305669-9096bffe87fd?w=700&q=85', rating: 4.9, reviews: 342, stock: 8, sku: 'MBP14-M3-2024', badge: 'Mais vendido', description: 'Notebook premium com alta performance, tela Liquid Retina e bateria para o dia inteiro.', colors: ['Cinza espacial', 'Prateado'], installments: 12 },
-  { id: '2', name: 'Fones Sony WH-1000XM5', category: 'Eletrônicos', price: 2199, originalPrice: 2799, image: 'https://images.unsplash.com/photo-1515940175183-6798529cb860?w=700&q=85', rating: 4.8, reviews: 891, stock: 23, sku: 'SONY-WH5-BLK', badge: 'Oferta', description: 'Cancelamento de ruído líder da categoria, áudio limpo e autonomia para viagens longas.', colors: ['Preto', 'Branco'], installments: 6 },
-  { id: '3', name: 'Kit Apple — Watch + AirPods', category: 'Eletrônicos', price: 5499, originalPrice: 7299, image: 'https://images.unsplash.com/photo-1491933382434-500287f9b54b?w=700&q=85', rating: 4.7, reviews: 215, stock: 5, sku: 'APPLE-KIT-01', badge: 'Bundle', description: 'Combo de acessórios Apple para rotina, chamadas, treino e produtividade.', colors: ['Midnight', 'Starlight'], installments: 12 },
-  { id: '4', name: 'Tênis Air Max 270', category: 'Calçados', price: 899, originalPrice: 1199, image: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=700&q=85', rating: 4.6, reviews: 1243, stock: 42, sku: 'NIKE-AM270-WHT', badge: 'Oferta', description: 'Tênis casual com amortecimento alto no calcanhar e acabamento leve.', colors: ['Branco/Laranja', 'Preto/Vermelho'], sizes: ['37', '38', '39', '40', '41', '42', '43'], installments: 6 },
-  { id: '5', name: 'Camiseta Premium Algodão', category: 'Moda', price: 89, image: 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=700&q=85', rating: 4.4, reviews: 567, stock: 120, sku: 'CAMI-PREM-001', description: 'Camiseta 100% algodão com toque macio, modelagem versátil e acabamento reforçado.', colors: ['Branco', 'Preto', 'Cinza'], sizes: ['P', 'M', 'G', 'GG'], installments: 3 },
-  { id: '6', name: 'Tênis Nike Running', category: 'Calçados', price: 699, originalPrice: 899, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700&q=85', rating: 4.7, reviews: 432, stock: 31, sku: 'NIKE-RUN-PRO', badge: 'Novo', description: 'Tênis de corrida com resposta rápida, cabedal respirável e solado leve.', colors: ['Vermelho/Branco', 'Preto'], sizes: ['37', '38', '39', '40', '41', '42', '43'], installments: 6 },
-  { id: '7', name: 'Mesa Gamer RGB', category: 'Casa', price: 1899, originalPrice: 2399, image: 'https://images.unsplash.com/photo-1615655406736-b37c4fabf923?w=700&q=85', rating: 4.5, reviews: 89, stock: 7, sku: 'MESA-GAME-RGB', badge: 'Retirada disponível', description: 'Mesa gamer com iluminação RGB, suporte para monitor e organização de cabos.', colors: ['Preto'], installments: 12 },
-  { id: '8', name: 'Smartphone Galaxy S24', category: 'Eletrônicos', price: 4199, originalPrice: 4999, image: 'https://images.unsplash.com/photo-1602526432604-029a709e131c?w=700&q=85', rating: 4.8, reviews: 678, stock: 15, sku: 'SAM-S24-256', badge: 'Oferta', description: 'Smartphone premium com câmera avançada, tela fluida e alto desempenho.', colors: ['Phantom Black', 'Cream'], installments: 12 },
-  { id: '9', name: 'Mochila Notebook 15"', category: 'Acessórios', price: 279, originalPrice: 349, image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=700&q=85', rating: 4.6, reviews: 234, stock: 58, sku: 'MOCH-NOTE-15', description: 'Mochila ergonômica para notebook com divisórias internas e porta USB.', colors: ['Preto', 'Cinza', 'Azul'], installments: 3 },
-  { id: '10', name: 'Cadeira Escritório Ergonômica', category: 'Casa', price: 2799, originalPrice: 3499, image: 'https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=700&q=85', rating: 4.9, reviews: 412, stock: 3, sku: 'CADE-ERG-PRO', badge: 'Baixo estoque', description: 'Cadeira ergonômica com apoio lombar ajustável, apoio de cabeça e braços 4D.', colors: ['Preto', 'Cinza'], installments: 12 },
-  { id: '11', name: 'Kit Moda Verão', category: 'Moda', price: 199, originalPrice: 289, image: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=700&q=85', rating: 4.2, reviews: 98, stock: 85, sku: 'KIT-VERA-001', badge: 'Novo', description: 'Kit com peças leves para o verão, com algodão macio e caimento casual.', colors: ['Azul Aqua', 'Rosa', 'Branco'], sizes: ['P', 'M', 'G', 'GG'], installments: 3 },
-  { id: '12', name: 'Rack Capsule de Roupas', category: 'Moda', price: 349, image: 'https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?w=700&q=85', rating: 4.3, reviews: 156, stock: 0, sku: 'RACK-FASH-001', badge: 'Sem estoque', description: 'Rack minimalista para organizar looks e coleções cápsula.', installments: 3 },
-];
-
-const ORDERS = [
-  { id: '#12847', customer: 'Ana Silva', email: 'ana@email.com', items: [{ name: 'MacBook Pro 14"', qty: 1, price: 12999 }], total: 12999, paymentMethod: 'Cartão', type: 'delivery', status: 'shipped', date: '2026-05-22', city: 'São Paulo' },
-  { id: '#12846', customer: 'Carlos Mota', email: 'carlos@email.com', items: [{ name: 'Fones Sony WH-1000XM5', qty: 1, price: 2199 }, { name: 'Camiseta Premium Algodão', qty: 2, price: 89 }], total: 2377, paymentMethod: 'PIX', type: 'pickup', status: 'ready', date: '2026-05-22', city: 'Rio de Janeiro' },
-  { id: '#12845', customer: 'Beatriz Souza', email: 'bea@email.com', items: [{ name: 'Tênis Air Max 270', qty: 1, price: 899 }], total: 899, paymentMethod: 'Cartão', type: 'delivery', status: 'paid', date: '2026-05-21', city: 'Belo Horizonte' },
-  { id: '#12844', customer: 'Diego Lima', email: 'diego@email.com', items: [{ name: 'Smartphone Galaxy S24', qty: 1, price: 4199 }], total: 4199, paymentMethod: 'PIX', type: 'delivery', status: 'delivered', date: '2026-05-20', city: 'Porto Alegre' },
-  { id: '#12843', customer: 'Fernanda Castro', email: 'fer@email.com', items: [{ name: 'Mesa Gamer RGB', qty: 1, price: 1899 }], total: 1899, paymentMethod: 'Boleto', type: 'pickup', status: 'pending', date: '2026-05-20', city: 'Recife' },
-  { id: '#12842', customer: 'Gustavo Pereira', email: 'gus@email.com', items: [{ name: 'Kit Apple — Watch + AirPods', qty: 1, price: 5499 }], total: 5499, paymentMethod: 'Cartão', type: 'delivery', status: 'cancelled', date: '2026-05-19', city: 'Manaus' },
-  { id: '#12841', customer: 'Helena Nunes', email: 'hel@email.com', items: [{ name: 'Cadeira Escritório Ergonômica', qty: 1, price: 2799 }], total: 2799, paymentMethod: 'PIX', type: 'pickup', status: 'delivered', date: '2026-05-18', city: 'Fortaleza' },
-  { id: '#12840', customer: 'Igor Santos', email: 'igor@email.com', items: [{ name: 'Camiseta Premium Algodão', qty: 3, price: 89 }, { name: 'Mochila Notebook 15"', qty: 1, price: 279 }], total: 546, paymentMethod: 'Cartão', type: 'delivery', status: 'delivered', date: '2026-05-17', city: 'Salvador' },
-  { id: '#12839', customer: 'Juliana Alves', email: 'jul@email.com', items: [{ name: 'Tênis Nike Running', qty: 1, price: 699 }], total: 699, paymentMethod: 'PIX', type: 'delivery', status: 'shipped', date: '2026-05-16', city: 'Brasília' },
-  { id: '#12838', customer: 'Kleber Ramos', email: 'kleber@email.com', items: [{ name: 'Kit Moda Verão', qty: 1, price: 199 }, { name: 'Mochila Notebook 15"', qty: 1, price: 279 }], total: 478, paymentMethod: 'Cartão', type: 'delivery', status: 'paid', date: '2026-05-15', city: 'Curitiba' },
-];
-
-const CUSTOMERS = [
-  { id: 'C001', name: 'Ana Silva', email: 'ana@email.com', city: 'São Paulo', totalOrders: 8, totalSpent: 34567, status: 'active', joinDate: '2024-03-15', phone: '(11) 98765-4321' },
-  { id: 'C002', name: 'Carlos Mota', email: 'carlos@email.com', city: 'Rio de Janeiro', totalOrders: 5, totalSpent: 12890, status: 'active', joinDate: '2024-05-20', phone: '(21) 99876-5432' },
-  { id: 'C003', name: 'Beatriz Souza', email: 'bea@email.com', city: 'Belo Horizonte', totalOrders: 12, totalSpent: 67234, status: 'active', joinDate: '2023-11-08', phone: '(31) 97654-3210' },
-  { id: 'C004', name: 'Diego Lima', email: 'diego@email.com', city: 'Curitiba', totalOrders: 3, totalSpent: 8999, status: 'inactive', joinDate: '2025-01-22', phone: '(41) 96543-2109' },
-];
-
-const CASHFLOW = [
-  // Hoje — 2026-05-25
-  { id: 'CF001', type: 'income',  description: 'Venda #12850 — Tênis Air Max 270',       category: 'Vendas',        amount: 899,   date: '2026-05-25 10:14', paymentMethod: 'Cartão' },
-  { id: 'CF002', type: 'income',  description: 'Venda #12851 — Camiseta Premium ×2',     category: 'Vendas',        amount: 178,   date: '2026-05-25 08:37', paymentMethod: 'PIX' },
-  // Esta semana (19–24/mai)
-  { id: 'CF003', type: 'income',  description: 'Venda #12847 — MacBook Pro 14"',         category: 'Vendas',        amount: 12999, date: '2026-05-22 14:32', paymentMethod: 'Cartão' },
-  { id: 'CF004', type: 'income',  description: 'Venda #12846 — Sony WH-1000XM5 + Cam.', category: 'Vendas',        amount: 2377,  date: '2026-05-22 11:15', paymentMethod: 'PIX' },
-  { id: 'CF005', type: 'income',  description: 'Venda #12845 — Tênis Air Max 270',       category: 'Vendas',        amount: 899,   date: '2026-05-21 16:48', paymentMethod: 'Cartão' },
-  { id: 'CF006', type: 'income',  description: 'Venda #12843 — Mesa Gamer RGB',          category: 'Vendas',        amount: 1899,  date: '2026-05-20 13:22', paymentMethod: 'Boleto' },
-  { id: 'CF007', type: 'income',  description: 'Venda #12848 — Mochila Notebook 15"',   category: 'Vendas',        amount: 279,   date: '2026-05-19 09:05', paymentMethod: 'PIX' },
-  // Este mês mas antes desta semana (1–18/mai)
-  { id: 'CF008', type: 'income',  description: 'Venda #12841 — Cadeira Ergonômica',      category: 'Vendas',        amount: 2799,  date: '2026-05-18 14:08', paymentMethod: 'PIX' },
-  { id: 'CF009', type: 'income',  description: 'Venda #12840 — Camisetas + Mochila',     category: 'Vendas',        amount: 546,   date: '2026-05-17 09:45', paymentMethod: 'Cartão' },
-  { id: 'CF010', type: 'income',  description: 'Venda #12839 — Tênis Nike Running',      category: 'Vendas',        amount: 699,   date: '2026-05-16 11:30', paymentMethod: 'PIX' },
-  { id: 'CF011', type: 'income',  description: 'Venda #12838 — Kit Moda + Mochila',      category: 'Vendas',        amount: 478,   date: '2026-05-15 15:55', paymentMethod: 'Cartão' },
-  { id: 'CF012', type: 'expense', description: 'Folha de pagamento — Maio 2026',         category: 'Despesa fixa',  amount: 18000, date: '2026-05-10 09:00', paymentMethod: 'TED' },
-  { id: 'CF013', type: 'expense', description: 'Aluguel — Maio 2026',                    category: 'Despesa fixa',  amount: 8500,  date: '2026-05-05 08:00', paymentMethod: 'TED' },
-  { id: 'CF014', type: 'income',  description: 'Venda #12844 — Kit Apple Watch+AirPods', category: 'Vendas',        amount: 5499,  date: '2026-05-03 13:20', paymentMethod: 'Cartão' },
-  // Meses anteriores (para filtro Ano)
-  { id: 'CF015', type: 'income',  description: 'Lote vendas — Abril 2026',               category: 'Vendas',        amount: 34500, date: '2026-04-30 18:00', paymentMethod: 'Cartão' },
-  { id: 'CF016', type: 'expense', description: 'Fornecedor Apple — Reposição',           category: 'Fornecedor',    amount: 45000, date: '2026-04-15 09:00', paymentMethod: 'TED' },
-  { id: 'CF017', type: 'expense', description: 'Aluguel — Abril 2026',                   category: 'Despesa fixa',  amount: 8500,  date: '2026-04-05 08:00', paymentMethod: 'TED' },
-  { id: 'CF018', type: 'income',  description: 'Lote vendas — Março 2026',               category: 'Vendas',        amount: 28900, date: '2026-03-31 18:00', paymentMethod: 'Cartão' },
-  { id: 'CF019', type: 'expense', description: 'Aluguel — Março 2026',                   category: 'Despesa fixa',  amount: 8500,  date: '2026-03-05 08:00', paymentMethod: 'TED' },
-  { id: 'CF020', type: 'income',  description: 'Lote vendas — Fevereiro 2026',           category: 'Vendas',        amount: 41200, date: '2026-02-28 18:00', paymentMethod: 'Cartão' },
-  { id: 'CF021', type: 'expense', description: 'Aluguel — Fevereiro 2026',               category: 'Despesa fixa',  amount: 8500,  date: '2026-02-05 08:00', paymentMethod: 'TED' },
-  { id: 'CF022', type: 'income',  description: 'Lote vendas — Janeiro 2026',             category: 'Vendas',        amount: 38700, date: '2026-01-31 18:00', paymentMethod: 'Cartão' },
-  { id: 'CF023', type: 'expense', description: 'Aluguel — Janeiro 2026',                 category: 'Despesa fixa',  amount: 8500,  date: '2026-01-05 08:00', paymentMethod: 'TED' },
-];
-
-const CATEGORIES = [
-  { name: 'Eletrônicos', icon: '💻', count: 45 },
-  { name: 'Calçados', icon: '👟', count: 68 },
-  { name: 'Moda', icon: '👔', count: 124 },
-  { name: 'Casa', icon: '🏠', count: 37 },
-  { name: 'Esportes', icon: '⚽', count: 52 },
-  { name: 'Livros', icon: '📚', count: 89 },
-  { name: 'Beleza', icon: '💄', count: 76 },
-  { name: 'Acessórios', icon: '🎒', count: 43 },
-];
-
-const WEEKLY_REVENUE = [
-  { label: 'Seg', value: 12430 },
-  { label: 'Ter', value: 8920 },
-  { label: 'Qua', value: 15670 },
-  { label: 'Qui', value: 9340 },
-  { label: 'Sex', value: 21890 },
-  { label: 'Sáb', value: 18450 },
-  { label: 'Dom', value: 7230 },
-];
-
-const MONTHLY_REVENUE = [
-  { label: 'Jan', value: 142000 },
-  { label: 'Fev', value: 168000 },
-  { label: 'Mar', value: 155000 },
-  { label: 'Abr', value: 189000 },
-  { label: 'Mai', value: 94020 },
-];
+const SUPABASE_CONFIG = {
+  restUrl: 'https://nnkokgtplnuhmhlqarba.supabase.co/rest/v1',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ua29rZ3RwbG51aG1obHFhcmJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMjk3MjUsImV4cCI6MjA5NDgwNTcyNX0.2nf1eytsNVNAAi4FymsmTSQEnwpzokGRXV6Lbp7k0pU',
+};
 
 const STATUS_CONFIG = {
   pending: { label: 'Pendente', cls: 'badge-amber' },
@@ -108,42 +19,695 @@ const STATUS_CONFIG = {
   inactive: { label: 'Inativo', cls: 'badge-amber' },
 };
 
-const CHANNELS = [
-  { label: 'Site', value: 62, color: '#818cf8' },
-  { label: 'App', value: 25, color: '#34d399' },
-  { label: 'Marketplace', value: 13, color: '#a7f3d0' },
-];
+const EMPTY_SETTINGS = {
+  geral: {
+    storeName: '',
+    email: '',
+    cpfCnpj: '',
+    phone: '',
+    address: '',
+    number: '',
+    city: '',
+    state: '',
+    complement: '',
+    zipcode: '',
+  },
+  comercial: {
+    freeShippingValue: '',
+    freeShippingText: '',
+    payment_card: false,
+    payment_pix: false,
+    payment_boleto: false,
+    payment_pickup: false,
+  },
+  contato: {
+    businessHours: '',
+    whatsapp: '',
+    instagram: '',
+    facebook: '',
+    privacyUrl: '',
+    termsUrl: '',
+  },
+};
 
-const _runtimeCashflow = [];
-const _customerStatusOverrides = {};
-const _runtimeCategories = [...CATEGORIES];
+const _state = {
+  products: [],
+  orders: [],
+  customers: [],
+  cashflow: [],
+  categories: [],
+  coupons: [],
+  settings: typeof structuredClone === 'function'
+    ? structuredClone(EMPTY_SETTINGS)
+    : JSON.parse(JSON.stringify(EMPTY_SETTINGS)),
+  weeklyRevenue: [],
+  monthlyRevenue: [],
+  channels: [],
+};
+
+const _missingTables = new Set();
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function getValue(row, ...keys) {
+  for (const key of keys) {
+    if (row && row[key] !== undefined && row[key] !== null) return row[key];
+  }
+  return undefined;
+}
+
+function asNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function asArray(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return parsed;
+    } catch (_) {
+      return value.split(',').map(item => item.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
+function dateOnly(value) {
+  if (!value) return new Date().toISOString().slice(0, 10);
+  return String(value).slice(0, 10);
+}
+
+function supabaseHeaders(extra = {}) {
+  return {
+    apikey: SUPABASE_CONFIG.anonKey,
+    Authorization: `Bearer ${SUPABASE_CONFIG.anonKey}`,
+    'Content-Type': 'application/json',
+    ...extra,
+  };
+}
+
+async function supabaseRequest(path, options = {}) {
+  const response = await fetch(`${SUPABASE_CONFIG.restUrl}/${path}`, {
+    method: options.method || 'GET',
+    headers: supabaseHeaders(options.headers),
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => '');
+    const error = new Error(`${options.method || 'GET'} ${path} failed (${response.status})`);
+    error.status = response.status;
+    error.detail = detail;
+    throw error;
+  }
+
+  if (response.status === 204) return null;
+
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function fetchRows(table) {
+  try {
+    const data = await supabaseRequest(`${table}?select=*`);
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    if (error.status === 404) {
+      _missingTables.add(table);
+      return [];
+    }
+    console.warn(`[ShopData] Falha ao buscar ${table}:`, error);
+    return [];
+  }
+}
+
+function persist(table, action) {
+  action().catch(error => {
+    if (error.status === 404) _missingTables.add(table);
+    console.warn(`[ShopData] Falha ao salvar ${table}:`, error);
+  });
+}
+
+function toQueryFilter(column, value) {
+  const params = new URLSearchParams({ [column]: `eq.${value}` });
+  return params.toString();
+}
+
+function insertRow(table, row) {
+  return supabaseRequest(table, {
+    method: 'POST',
+    headers: { Prefer: 'return=minimal' },
+    body: row,
+  });
+}
+
+function upsertRow(table, row, conflictKey = 'id') {
+  return supabaseRequest(`${table}?on_conflict=${conflictKey}`, {
+    method: 'POST',
+    headers: { Prefer: 'return=minimal,resolution=merge-duplicates' },
+    body: row,
+  });
+}
+
+function patchRow(table, column, value, row) {
+  return supabaseRequest(`${table}?${toQueryFilter(column, value)}`, {
+    method: 'PATCH',
+    headers: { Prefer: 'return=minimal' },
+    body: row,
+  });
+}
+
+function deleteRow(table, column, value) {
+  return supabaseRequest(`${table}?${toQueryFilter(column, value)}`, {
+    method: 'DELETE',
+    headers: { Prefer: 'return=minimal' },
+  });
+}
+
+function normalizeProduct(row) {
+  return {
+    id: String(getValue(row, 'id') ?? ''),
+    name: getValue(row, 'name', 'nome') || '',
+    category: getValue(row, 'category', 'categoria') || '',
+    price: asNumber(getValue(row, 'price', 'preco')),
+    originalPrice: asNumber(getValue(row, 'originalPrice', 'original_price', 'preco_original'), 0) || undefined,
+    image: getValue(row, 'image', 'image_url', 'imagem') || '',
+    rating: asNumber(getValue(row, 'rating', 'avaliacao'), 0),
+    reviews: asNumber(getValue(row, 'reviews', 'review_count', 'avaliacoes'), 0),
+    stock: asNumber(getValue(row, 'stock', 'estoque'), 0),
+    sku: getValue(row, 'sku') || '',
+    badge: getValue(row, 'badge', 'selo') || '',
+    description: getValue(row, 'description', 'descricao') || '',
+    colors: asArray(getValue(row, 'colors', 'cores')),
+    sizes: asArray(getValue(row, 'sizes', 'tamanhos')),
+    installments: asNumber(getValue(row, 'installments', 'parcelas'), 1),
+  };
+}
+
+function productToRow(product) {
+  return {
+    id: String(product.id),
+    name: product.name || '',
+    category: product.category || '',
+    price: asNumber(product.price),
+    original_price: product.originalPrice ? asNumber(product.originalPrice) : null,
+    image: product.image || '',
+    rating: asNumber(product.rating, 0),
+    reviews: asNumber(product.reviews, 0),
+    stock: asNumber(product.stock, 0),
+    sku: product.sku || '',
+    badge: product.badge || '',
+    description: product.description || '',
+    colors: product.colors || [],
+    sizes: product.sizes || [],
+    installments: asNumber(product.installments, 1),
+  };
+}
+
+function normalizeOrder(row) {
+  return {
+    id: String(getValue(row, 'id') ?? ''),
+    customer: getValue(row, 'customer', 'customer_name', 'cliente') || '',
+    email: getValue(row, 'email', 'customer_email') || '',
+    items: asArray(getValue(row, 'items', 'itens')),
+    total: asNumber(getValue(row, 'total')),
+    paymentMethod: getValue(row, 'paymentMethod', 'payment_method', 'pagamento') || '',
+    type: getValue(row, 'type', 'delivery_type', 'tipo') || 'delivery',
+    status: getValue(row, 'status') || 'pending',
+    date: dateOnly(getValue(row, 'date', 'created_at', 'data')),
+    city: getValue(row, 'city', 'cidade') || '',
+    channel: getValue(row, 'channel', 'canal') || 'Site',
+  };
+}
+
+function orderToRow(order) {
+  return {
+    id: String(order.id),
+    customer: order.customer || '',
+    email: order.email || '',
+    items: order.items || [],
+    total: asNumber(order.total),
+    payment_method: order.paymentMethod || '',
+    type: order.type || 'delivery',
+    status: order.status || 'pending',
+    date: order.date || new Date().toISOString().slice(0, 10),
+    city: order.city || '',
+    channel: order.channel || 'Site',
+  };
+}
+
+function normalizeCustomer(row) {
+  return {
+    id: String(getValue(row, 'id') ?? ''),
+    name: getValue(row, 'name', 'nome') || '',
+    email: getValue(row, 'email') || '',
+    city: getValue(row, 'city', 'cidade') || '',
+    totalOrders: asNumber(getValue(row, 'totalOrders', 'total_orders', 'pedidos'), 0),
+    totalSpent: asNumber(getValue(row, 'totalSpent', 'total_spent', 'total_gasto'), 0),
+    status: getValue(row, 'status') || 'active',
+    joinDate: dateOnly(getValue(row, 'joinDate', 'join_date', 'created_at')),
+    phone: getValue(row, 'phone', 'telefone') || '',
+  };
+}
+
+function customerToRow(customer) {
+  return {
+    id: String(customer.id),
+    name: customer.name || '',
+    email: customer.email || '',
+    city: customer.city || '',
+    total_orders: asNumber(customer.totalOrders, 0),
+    total_spent: asNumber(customer.totalSpent, 0),
+    status: customer.status || 'active',
+    join_date: customer.joinDate || new Date().toISOString().slice(0, 10),
+    phone: customer.phone || '',
+  };
+}
+
+function normalizeCategory(row) {
+  return {
+    name: getValue(row, 'name', 'nome') || '',
+    icon: getValue(row, 'icon', 'icone') || '',
+    image: getValue(row, 'image', 'image_url', 'imagem') || undefined,
+    count: asNumber(getValue(row, 'count', 'product_count', 'quantidade'), 0),
+  };
+}
+
+function categoryToRow(category) {
+  return {
+    name: category.name || '',
+    icon: category.icon || '',
+    image: category.image || null,
+    count: asNumber(category.count, 0),
+  };
+}
+
+function normalizeCashflow(row) {
+  return {
+    id: String(getValue(row, 'id') ?? ''),
+    type: getValue(row, 'type', 'tipo') || 'income',
+    description: getValue(row, 'description', 'descricao') || '',
+    category: getValue(row, 'category', 'categoria') || '',
+    amount: asNumber(getValue(row, 'amount', 'valor')),
+    date: getValue(row, 'date', 'data') || new Date().toISOString().slice(0, 16).replace('T', ' '),
+    paymentMethod: getValue(row, 'paymentMethod', 'payment_method', 'pagamento') || '',
+  };
+}
+
+function cashflowToRow(entry) {
+  return {
+    id: String(entry.id),
+    type: entry.type || 'income',
+    description: entry.description || '',
+    category: entry.category || '',
+    amount: asNumber(entry.amount),
+    date: entry.date || new Date().toISOString().slice(0, 16).replace('T', ' '),
+    payment_method: entry.paymentMethod || '',
+  };
+}
+
+function normalizeCoupon(row) {
+  return {
+    code: String(getValue(row, 'code', 'codigo') || '').toUpperCase(),
+    discountType: getValue(row, 'discountType', 'discount_type', 'tipo_desconto') || 'percentage',
+    discountValue: asNumber(getValue(row, 'discountValue', 'discount_value', 'valor_desconto')),
+    expiryDate: dateOnly(getValue(row, 'expiryDate', 'expiry_date', 'validade')),
+    maxUses: asNumber(getValue(row, 'maxUses', 'max_uses', 'usos_maximos'), 0),
+    uses: asNumber(getValue(row, 'uses', 'usos'), 0),
+  };
+}
+
+function couponToRow(coupon) {
+  return {
+    code: String(coupon.code || '').toUpperCase(),
+    discount_type: coupon.discountType || 'percentage',
+    discount_value: asNumber(coupon.discountValue),
+    expiry_date: coupon.expiryDate || null,
+    max_uses: asNumber(coupon.maxUses, 0),
+    uses: asNumber(coupon.uses, 0),
+  };
+}
+
+function normalizePromotion(row) {
+  return {
+    id: String(getValue(row, 'id') ?? ''),
+    productId: String(getValue(row, 'product_id', 'productId') ?? ''),
+    discountPercentage: asNumber(getValue(row, 'discount_percentage', 'discountPercentage'), 0),
+    startDate: getValue(row, 'start_date', 'startDate') || '',
+    endDate: getValue(row, 'end_date', 'endDate') || '',
+    active: getValue(row, 'active') === true || getValue(row, 'active') === 'true',
+  };
+}
+
+function promotionToRow(promotion) {
+  return {
+    id: String(promotion.id),
+    product_id: String(promotion.productId),
+    discount_percentage: asNumber(promotion.discountPercentage, 0),
+    start_date: promotion.startDate || null,
+    end_date: promotion.endDate || '',
+    active: promotion.active === true,
+  };
+}
+
+function normalizeSettings(rows) {
+  const settings = clone(EMPTY_SETTINGS);
+  if (!rows.length) return settings;
+
+  const first = rows[0];
+  if (first.geral || first.comercial || first.contato) {
+    return {
+      geral: { ...settings.geral, ...(first.geral || {}) },
+      comercial: { ...settings.comercial, ...(first.comercial || {}) },
+      contato: { ...settings.contato, ...(first.contato || {}) },
+    };
+  }
+
+  rows.forEach(row => {
+    const type = getValue(row, 'type', 'section', 'key');
+    const data = getValue(row, 'data', 'payload', 'value');
+    if (type && settings[type] && data && typeof data === 'object') {
+      settings[type] = { ...settings[type], ...data };
+    }
+  });
+
+  return settings;
+}
+
+function deriveCustomers(orders) {
+  const byEmail = new Map();
+  orders.forEach(order => {
+    if (!order.email) return;
+    const current = byEmail.get(order.email) || {
+      id: `C${String(byEmail.size + 1).padStart(3, '0')}`,
+      name: order.customer,
+      email: order.email,
+      city: order.city,
+      totalOrders: 0,
+      totalSpent: 0,
+      status: 'active',
+      joinDate: order.date,
+      phone: '',
+    };
+    current.totalOrders += 1;
+    current.totalSpent += order.total;
+    if (order.date < current.joinDate) current.joinDate = order.date;
+    byEmail.set(order.email, current);
+  });
+  return [...byEmail.values()];
+}
+
+function refreshCategoryCounts() {
+  const counts = _state.products.reduce((map, product) => {
+    map[product.category] = (map[product.category] || 0) + 1;
+    return map;
+  }, {});
+
+  _state.categories.forEach(category => {
+    category.count = category.count || counts[category.name] || 0;
+  });
+}
+
+function aggregateRevenueByDay(orders) {
+  return orders.reduce((map, order) => {
+    const key = dateOnly(order.date);
+    map[key] = (map[key] || 0) + order.total;
+    return map;
+  }, {});
+}
+
+function makeWeeklyRevenue(orders) {
+  const revenue = aggregateRevenueByDay(orders);
+  const latest = Object.keys(revenue).sort().at(-1) || new Date().toISOString().slice(0, 10);
+  const start = new Date(`${latest}T00:00:00`);
+  start.setDate(start.getDate() - 6);
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(start);
+    date.setDate(start.getDate() + index);
+    const key = date.toISOString().slice(0, 10);
+    const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+    return { label: labels[date.getDay()], value: revenue[key] || 0 };
+  });
+}
+
+function makeMonthlyRevenue(orders) {
+  const revenue = orders.reduce((map, order) => {
+    const key = dateOnly(order.date).slice(0, 7);
+    map[key] = (map[key] || 0) + order.total;
+    return map;
+  }, {});
+  const latest = Object.keys(revenue).sort().at(-1) || new Date().toISOString().slice(0, 7);
+  const [year, month] = latest.split('-').map(Number);
+  const start = new Date(year, month - 5, 1);
+  const labels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+  return Array.from({ length: 5 }, (_, index) => {
+    const date = new Date(start.getFullYear(), start.getMonth() + index, 1);
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    return { label: labels[date.getMonth()], value: revenue[key] || 0 };
+  });
+}
+
+function makeChannels(orders) {
+  const map = orders.reduce((acc, order) => {
+    const channel = order.channel || 'Site';
+    acc[channel] = (acc[channel] || 0) + 1;
+    return acc;
+  }, {});
+  const total = Object.values(map).reduce((sum, count) => sum + count, 0);
+  const colors = ['#818cf8', '#34d399', '#fbbf24', '#60a5fa', '#f87171'];
+
+  if (!total) return [];
+
+  return Object.entries(map).map(([label, count], index) => ({
+    label,
+    value: Math.round((count / total) * 100),
+    color: colors[index % colors.length],
+  }));
+}
+
+function refreshDerivedData() {
+  refreshCategoryCounts();
+  _state.weeklyRevenue = makeWeeklyRevenue(_state.orders);
+  _state.monthlyRevenue = makeMonthlyRevenue(_state.orders);
+  _state.channels = makeChannels(_state.orders);
+}
+
+async function loadSupabaseData() {
+  const [
+    products,
+    orders,
+    customers,
+    categories,
+    cashflow,
+    coupons,
+    storeSettings,
+    legacySettings,
+  ] = await Promise.all([
+    fetchRows('products'),
+    fetchRows('orders'),
+    fetchRows('customers'),
+    fetchRows('categories'),
+    fetchRows('cashflow'),
+    fetchRows('coupons'),
+    fetchRows('store_settings'),
+    fetchRows('settings'),
+  ]);
+
+  _state.products = products.map(normalizeProduct).filter(product => product.id && product.name);
+  _state.orders = orders.map(normalizeOrder).filter(order => order.id);
+  _state.customers = customers.length
+    ? customers.map(normalizeCustomer).filter(customer => customer.id)
+    : deriveCustomers(_state.orders);
+  _state.categories = categories.map(normalizeCategory).filter(category => category.name);
+  _state.cashflow = cashflow.map(normalizeCashflow).filter(entry => entry.id);
+  _state.coupons = coupons.map(normalizeCoupon).filter(coupon => coupon.code);
+  _state.settings = normalizeSettings(storeSettings.length ? storeSettings : legacySettings);
+
+  refreshDerivedData();
+}
+
+let _readyPromise = null;
 
 const ShopData = {
-  provider: 'mock',
-  useProvider(providerName, provider) {
-    this.provider = providerName;
-    Object.assign(this, provider);
+  provider: 'supabase',
+  config: SUPABASE_CONFIG,
+  missingTables: () => [..._missingTables],
+  ready() {
+    if (!_readyPromise) {
+      _readyPromise = loadSupabaseData().catch(error => {
+        console.warn('[ShopData] Supabase indisponivel. Renderizando sem dados mockados.', error);
+        refreshDerivedData();
+      });
+    }
+    return _readyPromise;
   },
-  products: () => PRODUCTS,
-  orders: () => ORDERS,
-  customers: () => CUSTOMERS.map(c =>
-    _customerStatusOverrides[c.id] ? { ...c, status: _customerStatusOverrides[c.id] } : c
-  ),
-  cashflow: () => [...CASHFLOW, ..._runtimeCashflow],
-  addCashflow(entry) { _runtimeCashflow.push(entry); },
-  updateCustomerStatus(id, status) { _customerStatusOverrides[id] = status; },
-  categories: () => _runtimeCategories,
-  addCategory(cat) { _runtimeCategories.push(cat); },
-  updateCategory(name, updates) {
-    const idx = _runtimeCategories.findIndex(c => c.name === name);
-    if (idx !== -1) Object.assign(_runtimeCategories[idx], updates);
+  reload() {
+    _readyPromise = null;
+    return this.ready();
   },
-  deleteCategory(name) {
-    const idx = _runtimeCategories.findIndex(c => c.name === name);
-    if (idx !== -1) _runtimeCategories.splice(idx, 1);
-  },
-  weeklyRevenue: () => WEEKLY_REVENUE,
-  monthlyRevenue: () => MONTHLY_REVENUE,
+  products: () => _state.products,
+  orders: () => _state.orders,
+  customers: () => _state.customers,
+  cashflow: () => _state.cashflow,
+  categories: () => _state.categories,
+  weeklyRevenue: () => _state.weeklyRevenue,
+  monthlyRevenue: () => _state.monthlyRevenue,
   status: () => STATUS_CONFIG,
-  channels: () => CHANNELS,
+  channels: () => _state.channels,
+  coupons: () => _state.coupons,
+  settings: () => _state.settings,
+
+  addProduct(product) {
+    const next = {
+      id: String(product.id || Date.now()),
+      rating: 0,
+      reviews: 0,
+      installments: 1,
+      ...product,
+    };
+    _state.products.push(next);
+    refreshDerivedData();
+    persist('products', () => upsertRow('products', productToRow(next)));
+    return next;
+  },
+
+  updateProduct(id, updates) {
+    const index = _state.products.findIndex(product => product.id === String(id));
+    if (index === -1) return;
+    _state.products[index] = { ..._state.products[index], ...updates, id: String(id) };
+    refreshDerivedData();
+    persist('products', () => upsertRow('products', productToRow(_state.products[index])));
+  },
+
+  deleteProduct(id) {
+    const index = _state.products.findIndex(product => product.id === String(id));
+    if (index === -1) return;
+    _state.products.splice(index, 1);
+    refreshDerivedData();
+    persist('products', () => deleteRow('products', 'id', String(id)));
+  },
+
+  addOrder(order) {
+    const next = { id: `#${Date.now()}`, status: 'pending', type: 'delivery', ...order };
+    _state.orders.unshift(next);
+    _state.customers = deriveCustomers(_state.orders);
+    refreshDerivedData();
+    persist('orders', () => upsertRow('orders', orderToRow(next)));
+    return next;
+  },
+
+  updateOrderStatus(id, status) {
+    const order = _state.orders.find(item => item.id === id);
+    if (!order) return;
+    order.status = status;
+    refreshDerivedData();
+    persist('orders', () => patchRow('orders', 'id', id, { status }));
+  },
+
+  addCashflow(entry) {
+    _state.cashflow.push(entry);
+    persist('cashflow', () => upsertRow('cashflow', cashflowToRow(entry)));
+  },
+
+  updateCustomerStatus(id, status) {
+    const customer = _state.customers.find(item => item.id === id);
+    if (!customer) return;
+    customer.status = status;
+    persist('customers', () => patchRow('customers', 'id', id, { status }));
+  },
+
+  addCategory(category) {
+    const next = { count: 0, ...category };
+    _state.categories.push(next);
+    refreshDerivedData();
+    persist('categories', () => upsertRow('categories', categoryToRow(next), 'name'));
+  },
+
+  updateCategory(name, updates) {
+    const index = _state.categories.findIndex(category => category.name === name);
+    if (index === -1) return;
+    _state.categories[index] = { ..._state.categories[index], ...updates };
+    refreshDerivedData();
+    persist('categories', () => {
+      if (updates.name && updates.name !== name) {
+        return deleteRow('categories', 'name', name)
+          .then(() => upsertRow('categories', categoryToRow(_state.categories[index]), 'name'));
+      }
+      return upsertRow('categories', categoryToRow(_state.categories[index]), 'name');
+    });
+  },
+
+  deleteCategory(name) {
+    const index = _state.categories.findIndex(category => category.name === name);
+    if (index === -1) return;
+    _state.categories.splice(index, 1);
+    persist('categories', () => deleteRow('categories', 'name', name));
+  },
+
+  addCoupon(coupon) {
+    const next = { ...coupon, code: String(coupon.code || '').toUpperCase(), uses: coupon.uses || 0 };
+    _state.coupons.push(next);
+    persist('coupons', () => upsertRow('coupons', couponToRow(next), 'code'));
+  },
+
+  updateCoupon(oldCode, updates) {
+    const index = _state.coupons.findIndex(coupon => coupon.code === oldCode);
+    if (index === -1) return;
+    _state.coupons[index] = { ..._state.coupons[index], ...updates, code: String(updates.code || oldCode).toUpperCase() };
+    persist('coupons', () => {
+      if (_state.coupons[index].code !== oldCode) {
+        return deleteRow('coupons', 'code', oldCode)
+          .then(() => upsertRow('coupons', couponToRow(_state.coupons[index]), 'code'));
+      }
+      return upsertRow('coupons', couponToRow(_state.coupons[index]), 'code');
+    });
+  },
+
+  deleteCoupon(code) {
+    const index = _state.coupons.findIndex(coupon => coupon.code === code);
+    if (index === -1) return;
+    _state.coupons.splice(index, 1);
+    persist('coupons', () => deleteRow('coupons', 'code', code));
+  },
+
+  updateSettings(type, data) {
+    if (!_state.settings[type]) return;
+    _state.settings[type] = { ..._state.settings[type], ...data };
+    persist('store_settings', () => upsertRow('store_settings', {
+      id: 'default',
+      geral: _state.settings.geral,
+      comercial: _state.settings.comercial,
+      contato: _state.settings.contato,
+    }));
+  },
 };
+
+ShopData.ready();
+
+(function gateDOMContentLoadedUntilDataIsReady() {
+  const nativeAddEventListener = document.addEventListener.bind(document);
+
+  document.addEventListener = function addEventListenerWithDataReady(type, listener, options) {
+    if (type !== 'DOMContentLoaded' || !listener) {
+      return nativeAddEventListener(type, listener, options);
+    }
+
+    const wrapped = function wrappedDOMContentLoaded(event) {
+      ShopData.ready().then(() => {
+        if (typeof listener === 'function') {
+          listener.call(this, event);
+        } else if (typeof listener.handleEvent === 'function') {
+          listener.handleEvent(event);
+        }
+      });
+    };
+
+    return nativeAddEventListener(type, wrapped, options);
+  };
+})();

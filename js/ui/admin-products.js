@@ -276,34 +276,54 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.classList.remove('is-hidden');
   }
 
+  function readProductFromModal(base = {}) {
+    const product = { ...base };
+
+    overlay.querySelectorAll('[data-field]').forEach(field => {
+      const key = field.dataset.field;
+      if (key === 'status') return;
+
+      if (key === 'colors' || key === 'sizes') {
+        const arr = field.value.split(',').map(v => v.trim()).filter(Boolean);
+        product[key] = arr.length ? arr : undefined;
+        return;
+      }
+
+      if (field.type === 'number') {
+        product[key] = Number(field.value) || 0;
+        return;
+      }
+
+      product[key] = field.value.trim();
+    });
+
+    if (carouselImages.length) product.image = carouselImages[0].src;
+    if (!product.installments) product.installments = 1;
+    return product;
+  }
+
   // ---------------------------------------------------------
-  // Submit — cria ou atualiza o produto no array mock.
-  // Em produção, trocar pelo POST/PATCH ao Supabase Storage + DB.
+  // Submit — cria ou atualiza o produto no Supabase via ShopData.
   // ---------------------------------------------------------
   submitBtn.addEventListener('click', () => {
+    const product = readProductFromModal(editingId ? ShopData.products().find(p => p.id === editingId) : {});
+
+    if (!product.name || !product.sku) {
+      ShopNow.toast('Informe nome e SKU do produto');
+      return;
+    }
+
     if (editingId) {
-      const products = ShopData.products();
-      const idx = products.findIndex(p => p.id === editingId);
-      if (idx !== -1) {
-        overlay.querySelectorAll('[data-field]').forEach(field => {
-          const key = field.dataset.field;
-          if (key === 'colors' || key === 'sizes') {
-            const arr = field.value.split(',').map(v => v.trim()).filter(Boolean);
-            products[idx][key] = arr.length ? arr : undefined;
-          } else if (field.type === 'number') {
-            products[idx][key] = Number(field.value) || 0;
-          } else {
-            products[idx][key] = field.value;
-          }
-        });
-        // Persiste a primeira imagem do carrossel (se houver nova)
-        if (carouselImages.length) products[idx].image = carouselImages[0].src;
-      }
+      ShopData.updateProduct(editingId, product);
       ShopNow.toast('Produto atualizado com sucesso!');
-      render();
     } else {
+      ShopData.addProduct({ ...product, id: `P${Date.now()}` });
       ShopNow.toast('Produto criado com sucesso!');
     }
+
+    render();
+    renderCategories();
+    rebuildCategorySelect();
     overlay.classList.add('is-hidden');
   });
 
@@ -469,15 +489,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---------------------------------------------------------
   // Tab switching — Produtos / Categorias.
   // ---------------------------------------------------------
+  function switchTab(tabName) {
+    document.querySelectorAll('[data-products-tab]').forEach(t => t.classList.remove('is-active'));
+    document.querySelectorAll('[data-products-panel]').forEach(panel => panel.classList.add('is-hidden'));
+    const activeTab = document.querySelector(`[data-products-tab="${tabName}"]`);
+    const activePanel = document.querySelector(`[data-products-panel="${tabName}"]`);
+    if (activeTab) activeTab.classList.add('is-active');
+    if (activePanel) activePanel.classList.remove('is-hidden');
+  }
+
   document.querySelectorAll('[data-products-tab]').forEach(tab => {
     tab.addEventListener('click', () => {
-      document.querySelectorAll('[data-products-tab]').forEach(t => t.classList.remove('is-active'));
-      tab.classList.add('is-active');
-      document.querySelectorAll('[data-products-panel]').forEach(panel => {
-        panel.classList.toggle('is-hidden', panel.dataset.productsPanel !== tab.dataset.productsTab);
-      });
+      switchTab(tab.dataset.productsTab);
     });
   });
+
+  // Suporte a URL query parameter para abrir aba específica
+  const params = new URLSearchParams(window.location.search);
+  const tabParam = params.get('tab');
+  if (tabParam) {
+    switchTab(tabParam);
+  }
 
   // ---------------------------------------------------------
   // Modal de categorias — criar / editar.

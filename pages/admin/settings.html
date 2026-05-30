@@ -27,7 +27,7 @@
         <a href="orders.html">
           <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg></span>
           Pedidos
-          <span class="admin-nav__badge">3</span>
+          <span class="admin-nav__badge" data-orders-badge style="display: none;"></span>
         </a>
         <a href="customers.html">
           <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
@@ -54,7 +54,7 @@
         <button class="admin-hamburger" data-sidebar-btn>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
-        <div><h1>Cadastro</h1><span class="text-muted">Dados da loja</span></div>
+        <div><h1>Configurações</h1><span class="text-muted">Cadastro da loja</span></div>
         <div class="admin-topbar__right">
           <div class="search-wrapper">
             <div class="admin-searchbar">
@@ -76,29 +76,348 @@
           </button>
         </div>
       </header>
-      <section class="admin-content">
-        <form class="settings-grid" data-settings-form>
-          <article class="admin-card">
-            <h2 class="admin-card__title">Loja</h2>
-            <p><input class="admin-input" class="admin-input--full" value="ShopNow" aria-label="Nome da loja"></p>
-            <p><input class="admin-input" class="admin-input--full" value="contato@shopnow.com" aria-label="E-mail"></p>
-            <p><input class="admin-input" class="admin-input--full" value="São Paulo, SP" aria-label="Endereço"></p>
-          </article>
-          <article class="admin-card">
-            <h2 class="admin-card__title">Comercial</h2>
-            <p><input class="admin-input" class="admin-input--full" value="Frete grátis acima de R$ 299" aria-label="Regra de frete"></p>
-            <p><input class="admin-input" class="admin-input--full" value="SHOP10" aria-label="Cupom"></p>
-            <button class="btn btn-primary" type="submit">Salvar configurações</button>
-          </article>
-        </form>
+
+      <section class="admin-content admin-content--settings">
+        <div class="settings-heading">
+          <div>
+            <p class="settings-heading__eyebrow">Config / Cadastro</p>
+            <h2>Dados da loja</h2>
+            <span>Identidade, venda, cupons e atendimento em áreas separadas.</span>
+          </div>
+        </div>
+
+        <div class="settings-tabs" role="tablist" aria-label="Cadastro da loja">
+          <button class="settings-tab is-active" type="button" data-tab="geral" role="tab" aria-selected="true" aria-controls="panel-geral" title="Informações gerais da loja">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2.5"/></svg>
+            Geral
+          </button>
+          <button class="settings-tab" type="button" data-tab="comercial" role="tab" aria-selected="false" aria-controls="panel-comercial" title="Configurações comerciais">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Comercial
+          </button>
+          <button class="settings-tab" type="button" data-tab="cupons" role="tab" aria-selected="false" aria-controls="panel-cupons" title="Gerenciar cupons de desconto">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10h10V2z"/><path d="M22 12H12v10h10V12z"/><path d="M6 8h4M16 18h4"/></svg>
+            Cupons
+          </button>
+          <button class="settings-tab" type="button" data-tab="contato" role="tab" aria-selected="false" aria-controls="panel-contato" title="Informações de contato">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Contato
+          </button>
+        </div>
+
+        <div class="settings-content">
+          <div class="settings-panel is-active" data-panel="geral" id="panel-geral" role="tabpanel">
+            <form class="settings-form" data-form="geral">
+              <article class="admin-card settings-card">
+                <div class="settings-card__header">
+                  <span class="settings-card__icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7"/><path d="M9 22V12h6v10"/><path d="M21 9v13H3V9"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="admin-card__title">Identidade da loja</h3>
+                    <p class="settings-card__description">Nome público, documento e canais principais.</p>
+                  </div>
+                </div>
+                <div class="settings-field-grid settings-field-grid--two">
+                  <div class="form-col">
+                    <label class="form-label">Nome da Loja *</label>
+                    <input type="text" class="admin-input" name="storeName" placeholder="ShopNow" required>
+                  </div>
+                  <div class="form-col">
+                    <label class="form-label">CNPJ/CPF</label>
+                    <input type="text" class="admin-input" name="cpfCnpj" placeholder="00.000.000/0000-00">
+                  </div>
+                  <div class="form-col">
+                    <label class="form-label">Email *</label>
+                    <input type="email" class="admin-input" name="email" placeholder="contato@shopnow.com" required>
+                  </div>
+                  <div class="form-col">
+                    <label class="form-label">Telefone</label>
+                    <input type="tel" class="admin-input" name="phone" placeholder="(11) 98765-4321">
+                  </div>
+                </div>
+              </article>
+
+              <article class="admin-card settings-card">
+                <div class="settings-card__header">
+                  <span class="settings-card__icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="admin-card__title">Endereço</h3>
+                    <p class="settings-card__description">Local usado para retirada, emissão e contato.</p>
+                  </div>
+                </div>
+                <div class="settings-field-grid settings-field-grid--address">
+                  <div class="form-col">
+                    <label class="form-label">Rua</label>
+                    <input type="text" class="admin-input" name="address" placeholder="Rua das Flores">
+                  </div>
+                  <div class="form-col form-col-mini">
+                    <label class="form-label">Número</label>
+                    <input type="text" class="admin-input" name="number" placeholder="123">
+                  </div>
+                  <div class="form-col">
+                    <label class="form-label">Complemento</label>
+                    <input type="text" class="admin-input" name="complement" placeholder="Apto 42">
+                  </div>
+                  <div class="form-col">
+                    <label class="form-label">Cidade</label>
+                    <input type="text" class="admin-input" name="city" placeholder="São Paulo">
+                  </div>
+                  <div class="form-col form-col-mini">
+                    <label class="form-label">Estado</label>
+                    <input type="text" class="admin-input" name="state" placeholder="SP" maxlength="2">
+                  </div>
+                  <div class="form-col form-col-mini">
+                    <label class="form-label">CEP</label>
+                    <input type="text" class="admin-input" name="zipcode" placeholder="01310-100">
+                  </div>
+                </div>
+              </article>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+                  Salvar alterações
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="settings-panel" data-panel="comercial" id="panel-comercial" role="tabpanel">
+            <form class="settings-form" data-form="comercial">
+              <article class="admin-card settings-card">
+                <div class="settings-card__header">
+                  <span class="settings-card__icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M14 17h1"/><path d="M19 17h3v-6l-3-4h-5"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="admin-card__title">Frete</h3>
+                    <p class="settings-card__description">Regras exibidas na loja e no checkout.</p>
+                  </div>
+                </div>
+                <div class="settings-field-grid settings-field-grid--two">
+                  <div class="form-col">
+                    <label class="form-label">Valor Mínimo para Frete Grátis *</label>
+                    <div class="input-affix">
+                      <span>R$</span>
+                      <input type="number" class="admin-input" name="freeShippingValue" placeholder="299" min="0" step="1" required>
+                    </div>
+                  </div>
+                  <div class="form-col">
+                    <label class="form-label">Descrição Exibida *</label>
+                    <input type="text" class="admin-input" name="freeShippingText" placeholder="Frete grátis acima de R$ 299" required>
+                  </div>
+                </div>
+              </article>
+
+              <article class="admin-card settings-card">
+                <div class="settings-card__header">
+                  <span class="settings-card__icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="admin-card__title">Formas de pagamento</h3>
+                    <p class="settings-card__description">Opções disponíveis para finalizar pedidos.</p>
+                  </div>
+                </div>
+                <div class="payment-methods">
+                  <label class="form-checkbox">
+                    <input type="checkbox" name="payment_card" checked>
+                    <span>Cartão de crédito</span>
+                  </label>
+                  <label class="form-checkbox">
+                    <input type="checkbox" name="payment_pix" checked>
+                    <span>PIX</span>
+                  </label>
+                  <label class="form-checkbox">
+                    <input type="checkbox" name="payment_boleto" checked>
+                    <span>Boleto</span>
+                  </label>
+                  <label class="form-checkbox">
+                    <input type="checkbox" name="payment_pickup" checked>
+                    <span>Retirada na loja</span>
+                  </label>
+                </div>
+              </article>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+                  Salvar alterações
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="settings-panel" data-panel="cupons" id="panel-cupons" role="tabpanel">
+            <article class="admin-card settings-card settings-card--table">
+              <div class="settings-card__header settings-card__header--split">
+                <div class="settings-card__title-group">
+                  <span class="settings-card__icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7Z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="admin-card__title">Cupons</h3>
+                    <p class="settings-card__description">Códigos ativos para campanhas e descontos.</p>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-primary" data-add-coupon-btn>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Novo cupom
+                </button>
+              </div>
+
+              <div class="settings-table-wrap">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Código</th>
+                      <th>Desconto</th>
+                      <th>Tipo</th>
+                      <th>Validade</th>
+                      <th>Usos</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody data-coupons-list></tbody>
+                </table>
+              </div>
+
+              <div class="empty-state settings-empty" data-coupons-empty hidden>
+                <div class="settings-empty__icon" aria-hidden="true">
+                  <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a3 3 0 0 0 0 6v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2a3 3 0 0 0 0-6V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2Z"/><path d="M13 5v14"/><path d="M8 9h.01"/><path d="M8 15h.01"/></svg>
+                </div>
+                <p>Nenhum cupom cadastrado</p>
+                <span>Crie o primeiro código de desconto para a loja.</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="settings-panel" data-panel="contato" id="panel-contato" role="tabpanel">
+            <form class="settings-form" data-form="contato">
+              <article class="admin-card settings-card">
+                <div class="settings-card__header">
+                  <span class="settings-card__icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.19 19 19.5 19.5 0 0 1 5 12.81a19.79 19.79 0 0 1-2.92-8.63A2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.13.97.36 1.92.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.89.34 1.84.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="admin-card__title">Atendimento</h3>
+                    <p class="settings-card__description">Horários e canais usados pelos clientes.</p>
+                  </div>
+                </div>
+                <div class="settings-field-grid settings-field-grid--two">
+                  <div class="form-col">
+                    <label class="form-label">Horário de Funcionamento</label>
+                    <input type="text" class="admin-input" name="businessHours" placeholder="Seg-Sex: 9h às 18h | Sábado: 9h às 13h">
+                  </div>
+                  <div class="form-col">
+                    <label class="form-label">WhatsApp</label>
+                    <input type="tel" class="admin-input" name="whatsapp" placeholder="(11) 98765-4321">
+                  </div>
+                  <div class="form-col">
+                    <label class="form-label">Instagram</label>
+                    <input type="text" class="admin-input" name="instagram" placeholder="@shopnow">
+                  </div>
+                  <div class="form-col">
+                    <label class="form-label">Facebook</label>
+                    <input type="text" class="admin-input" name="facebook" placeholder="shopnow">
+                  </div>
+                </div>
+              </article>
+
+              <article class="admin-card settings-card">
+                <div class="settings-card__header">
+                  <span class="settings-card__icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-2 7-4 2 2 5 4 7 4h2"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="admin-card__title">Políticas e documentos</h3>
+                    <p class="settings-card__description">Links legais exibidos no rodapé e no checkout.</p>
+                  </div>
+                </div>
+                <div class="settings-field-grid settings-field-grid--one">
+                  <div class="form-col">
+                    <label class="form-label">Política de Privacidade</label>
+                    <input type="url" class="admin-input" name="privacyUrl" placeholder="https://...">
+                  </div>
+                  <div class="form-col">
+                    <label class="form-label">Termos de Serviço</label>
+                    <input type="url" class="admin-input" name="termsUrl" placeholder="https://...">
+                  </div>
+                </div>
+              </article>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+                  Salvar alterações
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </section>
     </main>
   </div>
+
+  <!-- Modal de Cupom -->
+  <div class="coupon-modal-overlay" data-coupon-modal-overlay aria-hidden="true"></div>
+  <div class="coupon-modal" data-coupon-modal aria-hidden="true">
+    <div class="coupon-modal__content">
+      <div class="coupon-modal__header">
+        <h3 data-coupon-modal-title>Novo cupom</h3>
+        <button class="coupon-modal__close" data-coupon-modal-close aria-label="Fechar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <form class="coupon-form" data-coupon-form>
+        <div class="form-group">
+          <label for="coupon-code" class="form-label">Código do Cupom *</label>
+          <input type="text" id="coupon-code" name="code" class="admin-input" placeholder="SHOP10" maxlength="20" required>
+          <small class="settings-help">Use letras maiúsculas e números. Ex: SHOP10, BLACKFRIDAY</small>
+        </div>
+        <div class="form-row">
+          <div class="form-col">
+            <label class="form-label">Tipo de Desconto *</label>
+            <select name="discountType" class="admin-input" required>
+              <option value="percentage">Percentual (%)</option>
+              <option value="fixed">Valor Fixo (R$)</option>
+            </select>
+          </div>
+          <div class="form-col">
+            <label class="form-label">Valor *</label>
+            <input type="number" name="discountValue" class="admin-input" placeholder="10" step="0.01" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-col">
+            <label class="form-label">Data de Validade *</label>
+            <input type="date" name="expiryDate" class="admin-input" required>
+          </div>
+          <div class="form-col">
+            <label class="form-label">Usos Máximos</label>
+            <input type="number" name="maxUses" class="admin-input" placeholder="Deixe em branco para ilimitado" min="0">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" data-coupon-modal-close>Cancelar</button>
+          <button type="submit" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+            Salvar cupom
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="../../js/ui/admin-auth.js"></script>
   <script src="../../js/data.js"></script>
   <script src="../../js/ui/common.js"></script>
   <script src="../../js/ui/admin-settings.js"></script>
   <script src="../../js/ui/admin-search.js"></script>
   <script src="../../js/ui/admin-notifications.js"></script>
+  <script src="../../js/ui/admin-badges.js"></script>
 </body>
 </html>

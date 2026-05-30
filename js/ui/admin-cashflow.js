@@ -9,15 +9,14 @@
   let activePeriod = 'week';
 
   // ---------------------------------------------------------
-  // getMockToday() — encontra a data mais recente nos dados
-  // para usar como "hoje" do sistema mock, evitando comparar
-  // com a data real do PC (que seria posterior aos dados).
+  // Usa a data mais recente cadastrada como referencia.
+  // Se ainda nao houver movimentacoes reais, cai para a data atual.
   // ---------------------------------------------------------
   function getMockToday() {
     return ShopData.cashflow()
       .map(e => e.date.slice(0, 10))
       .sort()
-      .at(-1);
+      .at(-1) || new Date().toISOString().slice(0, 10);
   }
 
   // ---------------------------------------------------------

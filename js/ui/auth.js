@@ -5,6 +5,28 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   // ---------------------------------------------------------
+  // Máscara de Telefone
+  // ---------------------------------------------------------
+  const phoneInput = document.querySelector('[data-phone-mask]');
+  if (phoneInput) {
+    phoneInput.addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\D/g, '');
+
+      if (value.length > 11) {
+        value = value.slice(0, 11);
+      }
+
+      if (value.length <= 2) {
+        e.target.value = value;
+      } else if (value.length <= 7) {
+        e.target.value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
+      } else {
+        e.target.value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`;
+      }
+    });
+  }
+
+  // ---------------------------------------------------------
   // Toggle de Visibilidade de Senha
   // ---------------------------------------------------------
   const passwordToggles = document.querySelectorAll('[data-toggle-password]');
@@ -49,13 +71,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       
+      // Simula armazenar dados do usuário
+      const userName = email.split('@')[0].split(/[._-]/).map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+      localStorage.setItem('user', JSON.stringify({ email, name: userName }));
+
       // Aqui você chamaria sua API de login
-      console.log('Login attempt:', { email, password });
+      console.log('Login attempt:', { email, password, name: userName });
       showNotification('Entrando na sua conta...', 'success');
-      
-      // Simula redirecionamento após sucesso
+
+      // Redireciona para a página de perfil após sucesso
       setTimeout(() => {
-        window.location.href = '../index.html';
+        window.location.href = 'account.html';
       }, 1500);
     });
   }
@@ -70,13 +96,21 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const name = registerForm.querySelector('[name="name"]').value;
       const email = registerForm.querySelector('[name="email"]').value;
+      const phone = registerForm.querySelector('[name="phone"]').value;
       const password = registerForm.querySelector('[name="password"]').value;
       const confirmPassword = registerForm.querySelector('[name="confirm-password"]').value;
       const terms = registerForm.querySelector('[name="terms"]').checked;
-      
+
       // Validações
-      if (!name || !email || !password || !confirmPassword) {
+      if (!name || !email || !phone || !password || !confirmPassword) {
         showNotification('Por favor, preencha todos os campos', 'error');
+        return;
+      }
+
+      const phoneDigits = phone.replace(/\D/g, '');
+
+      if (phoneDigits.length !== 11) {
+        showNotification('Número de celular deve ter exatamente 11 dígitos', 'error');
         return;
       }
       
@@ -107,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       // Aqui você chamaria sua API de registro
-      console.log('Register attempt:', { name, email, password });
+      console.log('Register attempt:', { name, email, phone: phoneDigits, password });
       showNotification('Criando sua conta...', 'success');
       
       // Simula redirecionamento após sucesso

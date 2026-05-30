@@ -10,13 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let revenueChart  = null;
   let categoryChart = null;
 
-  // Tendências mock por período (índice = [receita, pedidos, ticket, clientes])
-  const PERIOD_TRENDS = {
-    week:    ['+8%', '+3%', '+5%', '+2%'],
-    month:   ['+14%', '+9%', '-3%', '+11%'],
-    quarter: ['+22%', '+18%', '+3%', '+15%'],
-    year:    ['+31%', '+25%', '+5%', '+20%'],
-  };
+  const PERIOD_TRENDS = {};
 
   // ---------------------------------------------------------
   // revenueData(period) — retorna os pontos do gráfico de linha

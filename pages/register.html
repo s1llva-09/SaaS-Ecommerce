@@ -52,10 +52,6 @@
           </div>
         </div>
 
-        <div class="auth-footer">
-          <p>Já tem uma conta?</p>
-          <a href="login.html" class="auth-footer__link">Fazer login</a>
-        </div>
       </div>
     </div>
 
@@ -73,6 +69,12 @@
           <div class="form-group">
             <label for="email" class="form-label">Email</label>
             <input type="email" id="email" name="email" class="field" placeholder="seu@email.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="phone" class="form-label">Número de Celular</label>
+            <input type="tel" id="phone" name="phone" class="field" placeholder="(11) 98765-4321" maxlength="15" data-phone-mask required>
+            <small style="color: #94a3b8; margin-top: 4px;">11 dígitos (DDD + número)</small>
           </div>
 
           <div class="form-group">

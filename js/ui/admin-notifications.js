@@ -5,7 +5,8 @@
 // ============================================================
 
 // -----------------------------------------------------------
-// DADOS MOCK
+// NOTIFICAÇÕES DINÂMICAS
+// Começa vazio e carrega dados reais do Supabase
 // Cada notificação tem:
 //   id       — identificador único
 //   type     — 'order' | 'stock' | 'payment'  (controla o ícone e a cor)
@@ -13,13 +14,7 @@
 //   time     — tempo relativo (string)
 //   unread   — true = negrito + ponto vermelho no sino
 // -----------------------------------------------------------
-const NOTIFICATIONS = [
-  { id: 'N1', type: 'order',   text: 'Novo pedido #12852 — Ana Silva',         time: '2 min atrás',  unread: true  },
-  { id: 'N2', type: 'stock',   text: 'Estoque baixo: MacBook Pro 14" (8 un.)', time: '14 min atrás', unread: true  },
-  { id: 'N3', type: 'order',   text: 'Pedido #12847 entregue — Carlos Mota',   time: '1h atrás',     unread: true  },
-  { id: 'N4', type: 'stock',   text: 'Sem estoque: Rack Capsule de Roupas',    time: '3h atrás',     unread: false },
-  { id: 'N5', type: 'payment', text: 'Pagamento confirmado — #12850 R$ 899',   time: '5h atrás',     unread: false },
-];
+let NOTIFICATIONS = [];
 
 // -----------------------------------------------------------
 // ÍCONES por tipo — SVGs consistentes entre plataformas
@@ -64,6 +59,49 @@ const NOTIF_ICONS = {
 //    - Esconder o dot
 // -----------------------------------------------------------
 
+// Carrega notificações reais do ShopData - SOMENTE se houver dados
+function loadRealNotifications() {
+  NOTIFICATIONS = [];
+
+  if (typeof ShopData === 'undefined') return;
+
+  // Pedidos recentes não pagos (unread)
+  try {
+    const orders = ShopData.orders() || [];
+    const pendingOrders = orders.filter(o => o && o.status === 'pending').slice(0, 2);
+
+    pendingOrders.forEach(order => {
+      NOTIFICATIONS.push({
+        id: `N-${order.id}`,
+        type: 'order',
+        text: `Novo pedido ${order.id} — ${order.customer || 'Cliente'}`,
+        time: 'Agora',
+        unread: true
+      });
+    });
+  } catch (e) {
+    // Silent fail
+  }
+
+  // Produtos com estoque baixo
+  try {
+    const products = ShopData.products() || [];
+    const lowStock = products.filter(p => p && p.stock > 0 && p.stock < 5).slice(0, 1);
+
+    lowStock.forEach(product => {
+      NOTIFICATIONS.push({
+        id: `S-${product.id}`,
+        type: 'stock',
+        text: `Estoque baixo: ${product.name} (${product.stock} un.)`,
+        time: 'Há pouco',
+        unread: false
+      });
+    });
+  } catch (e) {
+    // Silent fail
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.querySelector('[data-notif-btn]')
   const dot   = document.querySelector('[data-notif-dot]')
@@ -71,6 +109,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Sem os elementos na página, não faz nada
   if (!btn || !panel) return
+
+  // Carrega notificações reais quando ShopData estiver pronto
+  if (typeof ShopData !== 'undefined') {
+    ShopData.ready().then(() => {
+      loadRealNotifications();
+      render();
+    });
+  }
 
     // ---------------------------------------------------------
   // Renderiza o HTML interno do painel

@@ -3,24 +3,101 @@
    Pedidos do cliente e tela final do checkout.
    ============================================================ */
 
-.account-head {
+.account-profile-card {
+  margin-bottom: 40px;
+  padding: 28px;
+}
+
+.account-profile-header {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  align-items: flex-start;
+  justify-content: space-between;
   margin-bottom: 24px;
 }
 
-.account-orders-title { margin-bottom: 16px; }
+.account-profile-top {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
 
 .account-avatar {
   display: grid;
   place-items: center;
-  width: 58px;
-  height: 58px;
+  width: 80px;
+  height: 80px;
   border-radius: 999px;
   background: var(--brand);
   color: #fff;
   font-weight: 900;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.account-profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.account-profile-name {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.account-profile-email {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.account-profile-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 24px 0;
+}
+
+.account-profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.account-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: center;
+}
+
+.account-stat-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.account-stat-value {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.account-stat-status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  font-size: 13px;
+}
+
+.account-orders-title {
+  margin-bottom: 16px;
+  margin-top: 32px;
 }
 
 .order-list {
@@ -182,4 +259,113 @@
   margin: 56px auto;
   padding: 34px;
   text-align: center;
+}
+
+/* ── Modal de Logout ─────────────────────────────────────── */
+
+.logout-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  backdrop-filter: blur(2px);
+}
+
+.logout-modal-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.logout-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  z-index: 501;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s ease;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 20px;
+}
+
+.logout-modal.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.logout-modal__content {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 32px 28px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.logout-modal__content svg {
+  color: var(--brand);
+  margin-bottom: 16px;
+}
+
+.logout-modal__title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.logout-modal__message {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.logout-modal__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.logout-modal__actions .btn {
+  min-height: 40px;
+}
+
+/* ── Responsivo ──────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .account-profile-card {
+    padding: 20px;
+  }
+
+  .account-profile-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .account-avatar {
+    width: 70px;
+    height: 70px;
+    font-size: 20px;
+  }
+
+  .account-profile-name {
+    font-size: 20px;
+  }
+
+  .account-profile-stats {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .order-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 }

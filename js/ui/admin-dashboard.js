@@ -31,12 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
       : MONTHLY.reduce((s, d) => s + d.value, 0);
 
     const cancelled = orders.filter(o => o.status === 'cancelled').length;
+    const activeCustomers = ShopData.customers().filter(c => c.status !== 'inactive').length;
 
     const cards = [
-      { key: 'revenue', value: ShopNow.money(revenue), label: 'Receita total', trend: '+8.7%', up: true },
-      { key: 'orders',  value: ShopNow.int(34),         label: 'Total de pedidos', trend: '+14.3%', up: true },
-      { key: 'clients', value: ShopNow.int(18),         label: 'Clientes ativos', trend: '+22.1%', up: true },
-      { key: 'cancels', value: ShopNow.int(cancelled),  label: 'Cancelamentos', trend: '−5.9%', up: false },
+      { key: 'revenue', value: ShopNow.money(revenue), label: 'Receita total', trend: period === 'week' ? 'Semana' : 'Mes', up: true },
+      { key: 'orders',  value: ShopNow.int(orders.length), label: 'Total de pedidos', trend: 'Real', up: true },
+      { key: 'clients', value: ShopNow.int(activeCustomers), label: 'Clientes ativos', trend: 'Real', up: true },
+      { key: 'cancels', value: ShopNow.int(cancelled), label: 'Cancelamentos', trend: 'Real', up: false },
     ];
 
     if (!kpisEl) return;

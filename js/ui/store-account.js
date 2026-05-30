@@ -10,6 +10,68 @@ document.addEventListener('DOMContentLoaded', () => {
   const title   = document.querySelector('[data-od-title]');
   const body    = document.querySelector('[data-od-body]');
   const closeBtn = document.querySelector('[data-od-close]');
+  const logoutBtn = document.querySelector('[data-logout-btn]');
+
+  // ---------------------------------------------------------
+  // Atualiza informações do perfil
+  // ---------------------------------------------------------
+  const ordersCount = document.querySelector('[data-orders-count]');
+  const spentTotal = document.querySelector('[data-spent-total]');
+
+  if (ordersCount && spentTotal) {
+    const orders = ShopData.orders();
+    const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
+    ordersCount.textContent = orders.length;
+    spentTotal.textContent = ShopNow.money(totalSpent);
+  }
+
+  // ---------------------------------------------------------
+  // Logout com Modal
+  // ---------------------------------------------------------
+  const logoutModalOverlay = document.querySelector('[data-logout-overlay]');
+  const logoutModal = document.querySelector('[data-logout-modal]');
+  const logoutCancel = document.querySelector('[data-logout-cancel]');
+  const logoutConfirm = document.querySelector('[data-logout-confirm]');
+
+  function openLogoutModal() {
+    logoutModalOverlay?.classList.add('is-open');
+    logoutModal?.classList.add('is-open');
+    logoutModalOverlay?.setAttribute('aria-hidden', 'false');
+    logoutModal?.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeLogoutModal() {
+    logoutModalOverlay?.classList.remove('is-open');
+    logoutModal?.classList.remove('is-open');
+    logoutModalOverlay?.setAttribute('aria-hidden', 'true');
+    logoutModal?.setAttribute('aria-hidden', 'true');
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', openLogoutModal);
+  }
+
+  if (logoutCancel) {
+    logoutCancel.addEventListener('click', closeLogoutModal);
+  }
+
+  if (logoutConfirm) {
+    logoutConfirm.addEventListener('click', () => {
+      ShopNow.logout();
+    });
+  }
+
+  if (logoutModalOverlay) {
+    logoutModalOverlay.addEventListener('click', closeLogoutModal);
+  }
+
+  // Fechar modal com Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeLogoutModal();
+    }
+  });
+
   if (!list) return;
 
   // ---------------------------------------------------------

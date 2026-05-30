@@ -50,6 +50,15 @@ document.addEventListener('DOMContentLoaded', () => {
     return steps.map((s, i) => ({ ...s, done: i <= n }));
   }
 
+  function nextOrderStatus(order) {
+    if (order.type === 'pickup') {
+      const flow = { pending: 'paid', paid: 'ready', ready: 'delivered' };
+      return flow[order.status] || order.status;
+    }
+    const flow = { pending: 'paid', paid: 'shipped', shipped: 'delivered' };
+    return flow[order.status] || order.status;
+  }
+
   // SVGs estáticos usados nos botões de ação (sem dados do usuário)
   const SVG_CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>';
   const SVG_CANCEL = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>';
@@ -267,9 +276,15 @@ document.addEventListener('DOMContentLoaded', () => {
     drawer.querySelectorAll('[data-order-action]').forEach(btn => {
       btn.addEventListener('click', () => {
         const action = btn.dataset.orderAction;
-        if (action === 'advance') ShopNow.toast('Status atualizado com sucesso!');
-        else if (action === 'cancel') ShopNow.toast('Pedido cancelado.');
+        if (action === 'advance') {
+          ShopData.updateOrderStatus(order.id, nextOrderStatus(order));
+          ShopNow.toast('Status atualizado com sucesso!');
+        } else if (action === 'cancel') {
+          ShopData.updateOrderStatus(order.id, 'cancelled');
+          ShopNow.toast('Pedido cancelado.');
+        }
         closeDrawer();
+        render();
       });
     });
 
@@ -413,6 +428,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Escape') closeDrawer();
   });
 
-  initFilterCounts();
-  render();
+  // Aguarda dados do Supabase antes de renderizar
+  if (typeof ShopData !== 'undefined') {
+    ShopData.ready().then(() => {
+      initFilterCounts();
+      render();
+    });
+  } else {
+    initFilterCounts();
+    render();
+  }
 });

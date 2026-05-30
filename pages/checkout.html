@@ -11,12 +11,7 @@
   <header class="store-header">
     <div class="store-header__inner">
       <a class="store-brand" href="../index.html"><span class="store-brand__mark">S</span><span>ShopNow</span></a>
-      <nav class="store-nav" aria-label="Principal">
-        <a href="products.html">Produtos</a>
-        <a href="products.html?category=Eletr%C3%B4nicos">Eletrônicos</a>
-        <a href="products.html?category=Moda">Moda</a>
-        <a href="products.html?category=Cal%C3%A7ados">Calçados</a>
-      </nav>
+      <nav class="store-nav" aria-label="Principal" data-categories-nav></nav>
       <div class="store-actions">
         <button class="icon-btn" aria-label="Buscar" data-search-toggle>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -25,7 +20,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
           <span class="cart-count" data-cart-count>0</span>
         </a>
-        <a class="btn btn-ghost cart-pill" href="account.html">
+        <a class="btn btn-ghost cart-pill" href="account.html" data-login-btn>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Entrar
         </a>
@@ -54,9 +49,9 @@
         <form class="checkout-form card" data-checkout-form>
           <h2>Dados do cliente</h2>
           <div class="form-grid">
-            <input class="field field--full" required placeholder="Nome completo">
-            <input class="field" required type="email" placeholder="E-mail">
-            <input class="field" required placeholder="Telefone">
+            <input class="field field--full" name="customerName" required placeholder="Nome completo">
+            <input class="field" name="email" required type="email" placeholder="E-mail">
+            <input class="field" name="phone" required placeholder="Telefone">
             <div class="cep-row">
               <input class="field field--cep" required placeholder="CEP" maxlength="9" data-cep-input>
               <span class="cep-status" data-cep-status></span>
@@ -65,8 +60,8 @@
             <input class="field" placeholder="Bairro" data-cep-district disabled>
             <input class="field" placeholder="Cidade" data-cep-city disabled>
             <input class="field field--uf" placeholder="UF" maxlength="2" data-cep-state disabled>
-            <input class="field" required placeholder="Número" data-cep-number>
-            <input class="field" placeholder="Complemento (opcional)">
+            <input class="field" name="number" required placeholder="Número" data-cep-number>
+            <input class="field" name="complement" placeholder="Complemento (opcional)">
           </div>
           <h2>Forma de pagamento</h2>
           <div class="payment-options">

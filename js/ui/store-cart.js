@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const titleEl = document.querySelector('[data-cart-title]');
   if (!list || !summary) return;
 
-  const COUPON = { SHOP10: 10 };
   const STORE_ADDRESS = 'Rua das Flores, 1234 — Seg-Sáb 9h-20h, Dom 10h-18h';
   let delivery = 'home';
   let appliedCoupon = null;
@@ -272,7 +271,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderSummary() {
     const subtotal = ShopNow.cartTotal();
     const shipping = delivery === 'pickup' ? 0 : (subtotal >= 299 ? 0 : 24.9);
-    const discount = appliedCoupon ? Math.round(subtotal * (appliedCoupon / 100)) : 0;
+    const discount = appliedCoupon
+      ? appliedCoupon.discountType === 'fixed'
+        ? Math.min(subtotal, appliedCoupon.discountValue)
+        : Math.round(subtotal * (appliedCoupon.discountValue / 100))
+      : 0;
     const total = subtotal - discount + shipping;
 
     summary.innerHTML = '';
@@ -306,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const discountRow = document.createElement('div');
       discountRow.className = 'summary-row summary-row--discount';
       const discountLabel = document.createElement('span');
-      discountLabel.textContent = `Desconto (${appliedCoupon}%)`;
+      discountLabel.textContent = `Desconto (${appliedCoupon.code})`;
       discountRow.appendChild(discountLabel);
       const discountValue = document.createElement('span');
       discountValue.textContent = `−${ShopNow.money(discount)}`;
@@ -345,9 +348,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const couponInput = document.createElement('input');
     couponInput.className = 'field';
-    couponInput.placeholder = 'Ex: SHOP10';
+    couponInput.placeholder = 'Ex: CUPOM10';
     couponInput.dataset.couponInput = '';
-    couponInput.value = appliedCoupon ? 'SHOP10' : '';
+    couponInput.value = appliedCoupon ? appliedCoupon.code : '';
     couponRow.appendChild(couponInput);
 
     const applyBtn = document.createElement('button');
@@ -361,11 +364,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const couponHint = document.createElement('p');
     couponHint.className = 'coupon-hint';
-    couponHint.textContent = 'Use o cupom ';
-    const couponCode = document.createElement('strong');
-    couponCode.textContent = 'SHOP10';
-    couponHint.appendChild(couponCode);
-    couponHint.appendChild(document.createTextNode(' para 10% de desconto!'));
+    const firstCoupon = ShopData.coupons()[0];
+    if (firstCoupon) {
+      couponHint.textContent = 'Cupom disponivel: ';
+      const couponCode = document.createElement('strong');
+      couponCode.textContent = firstCoupon.code;
+      couponHint.appendChild(couponCode);
+    } else {
+      couponHint.textContent = 'Nenhum cupom disponivel no momento.';
+    }
     couponSection.appendChild(couponHint);
 
     summary.appendChild(couponSection);
@@ -385,9 +392,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     summary.querySelector('[data-coupon-apply]')?.addEventListener('click', () => {
       const val = summary.querySelector('[data-coupon-input]')?.value.trim().toUpperCase();
-      if (COUPON[val]) {
-        appliedCoupon = COUPON[val];
-        ShopNow.toast(`Cupom ${val} aplicado! ${COUPON[val]}% de desconto`);
+      const today = new Date().toISOString().slice(0, 10);
+      const coupon = ShopData.coupons().find(item =>
+        item.code === val &&
+        (!item.expiryDate || item.expiryDate >= today) &&
+        (!item.maxUses || item.uses < item.maxUses)
+      );
+
+      if (coupon) {
+        appliedCoupon = coupon;
+        ShopNow.toast(`Cupom ${val} aplicado!`);
         renderSummary();
       } else {
         ShopNow.toast('Cupom inválido ou expirado');
