@@ -251,6 +251,7 @@ function orderToRow(order) {
     id: String(order.id),
     customer: order.customer || '',
     email: order.email || '',
+    user_id: order.userId || null,
     items: order.items || [],
     total: asNumber(order.total),
     payment_method: order.paymentMethod || '',

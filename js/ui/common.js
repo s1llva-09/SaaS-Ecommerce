@@ -301,6 +301,7 @@ const ShopNow = {
 
   logout() {
     localStorage.removeItem('user');
+    localStorage.removeItem('supabase_token');
     window.location.href = `${this.root()}index.html`;
   },
 

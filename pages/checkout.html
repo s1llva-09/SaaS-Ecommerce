@@ -52,24 +52,43 @@
             <input class="field field--full" name="customerName" required placeholder="Nome completo">
             <input class="field" name="email" required type="email" placeholder="E-mail">
             <input class="field" name="phone" required placeholder="Telefone">
-            <div class="cep-row">
-              <input class="field field--cep" required placeholder="CEP" maxlength="9" data-cep-input>
-              <span class="cep-status" data-cep-status></span>
+          </div>
+
+          <h2 style="margin-top: 28px;">Entrega</h2>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--brand); border-radius: 8px; background: var(--brand-soft); margin-bottom: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <div>
+              <strong style="color: var(--brand); font-size: 14px;">Retirar na loja</strong>
+              <p style="margin: 2px 0 0; font-size: 13px; color: var(--muted);">Retire seu pedido diretamente em nossa loja</p>
             </div>
-            <input class="field field--full" placeholder="Logradouro" data-cep-street disabled>
-            <input class="field" placeholder="Bairro" data-cep-district disabled>
-            <input class="field" placeholder="Cidade" data-cep-city disabled>
-            <input class="field field--uf" placeholder="UF" maxlength="2" data-cep-state disabled>
-            <input class="field" name="number" required placeholder="Número" data-cep-number>
-            <input class="field" name="complement" placeholder="Complemento (opcional)">
           </div>
-          <h2>Forma de pagamento</h2>
-          <div class="payment-options">
-            <button class="payment-option is-active" type="button" data-payment-option>Cartão</button>
-            <button class="payment-option" type="button" data-payment-option>PIX</button>
-            <button class="payment-option" type="button" data-payment-option>Boleto</button>
+
+          <h2 style="margin-top: 28px;">Forma de pagamento</h2>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--brand); border-radius: 8px; background: var(--brand-soft); margin-bottom: 12px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            <div>
+              <strong style="color: var(--brand); font-size: 14px;">Pagamento na retirada</strong>
+              <p style="margin: 2px 0 0; font-size: 13px; color: var(--muted);">Pague em dinheiro, cartão ou PIX na loja</p>
+            </div>
           </div>
-          <button class="btn btn-primary checkout-submit" type="submit">Confirmar pedido</button>
+
+          <p style="font-size: 12px; color: var(--muted); margin: 0 0 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Em breve</p>
+          <div class="payment-options" style="opacity: 0.45; pointer-events: none;">
+            <button class="payment-option" type="button" disabled>
+              Cartão online
+              <span style="font-size: 10px; background: var(--muted); color: #fff; border-radius: 4px; padding: 1px 5px; margin-left: 6px;">Em breve</span>
+            </button>
+            <button class="payment-option" type="button" disabled>
+              PIX
+              <span style="font-size: 10px; background: var(--muted); color: #fff; border-radius: 4px; padding: 1px 5px; margin-left: 6px;">Em breve</span>
+            </button>
+            <button class="payment-option" type="button" disabled>
+              Boleto
+              <span style="font-size: 10px; background: var(--muted); color: #fff; border-radius: 4px; padding: 1px 5px; margin-left: 6px;">Em breve</span>
+            </button>
+          </div>
+
+          <button class="btn btn-primary checkout-submit" type="submit" style="margin-top: 24px;">Confirmar pedido</button>
         </form>
         <aside class="summary card checkout-summary" data-checkout-summary></aside>
       </div>
@@ -80,6 +99,9 @@
   <script src="../js/store-name.js"></script>
   <script src="../js/ui/store-config.js"></script>
   <script src="../js/ui/common.js"></script>
+  <script>
+    if (!localStorage.getItem('user')) window.location.href = 'login.html';
+  </script>
   <script src="../js/ui/form-validation.js"></script>
   <script src="../js/ui/admin-sync.js"></script>
   <script src="../js/ui/store-checkout.js"></script>

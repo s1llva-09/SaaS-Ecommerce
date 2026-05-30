@@ -26,6 +26,7 @@ create table if not exists public.orders (
   id text primary key,
   customer text,
   email text,
+  user_id text,
   items jsonb not null default '[]'::jsonb,
   total numeric not null default 0,
   payment_method text,
@@ -91,7 +92,7 @@ create table if not exists public.promotions (
   id text primary key,
   product_id text not null,
   discount_percentage numeric not null default 0,
-  start_date text,
+  start_date text not null,
   end_date text not null,
   active boolean default true,
   created_at timestamptz not null default now()

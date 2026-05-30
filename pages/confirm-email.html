@@ -130,79 +130,101 @@
     const SUPABASE_URL = 'https://nnkokgtplnuhmhlqarba.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ua29rZ3RwbG51aG1obHFhcmJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMjk3MjUsImV4cCI6MjA5NDgwNTcyNX0.2nf1eytsNVNAAi4FymsmTSQEnwpzokGRXV6Lbp7k0pU';
 
+    const titleEl = document.getElementById('title');
+    const messageEl = document.getElementById('message');
+    const statusEl = document.getElementById('status');
+    const actionsEl = document.getElementById('actions');
+    const spinnerEl = document.getElementById('spinner');
+    const successIconEl = document.getElementById('success-icon');
+    const errorIconEl = document.getElementById('error-icon');
+
+    function showSuccess(accessToken, user) {
+      if (accessToken) {
+        localStorage.setItem('supabase_token', accessToken);
+      }
+      if (user) {
+        localStorage.setItem('user', JSON.stringify({
+          id: user.id,
+          email: user.email,
+          name: user.user_metadata?.name || 'Usuário',
+        }));
+      }
+
+      titleEl.textContent = 'Email confirmado';
+      messageEl.textContent = 'Seu email foi confirmado com sucesso. Você já pode fazer login.';
+      statusEl.textContent = 'Email confirmado com sucesso';
+      statusEl.className = 'confirm-status success';
+      spinnerEl.style.display = 'none';
+      successIconEl.style.display = 'block';
+      actionsEl.innerHTML = `
+        <a href="login.html" class="btn btn-primary">Ir para login</a>
+        <a href="../index.html" class="btn btn-ghost">Ir para loja</a>
+      `;
+      setTimeout(() => { window.location.href = 'login.html'; }, 3000);
+    }
+
+    function showError(title, message) {
+      titleEl.textContent = title;
+      messageEl.textContent = message;
+      statusEl.textContent = title;
+      statusEl.className = 'confirm-status error';
+      spinnerEl.style.display = 'none';
+      errorIconEl.style.display = 'block';
+      actionsEl.innerHTML = `
+        <a href="register.html" class="btn btn-primary">Tentar novamente</a>
+        <a href="../index.html" class="btn btn-ghost">Ir para loja</a>
+      `;
+    }
+
     async function confirmEmail() {
-      const titleEl = document.getElementById('title');
-      const messageEl = document.getElementById('message');
-      const statusEl = document.getElementById('status');
-      const actionsEl = document.getElementById('actions');
-      const spinnerEl = document.getElementById('spinner');
-      const successIconEl = document.getElementById('success-icon');
-      const errorIconEl = document.getElementById('error-icon');
+      // Supabase redireciona de duas formas após verificar o link:
+      // 1. Hash: #access_token=...&type=signup  (fluxo implícito)
+      // 2. Query: ?token=...&type=signup         (fluxo antigo — precisa chamar /verify)
+      const hash = new URLSearchParams(window.location.hash.slice(1));
+      const query = new URLSearchParams(window.location.search);
 
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get('token');
-      const type = params.get('type');
-
-      if (!token || type !== 'email') {
-        showError('Link inválido', 'O link de confirmação é inválido ou expirou.', 'Link inválido');
+      const error = hash.get('error') || query.get('error');
+      if (error) {
+        showError('Link inválido', hash.get('error_description') || query.get('error_description') || 'O link expirou ou é inválido.');
         return;
       }
 
-      try {
-        const response = await fetch(`${SUPABASE_URL}/auth/v1/verify`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            apikey: SUPABASE_ANON_KEY,
-          },
-          body: JSON.stringify({ type: 'email', token }),
-        });
-
-        if (!response.ok) throw new Error('Falha na validação');
-
-        const data = await response.json();
-
-        titleEl.textContent = 'Email confirmado';
-        messageEl.textContent = 'Seu email foi confirmado com sucesso. Você já pode fazer login.';
-        statusEl.textContent = 'Email confirmado com sucesso';
-        statusEl.className = 'confirm-status success';
-        spinnerEl.style.display = 'none';
-        successIconEl.style.display = 'block';
-
-        if (data.session) {
-          localStorage.setItem('supabase_token', data.session.access_token);
-          localStorage.setItem('user', JSON.stringify({
-            id: data.user.id,
-            email: data.user.email,
-            name: data.user.user_metadata?.name || 'Usuário',
-          }));
+      // Fluxo 1: Supabase já verificou, temos o access_token no hash
+      const accessToken = hash.get('access_token');
+      const hashType = hash.get('type');
+      if (accessToken && (hashType === 'signup' || hashType === 'email')) {
+        try {
+          const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+            headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${accessToken}` },
+          });
+          const user = res.ok ? await res.json() : null;
+          showSuccess(accessToken, user);
+        } catch {
+          showSuccess(accessToken, null);
         }
-
-        actionsEl.innerHTML = `
-          <a href="login.html" class="btn btn-primary">Ir para login</a>
-          <a href="../index.html" class="btn btn-ghost">Ir para loja</a>
-        `;
-
-        setTimeout(() => {
-          window.location.href = 'login.html';
-        }, 3000);
-      } catch (error) {
-        console.error('Erro:', error);
-        showError('Erro na confirmação', 'Houve um erro ao confirmar seu email. O link pode ter expirado.', 'Erro na confirmação');
+        return;
       }
 
-      function showError(title, message, status) {
-        titleEl.textContent = title;
-        messageEl.textContent = message;
-        statusEl.textContent = status;
-        statusEl.className = 'confirm-status error';
-        spinnerEl.style.display = 'none';
-        errorIconEl.style.display = 'block';
-        actionsEl.innerHTML = `
-          <a href="register.html" class="btn btn-primary">Tentar novamente</a>
-          <a href="../index.html" class="btn btn-ghost">Ir para loja</a>
-        `;
+      // Fluxo 2: token na query string — chama /verify
+      const token = query.get('token');
+      const queryType = query.get('type');
+      if (token && (queryType === 'signup' || queryType === 'email')) {
+        try {
+          const res = await fetch(`${SUPABASE_URL}/auth/v1/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY },
+            body: JSON.stringify({ type: 'signup', token }),
+          });
+          if (!res.ok) throw new Error();
+          const data = await res.json();
+          showSuccess(data.access_token || data.session?.access_token, data.user);
+        } catch {
+          showError('Erro na confirmação', 'O link pode ter expirado. Tente criar sua conta novamente.');
+        }
+        return;
       }
+
+      showError('Link inválido', 'O link de confirmação é inválido ou expirou.');
     }
 
     confirmEmail();

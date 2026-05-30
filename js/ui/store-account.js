@@ -86,16 +86,39 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (editProfileForm) {
-    editProfileForm.addEventListener('submit', (e) => {
+    editProfileForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const updatedUser = {
+        ...user,
         name: editProfileForm.querySelector('[name="name"]').value,
         email: editProfileForm.querySelector('[name="email"]').value,
         phone: editProfileForm.querySelector('[name="phone"]').value,
       };
+
+      const token = localStorage.getItem('supabase_token');
+      if (token) {
+        try {
+          const res = await fetch('https://nnkokgtplnuhmhlqarba.supabase.co/auth/v1/user', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ua29rZ3RwbG51aG1obHFhcmJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMjk3MjUsImV4cCI6MjA5NDgwNTcyNX0.2nf1eytsNVNAAi4FymsmTSQEnwpzokGRXV6Lbp7k0pU',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              email: updatedUser.email,
+              data: { name: updatedUser.name, phone: updatedUser.phone },
+            }),
+          });
+          if (!res.ok) throw new Error();
+        } catch {
+          ShopNow.toast('Erro ao salvar no servidor. Tente novamente.', 'error');
+          return;
+        }
+      }
+
       localStorage.setItem('user', JSON.stringify(updatedUser));
 
-      // Atualiza a exibição
       if (userAvatar && updatedUser.name) {
         const initials = updatedUser.name.split(' ').slice(0, 2).map(p => p[0]?.toUpperCase()).join('');
         userAvatar.textContent = initials;

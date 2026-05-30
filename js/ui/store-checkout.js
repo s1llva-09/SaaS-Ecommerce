@@ -81,21 +81,23 @@ function bindCheckoutForm(checkoutForm) {
     const activePaymentIndex = Math.max(0, paymentOptions.findIndex(option => option.classList.contains('is-active')));
     const paymentMethod = ['Cartão', 'PIX', 'Boleto'][activePaymentIndex] || 'Cartão';
 
+    const currentUser = ShopNow.getUser();
     const order = {
       id: `#${Math.floor(13000 + Math.random() * 900)}`,
       customer: formData.get('customerName') || '',
       email: formData.get('email') || '',
+      userId: currentUser?.id || null,
       items: items.map(item => ({
         name: item.product.name,
         qty: item.qty,
         price: item.product.price,
       })),
       total: subtotal + shipping,
-      paymentMethod,
-      type: 'delivery',
+      paymentMethod: 'Retirada na loja',
+      type: 'pickup',
       status: 'pending',
       date: new Date().toISOString().slice(0, 10),
-      city: checkoutForm.querySelector('[data-cep-city]')?.value || '',
+      city: '',
     };
 
     ShopData.addOrder(order);
