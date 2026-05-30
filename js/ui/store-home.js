@@ -3,7 +3,9 @@
 // Preenche categorias, produtos em destaque, ofertas e countdown.
 // ============================================================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await ShopData.ready();
+
   const categories = document.querySelector('[data-categories]');
   const featured = document.querySelector('[data-featured-products]');
   const offers = document.querySelector('[data-offer-products]');
@@ -51,17 +53,28 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------
-  // Ofertas — até 4 produtos com preço original cadastrado
-  // (produto.originalPrice indica que tem desconto aplicado).
+  // Ofertas — produtos com promoções ativas.
+  // Carrega promoções do banco de dados e renderiza produtos com desconto.
   // ---------------------------------------------------------
   if (offers) {
     offers.innerHTML = '';
-    ShopData.products()
-      .filter(product => product.originalPrice)
-      .slice(0, 4)
-      .forEach(product => {
-        offers.appendChild(ShopNow.productCard(product));
-      });
+    const promotions = ShopData.promotions().filter(p => p.active && new Date(p.endDate) > new Date());
+    const products = ShopData.products();
+    const productMap = Object.fromEntries(products.map(p => [p.id, p]));
+
+    promotions.slice(0, 4).forEach(promo => {
+      const product = productMap[promo.productId];
+      if (!product) return;
+
+      const discountedProduct = {
+        ...product,
+        originalPrice: product.price,
+        price: Math.round(product.price * (1 - promo.discountPercentage / 100) * 100) / 100,
+        badge: `${promo.discountPercentage}% OFF`,
+      };
+
+      offers.appendChild(ShopNow.productCard(discountedProduct));
+    });
   }
 
   const hEl = document.querySelector('[data-countdown-h]');
@@ -70,10 +83,20 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!hEl || !mEl || !sEl) return;
 
   function tick() {
+    const promotions = ShopData.promotions().filter(p => p.active);
+    if (promotions.length === 0) {
+      hEl.firstChild.textContent = '00';
+      mEl.firstChild.textContent = '00';
+      sEl.firstChild.textContent = '00';
+      return;
+    }
+
+    const nextExpiry = promotions
+      .map(p => new Date(p.endDate))
+      .reduce((earliest, current) => (current < earliest ? current : earliest));
+
     const now = new Date();
-    const midnight = new Date(now);
-    midnight.setHours(24, 0, 0, 0);
-    let diff = Math.max(0, Math.floor((midnight - now) / 1000));
+    let diff = Math.max(0, Math.floor((nextExpiry - now) / 1000));
     const h = Math.floor(diff / 3600);
     diff -= h * 3600;
     const m = Math.floor(diff / 60);

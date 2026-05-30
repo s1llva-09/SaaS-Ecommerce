@@ -13,7 +13,7 @@
     <aside class="admin-sidebar">
       <a class="admin-brand" href="dashboard.html">
         <span class="admin-brand__mark">S</span>
-        <span>ShopNow<small>Admin Panel</small></span>
+        <span data-store-name>ShopNow<small>Admin Panel</small></span>
       </a>
       <nav class="admin-nav">
         <a href="dashboard.html">
@@ -42,6 +42,13 @@
         <a href="reports.html">
           <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
           Relatórios
+          <span class="admin-nav__badge" data-reports-badge style="display: none;"></span>
+        </a>
+        <p class="admin-nav__section">Promoções</p>
+        <a href="promotions.html">
+          <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-4V4M8 16h4v4"/></svg></span>
+          Ofertas
+          <span class="admin-nav__badge" data-promotions-badge style="display: none;"></span>
         </a>
         <p class="admin-nav__section">Config</p>
         <a href="settings.html">
@@ -116,5 +123,7 @@
   <script src="../../js/ui/admin-orders.js"></script>
   <script src="../../js/ui/admin-search.js"></script>
   <script src="../../js/ui/admin-notifications.js"></script>
+  <script src="../../js/ui/admin-badges.js"></script>
+  <script src="../../js/ui/admin-store-name.js"></script>
 </body>
 </html>

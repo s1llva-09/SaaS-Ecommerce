@@ -60,6 +60,7 @@ const _state = {
   settings: typeof structuredClone === 'function'
     ? structuredClone(EMPTY_SETTINGS)
     : JSON.parse(JSON.stringify(EMPTY_SETTINGS)),
+  promotions: [],
   weeklyRevenue: [],
   monthlyRevenue: [],
   channels: [],
@@ -506,6 +507,7 @@ async function loadSupabaseData() {
     categories,
     cashflow,
     coupons,
+    promotions,
     storeSettings,
     legacySettings,
   ] = await Promise.all([
@@ -515,6 +517,7 @@ async function loadSupabaseData() {
     fetchRows('categories'),
     fetchRows('cashflow'),
     fetchRows('coupons'),
+    fetchRows('promotions'),
     fetchRows('store_settings'),
     fetchRows('settings'),
   ]);
@@ -527,6 +530,7 @@ async function loadSupabaseData() {
   _state.categories = categories.map(normalizeCategory).filter(category => category.name);
   _state.cashflow = cashflow.map(normalizeCashflow).filter(entry => entry.id);
   _state.coupons = coupons.map(normalizeCoupon).filter(coupon => coupon.code);
+  _state.promotions = promotions.map(normalizePromotion).filter(promo => promo.id && promo.productId);
   _state.settings = normalizeSettings(storeSettings.length ? storeSettings : legacySettings);
 
   refreshDerivedData();
@@ -561,6 +565,7 @@ const ShopData = {
   status: () => STATUS_CONFIG,
   channels: () => _state.channels,
   coupons: () => _state.coupons,
+  promotions: () => _state.promotions,
   settings: () => _state.settings,
 
   addProduct(product) {
@@ -674,6 +679,27 @@ const ShopData = {
     if (index === -1) return;
     _state.coupons.splice(index, 1);
     persist('coupons', () => deleteRow('coupons', 'code', code));
+  },
+
+  addPromotion(promotion) {
+    const next = { ...promotion, id: String(promotion.id || `PROMO-${Date.now()}`), active: promotion.active !== false };
+    _state.promotions.push(next);
+    persist('promotions', () => upsertRow('promotions', promotionToRow(next)));
+    return next;
+  },
+
+  updatePromotion(id, updates) {
+    const index = _state.promotions.findIndex(promo => promo.id === id);
+    if (index === -1) return;
+    _state.promotions[index] = { ..._state.promotions[index], ...updates, id };
+    persist('promotions', () => upsertRow('promotions', promotionToRow(_state.promotions[index])));
+  },
+
+  deletePromotion(id) {
+    const index = _state.promotions.findIndex(promo => promo.id === id);
+    if (index === -1) return;
+    _state.promotions.splice(index, 1);
+    persist('promotions', () => deleteRow('promotions', 'id', id));
   },
 
   updateSettings(type, data) {

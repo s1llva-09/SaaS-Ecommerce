@@ -3,7 +3,9 @@
 // Gerencia dados da loja e cupons
 // ============================================================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await ShopData.ready();
+
   const tabButtons = document.querySelectorAll('.settings-tab');
   const panels = document.querySelectorAll('.settings-panel');
   const forms = document.querySelectorAll('.settings-form');
@@ -55,7 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!(field.name in values)) return;
 
         if (field.type === 'checkbox') {
-          field.checked = Boolean(values[field.name]);
+          const shouldBeChecked = Boolean(values[field.name]);
+          field.checked = shouldBeChecked;
           return;
         }
 
@@ -87,13 +90,31 @@ document.addEventListener('DOMContentLoaded', () => {
   // Salvar configurações
   // ---------------------------------------------------------
   forms.forEach(form => {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const data = collectFormData(form);
       const formType = form.dataset.form;
 
-      ShopData.updateSettings(formType, data);
-      showNotification(`Configurações ${formType} salvas com sucesso!`);
+      try {
+        ShopData.updateSettings(formType, data);
+
+        // Atualiza nome da loja no header se for aba "geral"
+        if (formType === 'geral' && data.storeName) {
+          const storeNameEl = document.querySelector('[data-store-name]');
+          if (storeNameEl) {
+            storeNameEl.innerHTML = `${data.storeName}<small>Admin Panel</small>`;
+          }
+        }
+
+        // Atualiza formulário com os dados salvos
+        await new Promise(resolve => setTimeout(resolve, 500));
+        hydrateForms();
+
+        showNotification(`✓ ${formType.charAt(0).toUpperCase() + formType.slice(1)} salvo com sucesso!`);
+      } catch (error) {
+        console.error('Erro ao salvar:', error);
+        showNotification(`✗ Erro ao salvar ${formType}`);
+      }
     });
   });
 
@@ -251,13 +272,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // Notificação
   // ---------------------------------------------------------
   function showNotification(message) {
+    // Remove notificação anterior se existir
+    const existing = document.querySelector('.settings-toast');
+    if (existing) existing.remove();
+
     const notif = document.createElement('div');
     notif.className = 'settings-toast';
     notif.textContent = message;
     document.body.appendChild(notif);
 
     setTimeout(() => {
-      notif.remove();
+      notif.classList.add('hide');
+      setTimeout(() => notif.remove(), 300);
     }, 3000);
   }
 

@@ -118,6 +118,8 @@ drop policy if exists "shopnow public read cashflow" on public.cashflow;
 drop policy if exists "shopnow public write cashflow" on public.cashflow;
 drop policy if exists "shopnow public read coupons" on public.coupons;
 drop policy if exists "shopnow public write coupons" on public.coupons;
+drop policy if exists "shopnow public read promotions" on public.promotions;
+drop policy if exists "shopnow public write promotions" on public.promotions;
 drop policy if exists "shopnow public read store_settings" on public.store_settings;
 drop policy if exists "shopnow public write store_settings" on public.store_settings;
 
@@ -138,6 +140,9 @@ create policy "shopnow public write cashflow" on public.cashflow for all using (
 
 create policy "shopnow public read coupons" on public.coupons for select using (true);
 create policy "shopnow public write coupons" on public.coupons for all using (true) with check (true);
+
+create policy "shopnow public read promotions" on public.promotions for select using (true);
+create policy "shopnow public write promotions" on public.promotions for all using (true) with check (true);
 
 create policy "shopnow public read store_settings" on public.store_settings for select using (true);
 create policy "shopnow public write store_settings" on public.store_settings for all using (true) with check (true);

@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="../../imgs/favicon.svg" type="image/svg+xml">
-  <title>Relatórios - ShopNow Admin</title>
+  <title>Promoções - ShopNow Admin</title>
   <link rel="stylesheet" href="../../css/index.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body class="admin-page" data-root="../../">
   <div class="admin-shell">
@@ -39,13 +38,13 @@
           <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>
           Caixa
         </a>
-        <a class="is-active" href="reports.html">
+        <a href="reports.html">
           <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
           Relatórios
           <span class="admin-nav__badge" data-reports-badge style="display: none;"></span>
         </a>
         <p class="admin-nav__section">Promoções</p>
-        <a href="promotions.html">
+        <a class="is-active" href="promotions.html">
           <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-4V4M8 16h4v4"/></svg></span>
           Ofertas
           <span class="admin-nav__badge" data-promotions-badge style="display: none;"></span>
@@ -62,7 +61,7 @@
         <button class="admin-hamburger" data-sidebar-btn>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
-        <div><h1>Relatórios</h1><span class="text-muted">Indicadores financeiros</span></div>
+        <div><h1>Ofertas & Promoções</h1><span class="text-muted">Gerencie descontos e promoções</span></div>
         <div class="admin-topbar__right">
           <div class="search-wrapper">
             <div class="admin-searchbar">
@@ -85,67 +84,72 @@
         </div>
       </header>
       <section class="admin-content">
-
-        <!-- Cabeçalho: filtros de período + botão exportar -->
-        <div class="reports-header">
-          <div class="period-tabs">
-            <button class="period-tab is-active" data-report-period="week">Semana</button>
-            <button class="period-tab" data-report-period="month">Mês</button>
-            <button class="period-tab" data-report-period="quarter">Trimestre</button>
-            <button class="period-tab" data-report-period="year">Ano</button>
-          </div>
-          <button class="btn-export" data-export-csv>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Exportar CSV
-          </button>
+        <div style="display: flex; gap: 12px; margin-bottom: 20px; align-items: center;">
+          <h2 style="margin: 0; flex: 1;">Promoções Ativas</h2>
+          <button class="btn btn-primary" data-promo-add-btn>+ Adicionar Promoção</button>
         </div>
 
-        <!-- KPIs -->
-        <div class="reports-kpi-grid" data-reports-kpis></div>
-
-        <!-- Gráfico de linha de receita -->
-        <article class="admin-card mt-16">
-          <div class="reports-chart-header">
-            <div>
-              <h2 class="admin-card__title" data-reports-chart-title>Receita — últimos 7 dias</h2>
-              <p class="admin-card__subtitle text-muted" data-reports-chart-sub></p>
-            </div>
-          </div>
-          <div class="chart-box"><canvas id="reportsRevenueChart"></canvas></div>
+        <article class="admin-card">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Desconto</th>
+                <th>Válido até</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody data-promotions-table></tbody>
+          </table>
         </article>
-
-        <!-- Top produtos + Distribuição por categoria -->
-        <div class="reports-grid mt-16">
-          <article class="admin-card">
-            <h2 class="admin-card__title">Top produtos</h2>
-            <table class="admin-table" data-top-products></table>
-          </article>
-          <article class="admin-card">
-            <h2 class="admin-card__title">Receita por categoria</h2>
-            <div class="chart-box chart-box--sm"><canvas id="reportsCategoryChart"></canvas></div>
-            <div class="chart-legend" data-reports-category-legend></div>
-          </article>
-        </div>
-
-        <!-- Métodos de pagamento + Pedidos por status -->
-        <div class="reports-grid mt-16">
-          <article class="admin-card">
-            <h2 class="admin-card__title">Métodos de pagamento</h2>
-            <div class="report-bars" data-payment-methods></div>
-          </article>
-          <article class="admin-card">
-            <h2 class="admin-card__title">Pedidos por status</h2>
-            <div class="report-bars" data-orders-status></div>
-          </article>
-        </div>
-
       </section>
     </main>
   </div>
+
+  <!-- MODAL: Adicionar/Editar Promoção -->
+  <div class="modal-overlay" data-promo-modal style="display: none;">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 data-promo-modal-title>Adicionar Promoção</h2>
+        <button class="modal__close" data-promo-modal-close>&times;</button>
+      </div>
+      <div class="modal__body">
+        <form data-promo-form>
+          <div class="form-group">
+            <label>Produto *</label>
+            <select data-promo-product required>
+              <option value="">Selecione um produto</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Desconto (%) *</label>
+            <input type="number" data-promo-discount min="0" max="100" required placeholder="Ex: 15">
+          </div>
+          <div class="form-group">
+            <label>Válido até *</label>
+            <input type="datetime-local" data-promo-enddate required>
+          </div>
+          <div class="form-group">
+            <label>
+              <input type="checkbox" data-promo-active checked>
+              Ativo
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn-secondary" data-promo-modal-cancel>Cancelar</button>
+        <button class="btn btn-primary" data-promo-save>Salvar</button>
+      </div>
+    </div>
+  </div>
+
   <script src="../../js/ui/admin-auth.js"></script>
   <script src="../../js/data.js"></script>
   <script src="../../js/ui/common.js"></script>
-  <script src="../../js/ui/admin-reports.js"></script>
+  <script src="../../js/ui/currency-formatter.js"></script>
+  <script src="../../js/ui/admin-promotions.js"></script>
   <script src="../../js/ui/admin-search.js"></script>
   <script src="../../js/ui/admin-notifications.js"></script>
   <script src="../../js/ui/admin-badges.js"></script>

@@ -66,6 +66,18 @@ document.addEventListener('DOMContentLoaded', () => {
         reportsBadge.style.display = 'none';
       }
     }
+
+    // Badge de Promoções
+    const promotionsBadge = document.querySelector('[data-promotions-badge]');
+    if (promotionsBadge) {
+      const promotionsCount = ShopData.promotions().length;
+      if (promotionsCount > 0) {
+        promotionsBadge.textContent = String(promotionsCount);
+        promotionsBadge.style.display = '';
+      } else {
+        promotionsBadge.style.display = 'none';
+      }
+    }
   }
 
   // Aguarda dados e atualiza badges
