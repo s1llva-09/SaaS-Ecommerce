@@ -370,7 +370,7 @@ function promotionToRow(promotion) {
     id: String(promotion.id),
     product_id: String(promotion.productId),
     discount_percentage: asNumber(promotion.discountPercentage, 0),
-    start_date: promotion.startDate || null,
+    start_date: promotion.startDate || new Date().toISOString(),
     end_date: promotion.endDate || '',
     active: promotion.active === true,
   };
