@@ -155,9 +155,19 @@
   display: block;
   margin-bottom: 7px;
   color: var(--text);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 850;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
+  gap: 0;
+}
+
+.form-label::before {
+  display: none;
+}
+
+.field::placeholder {
+  color: var(--muted);
 }
 
 .form-group small {
@@ -228,12 +238,42 @@
   cursor: pointer;
 }
 
-.form-checkbox input {
+.form-checkbox input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
   width: 17px;
   height: 17px;
+  min-width: 17px;
   margin-top: 1px;
-  accent-color: var(--brand);
   flex-shrink: 0;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  position: relative;
+  transition: border-color .15s, background .15s;
+}
+
+.form-checkbox input[type="checkbox"]:hover {
+  border-color: var(--brand);
+}
+
+.form-checkbox input[type="checkbox"]:checked {
+  background: var(--brand);
+  border-color: var(--brand);
+}
+
+.form-checkbox input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 5px;
+  height: 9px;
+  border: 2px solid #fff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
 }
 
 .form-checkbox a,

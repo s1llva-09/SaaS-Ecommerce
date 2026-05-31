@@ -49,13 +49,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const price = document.createElement('div');
   price.className = 'price-xl';
-  price.textContent = ShopNow.money(product.price);
+  price.textContent = ShopNow.money(product.price, true);
   aside.appendChild(price);
 
   if (product.originalPrice) {
     const original = document.createElement('p');
     original.className = 'text-muted';
-    original.textContent = `De ${ShopNow.money(product.originalPrice)} por ${ShopNow.discount(product)}% OFF`;
+    const savings = product.originalPrice - product.price;
+    original.textContent = `De ${ShopNow.money(product.originalPrice, true)} — Economize ${ShopNow.money(savings, true)} (${ShopNow.discount(product)}% OFF)`;
     aside.appendChild(original);
   }
 

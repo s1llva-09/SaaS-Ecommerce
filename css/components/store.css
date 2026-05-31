@@ -680,7 +680,13 @@
   }
 
   .mode-switch {
-    display: none;
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .mode-switch a {
+    min-width: 64px;
+    font-size: 11px;
   }
 }
 

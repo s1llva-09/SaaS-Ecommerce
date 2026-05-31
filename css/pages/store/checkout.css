@@ -52,8 +52,8 @@
 }
 
 .field--full { grid-column: 1 / -1; }
-.field--cep { max-width: 170px; }
-.field--uf { max-width: 88px; }
+.field--cep { max-width: 210px; }
+.field--uf { max-width: 100px; }
 
 .cep-row {
   grid-column: 1 / -1;

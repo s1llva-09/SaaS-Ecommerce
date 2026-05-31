@@ -169,7 +169,7 @@ const ShopNow = {
     if (product.originalPrice) {
       const oldPrice = document.createElement('div');
       oldPrice.className = 'product-card__old-price';
-      oldPrice.textContent = this.money(product.originalPrice);
+      oldPrice.textContent = this.money(product.originalPrice, true);
       body.appendChild(oldPrice);
     }
 
@@ -179,7 +179,7 @@ const ShopNow = {
     const priceCol = document.createElement('div');
     const price = document.createElement('div');
     price.className = 'product-card__price';
-    price.textContent = this.money(product.price);
+    price.textContent = this.money(product.price, true);
     priceCol.appendChild(price);
 
     const install = document.createElement('p');
@@ -403,7 +403,7 @@ const ShopNow = {
             <a href="#">Facebook</a>
             <a href="#">Instagram</a>
             <a href="#">WhatsApp</a>
-            <a href="${root}pages/login.html" style="color: #93c5fd; font-weight: 700;">Admin</a>
+            <a href="${root}pages/admin/login.html" style="color: #93c5fd; font-weight: 700;">Admin</a>
           </div>
         </div>
       </div>

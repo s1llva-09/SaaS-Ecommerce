@@ -325,7 +325,9 @@
 .admin-product-card__actions {
   display: flex;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: auto;
+  padding-top: 12px;
+  align-items: stretch;
 }
 
 .admin-product-card__edit-btn,
@@ -336,6 +338,10 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: border-color .15s, background .15s;
 }
 
