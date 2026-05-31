@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="../imgs/favicon.svg" type="image/svg+xml">
   <title>Produtos - ShopNow</title>
-  <link rel="stylesheet" href="../css/index.css">
+  <link rel="stylesheet" href="../css/store.css">
 </head>
 <body class="page" data-root="../">
   <header class="store-header">
@@ -42,7 +42,7 @@
 
   <main class="section products-page">
     <div class="container">
-      <nav class="breadcrumb" aria-label="Navegação estrutural">
+      <nav class="breadcrumb" aria-label="NavegaÃ§Ã£o estrutural">
         <a href="../index.html">Home</a>
         <span>/</span>
         <span data-breadcrumb-current>Produtos</span>
@@ -56,9 +56,9 @@
         <div class="products-toolbar">
           <select class="select products-sort" data-products-sort>
             <option value="relevance">Mais relevantes</option>
-            <option value="price-asc">Menor preço</option>
-            <option value="price-desc">Maior preço</option>
-            <option value="rating">Melhor avaliação</option>
+            <option value="price-asc">Menor preÃ§o</option>
+            <option value="price-desc">Maior preÃ§o</option>
+            <option value="rating">Melhor avaliaÃ§Ã£o</option>
             <option value="name">A-Z</option>
           </select>
           <div class="view-toggle">
@@ -79,7 +79,7 @@
             <input type="hidden" data-filter-category value="">
           </div>
           <div class="filters__group">
-            <h2 class="filters__title">Faixa de preço</h2>
+            <h2 class="filters__title">Faixa de preÃ§o</h2>
             <input class="price-range" data-filter-price type="range" min="0" max="15000" value="15000" step="100">
             <div class="price-range__labels">
               <span>R$ 0</span>
@@ -87,12 +87,12 @@
             </div>
           </div>
           <div class="filters__group">
-            <h2 class="filters__title">Avaliação mínima</h2>
+            <h2 class="filters__title">AvaliaÃ§Ã£o mÃ­nima</h2>
             <div class="rating-filter">
-              <button class="rating-filter__btn" type="button" data-filter-rating="4">★★★★ <span>ou mais</span></button>
-              <button class="rating-filter__btn" type="button" data-filter-rating="3">★★★ <span>ou mais</span></button>
-              <button class="rating-filter__btn" type="button" data-filter-rating="2">★★ <span>ou mais</span></button>
-              <button class="rating-filter__btn is-active" type="button" data-filter-rating="0">Qualquer avaliação</button>
+              <button class="rating-filter__btn" type="button" data-filter-rating="4">â˜…â˜…â˜…â˜… <span>ou mais</span></button>
+              <button class="rating-filter__btn" type="button" data-filter-rating="3">â˜…â˜…â˜… <span>ou mais</span></button>
+              <button class="rating-filter__btn" type="button" data-filter-rating="2">â˜…â˜… <span>ou mais</span></button>
+              <button class="rating-filter__btn is-active" type="button" data-filter-rating="0">Qualquer avaliaÃ§Ã£o</button>
             </div>
           </div>
           <div class="filters__group">

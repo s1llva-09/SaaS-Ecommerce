@@ -1,0 +1,21 @@
+/* ============================================================
+   SHOPNOW - LOJA
+   Entry point exclusivo para páginas da loja (cliente).
+   Não carrega nenhum CSS do painel admin.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+@import './base/reset.css';
+@import './base/tokens.css';
+@import './layout/site.css';
+
+@import './components/ui.css';
+@import './components/store.css';
+
+@import './pages/store/home.css';
+@import './pages/store/products.css';
+@import './pages/store/product.css';
+@import './pages/store/cart.css';
+@import './pages/store/checkout.css';
+@import './pages/store/account.css';

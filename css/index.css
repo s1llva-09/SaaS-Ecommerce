@@ -1,30 +1,8 @@
 /* ============================================================
-   SHOPNOW - CSS PRINCIPAL
-   Este arquivo e a porta de entrada. As paginas importam so ele.
+   SHOPNOW - LEGADO
+   Este arquivo foi substituído por store.css e admin.css.
+   Mantido apenas para compatibilidade. Não usar em páginas novas.
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
-@import './base/reset.css';
-@import './base/tokens.css';
-@import './layout/site.css';
-
-@import './components/ui.css';
-@import './components/store.css';
-@import './components/admin.css';
-
-@import './pages/store/home.css';
-@import './pages/store/products.css';
-@import './pages/store/product.css';
-@import './pages/store/cart.css';
-@import './pages/store/checkout.css';
-@import './pages/store/account.css';
-
-@import './pages/admin/dashboard.css';
-@import './pages/admin/products.css';
-@import './pages/admin/orders.css';
-@import './pages/admin/customers.css';
-@import './pages/admin/cashflow.css';
-@import './pages/admin/reports.css';
-@import './pages/admin/settings.css';
-@import './pages/admin/login.css';
+@import './store.css';
+@import './admin.css';
