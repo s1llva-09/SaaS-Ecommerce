@@ -3,7 +3,7 @@
 // Lista pedidos recentes e abre drawer de detalhe ao clicar.
 // ============================================================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const list    = document.querySelector('[data-order-list]');
   const overlay = document.querySelector('[data-od-overlay]');
   const drawer  = document.querySelector('[data-od-drawer]');
@@ -37,9 +37,207 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---------------------------------------------------------
   const ordersCount = document.querySelector('[data-orders-count]');
   const spentTotal = document.querySelector('[data-spent-total]');
+  const REVIEW_STORAGE_KEY = 'shopnow-product-reviews';
+  let productReviews = [];
 
-  if (ordersCount && spentTotal) {
-    const userOrders = ShopData.orders().filter(order => order.userId === user.id);
+  // Remove any previous localStorage review state and keep reviews only in memory.
+  if (localStorage.getItem(REVIEW_STORAGE_KEY)) {
+    localStorage.removeItem(REVIEW_STORAGE_KEY);
+  }
+
+  function loadProductReviews() {
+    return productReviews;
+  }
+
+  function saveProductReviews(reviews) {
+    productReviews = Array.isArray(reviews) ? reviews : [];
+  }
+
+  function getReviewIdentifier(item) {
+    // Use the most stable identifier available for order items.
+    // Orders created from checkout carry productId, while some existing items may use id or sku.
+    return String(item.productId || item.id || item.sku || item.name || '').trim();
+  }
+
+  function getProductReview(item) {
+    const key = getReviewIdentifier(item);
+    return loadProductReviews().find(review => review.productKey === key);
+  }
+
+  function setProductReview(review) {
+    const reviews = loadProductReviews();
+    const index = reviews.findIndex(item => item.productKey === review.productKey);
+    if (index >= 0) {
+      reviews[index] = review;
+    } else {
+      reviews.push(review);
+    }
+    saveProductReviews(reviews);
+  }
+
+  let reviewDialog = null;
+
+  function createReviewDialog() {
+    const overlay = document.createElement('div');
+    overlay.className = 'review-modal-overlay';
+    overlay.addEventListener('click', event => {
+      if (event.target === overlay) closeReviewModal();
+    });
+
+    const modal = document.createElement('div');
+    modal.className = 'review-modal';
+
+    const header = document.createElement('div');
+    header.className = 'review-modal__header';
+
+    const title = document.createElement('strong');
+    title.textContent = 'Avaliar produto';
+    header.appendChild(title);
+
+    const closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'review-modal-close';
+    closeButton.textContent = '×';
+    closeButton.addEventListener('click', closeReviewModal);
+    header.appendChild(closeButton);
+
+    modal.appendChild(header);
+
+    const productName = document.createElement('p');
+    productName.className = 'review-modal__product-name';
+    modal.appendChild(productName);
+
+    const stars = document.createElement('div');
+    stars.className = 'review-modal__stars';
+    modal.appendChild(stars);
+
+    const actions = document.createElement('div');
+    actions.className = 'review-modal__actions';
+
+    const cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.className = 'btn btn-outline';
+    cancel.textContent = 'Cancelar';
+    cancel.addEventListener('click', closeReviewModal);
+    actions.appendChild(cancel);
+
+    const save = document.createElement('button');
+    save.type = 'button';
+    save.className = 'btn btn-primary';
+    save.textContent = 'Salvar avaliação';
+    actions.appendChild(save);
+
+    modal.appendChild(actions);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    return {
+      overlay,
+      productName,
+      stars,
+      save,
+      currentItem: null,
+      currentOrder: null,
+      currentRating: 0,
+      previousRating: 0,
+    };
+  }
+
+  function renderReviewStars(value) {
+    if (!reviewDialog) return;
+    reviewDialog.currentRating = value;
+    reviewDialog.stars.innerHTML = '';
+    for (let i = 1; i <= 5; i += 1) {
+      const star = document.createElement('button');
+      star.type = 'button';
+      star.className = 'review-modal__star' + (i <= value ? ' is-active' : '');
+      star.innerHTML = '★';
+      star.addEventListener('click', () => renderReviewStars(i));
+      reviewDialog.stars.appendChild(star);
+    }
+  }
+
+  function refreshReviewButtons() {
+    if (!reviewDialog) return;
+    body.querySelectorAll('[data-review-button]').forEach(btn => {
+      const item = {
+        productId: btn.dataset.reviewProductId,
+        id: btn.dataset.reviewProductId,
+        sku: btn.dataset.reviewProductKey,
+        name: btn.dataset.reviewProductName,
+      };
+      const review = getProductReview(item);
+      btn.textContent = review ? 'Editar avaliação' : 'Avaliar produto';
+      const hint = btn.nextElementSibling;
+      if (hint && hint.classList.contains('reviewed-badge')) {
+        hint.textContent = review ? `Avaliado ${review.rating}★` : '';
+      }
+    });
+  }
+
+  function updateOrderCardReviewCount(order) {
+    const orderCard = list.querySelector(`[data-order-id="${order.id}"]`);
+    if (!orderCard) return;
+    const infoDiv = orderCard.querySelector('div');
+    if (!infoDiv) return;
+
+    const reviewedItemsCount = order.items.filter(item => getProductReview(item)).length;
+    let reviewBadge = orderCard.querySelector('.order-card__review-count');
+
+    if (reviewedItemsCount) {
+      if (!reviewBadge) {
+        reviewBadge = document.createElement('span');
+        reviewBadge.className = 'order-card__review-count';
+        infoDiv.appendChild(reviewBadge);
+      }
+      reviewBadge.textContent = reviewedItemsCount === 1
+        ? '1 item avaliado'
+        : `${reviewedItemsCount} itens avaliados`;
+    } else if (reviewBadge) {
+      reviewBadge.remove();
+    }
+  }
+
+  function openReviewModal(item, order) {
+    if (!reviewDialog) reviewDialog = createReviewDialog();
+    const savedReview = getProductReview(item) || { rating: 0, comment: '' };
+    reviewDialog.currentItem = item;
+    reviewDialog.currentOrder = order;
+    reviewDialog.productName.textContent = item.name || 'Produto';
+    reviewDialog.comment.value = savedReview.comment || '';
+    renderReviewStars(savedReview.rating || 0);
+    reviewDialog.save.onclick = () => {
+      const review = {
+        productKey: getReviewIdentifier(item),
+        productName: item.name || '',
+        orderId: order.id,
+        rating: reviewDialog.currentRating,
+        comment: reviewDialog.comment.value.trim(),
+        date: new Date().toISOString(),
+      };
+      setProductReview(review);
+      ShopNow.toast('Avaliação salva');
+      refreshReviewButtons();
+      updateOrderCardReviewCount(order);
+      closeReviewModal();
+    };
+    reviewDialog.overlay.classList.add('is-open');
+  }
+
+  function closeReviewModal() {
+    if (!reviewDialog) return;
+    reviewDialog.overlay.classList.remove('is-open');
+  }
+
+  if (!reviewDialog) reviewDialog = createReviewDialog();
+
+  function updateOrderStats() {
+    if (!ordersCount || !spentTotal) return;
+    const userId = String(user.id || '');
+    const userEmailLower = String(user.email || '').toLowerCase();
+    const userOrders = ShopData.orders().filter(order =>
+      String(order.userId || '') === userId || String(order.email || '').toLowerCase() === userEmailLower
+    );
     const totalSpent = userOrders.reduce((sum, order) => sum + order.total, 0);
     ordersCount.textContent = userOrders.length;
     spentTotal.textContent = ShopNow.money(totalSpent);
@@ -186,11 +384,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!list) return;
 
+  const orderSkeletonCount = 3;
+  const ordersCountPlaceholder = document.querySelector('[data-orders-count]');
+  const spentTotalPlaceholder = document.querySelector('[data-spent-total]');
+
+  function createOrderSkeleton() {
+    const article = document.createElement('article');
+    article.className = 'order-card card skeleton';
+    article.style.minHeight = '120px';
+    return article;
+  }
+
+  function renderOrderSkeletons() {
+    if (ordersCountPlaceholder) {
+      ordersCountPlaceholder.textContent = '—';
+      ordersCountPlaceholder.classList.add('skeleton');
+    }
+    if (spentTotalPlaceholder) {
+      spentTotalPlaceholder.textContent = '—';
+      spentTotalPlaceholder.classList.add('skeleton');
+    }
+    list.innerHTML = '';
+    for (let i = 0; i < orderSkeletonCount; i += 1) {
+      list.appendChild(createOrderSkeleton());
+    }
+  }
+
+  function clearOrderSkeletons() {
+    if (ordersCountPlaceholder) {
+      ordersCountPlaceholder.classList.remove('skeleton');
+    }
+    if (spentTotalPlaceholder) {
+      spentTotalPlaceholder.classList.remove('skeleton');
+    }
+  }
+
+  renderOrderSkeletons();
+  await ShopData.ready();
+  clearOrderSkeletons();
+  updateOrderStats();
+
   // ---------------------------------------------------------
   // Renderiza os cards de pedidos
   // ---------------------------------------------------------
   list.innerHTML = '';
-  const userOrders = ShopData.orders().filter(order => order.userId === user.id);
+  const userId = String(user.id || '');
+  const userEmailLower = String(user.email || '').toLowerCase();
+  const userOrders = ShopData.orders().filter(order =>
+    String(order.userId || '') === userId || String(order.email || '').toLowerCase() === userEmailLower
+  );
   userOrders.forEach(order => {
     const article = document.createElement('article');
     article.className = 'order-card card';
@@ -211,6 +453,15 @@ document.addEventListener('DOMContentLoaded', () => {
     metaP.style.margin = '4px 0';
     metaP.textContent = `${order.date} — ${order.paymentMethod}`;
     infoDiv.appendChild(metaP);
+    const reviewedItemsCount = order.items.filter(item => getProductReview(item)).length;
+    if (reviewedItemsCount) {
+      const reviewBadge = document.createElement('span');
+      reviewBadge.className = 'order-card__review-count';
+      reviewBadge.textContent = reviewedItemsCount === 1
+        ? '1 item avaliado'
+        : `${reviewedItemsCount} itens avaliados`;
+      infoDiv.appendChild(reviewBadge);
+    }
     article.appendChild(infoDiv);
 
     const rightDiv = document.createElement('div');
@@ -266,6 +517,26 @@ document.addEventListener('DOMContentLoaded', () => {
       qtySpan.className = 'od-item__qty';
       qtySpan.textContent = `Qtd: ${item.qty}`;
       infoDiv.appendChild(qtySpan);
+
+      const reviewButton = document.createElement('button');
+      reviewButton.type = 'button';
+      reviewButton.className = 'btn btn-outline btn-sm';
+      reviewButton.dataset.reviewButton = '';
+      reviewButton.dataset.reviewProductKey = getReviewIdentifier(item);
+      reviewButton.dataset.reviewProductName = item.name || '';
+      reviewButton.dataset.reviewProductId = item.productId || item.id || item.sku || '';
+      const existingReview = getProductReview(item);
+      reviewButton.textContent = existingReview ? 'Editar avaliação' : 'Avaliar produto';
+      reviewButton.addEventListener('click', event => {
+        event.stopPropagation();
+        openReviewModal(item, order);
+      });
+      infoDiv.appendChild(reviewButton);
+
+      const reviewHint = document.createElement('span');
+      reviewHint.className = 'reviewed-badge';
+      reviewHint.textContent = existingReview ? `Avaliado ${existingReview.rating}★` : '';
+      infoDiv.appendChild(reviewHint);
 
       itemDiv.appendChild(infoDiv);
 

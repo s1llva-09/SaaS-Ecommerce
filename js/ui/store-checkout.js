@@ -37,7 +37,7 @@ function renderCheckoutSummary(container) {
 
     const price = document.createElement('span');
     price.className = 'checkout-summary__item-price';
-    price.textContent = ShopNow.money(item.product.price * item.qty);
+    price.textContent = ShopNow.money(item.product.price * item.qty, true);
     row.appendChild(price);
 
     itemsGrid.appendChild(row);
@@ -46,7 +46,7 @@ function renderCheckoutSummary(container) {
 
   const totals = document.createElement('div');
   totals.className = 'checkout-summary__totals';
-  totals.appendChild(summaryRow('Subtotal', ShopNow.money(subtotal)));
+  totals.appendChild(summaryRow('Subtotal', ShopNow.money(subtotal, true)));
   totals.appendChild(summaryRow('Frete', shipping === 0 ? 'Grátis' : ShopNow.money(shipping, true), shipping === 0));
 
   const totalRow = document.createElement('div');
@@ -71,46 +71,40 @@ function summaryRow(label, value, isFree = false) {
 }
 
 function bindCheckoutForm(checkoutForm) {
-  checkoutForm.addEventListener('submit', event => {
+  checkoutForm.addEventListener('submit', async event => {
     event.preventDefault();
     const formData = new FormData(checkoutForm);
-    const items = ShopNow.cartItems();
+    const items    = ShopNow.cartItems();
     const subtotal = ShopNow.cartTotal();
     const shipping = subtotal >= 299 ? 0 : 24.9;
-    const paymentOptions = [...document.querySelectorAll('[data-payment-option]')];
-    const activePaymentIndex = Math.max(0, paymentOptions.findIndex(option => option.classList.contains('is-active')));
-    const paymentMethod = ['Cartão', 'PIX', 'Boleto'][activePaymentIndex] || 'Cartão';
 
-    const currentUser = ShopNow.getUser();
     const order = {
-      id: `#${Math.floor(13000 + Math.random() * 900)}`,
-      customer: formData.get('customerName') || '',
-      email: formData.get('email') || '',
-      userId: currentUser?.id || null,
-      items: items.map(item => ({
-        name: item.product.name,
-        qty: item.qty,
-        price: item.product.price,
+      customer:      formData.get('customerName') || '',
+      email:         formData.get('email') || '',
+      phone:         formData.get('phone') || '',
+      userId:        ShopNow.getUser()?.id || null,
+      items:         items.map(item => ({
+        productId: item.product.id,
+        name:      item.product.name,
+        qty:       item.qty,
+        price:     item.product.price,
       })),
-      total: subtotal + shipping,
+      total:         subtotal + shipping,
       paymentMethod: 'Retirada na loja',
-      type: 'pickup',
-      status: 'pending',
-      date: new Date().toISOString().slice(0, 10),
-      city: '',
+      type:          'pickup',
+      status:        'pending',
+      date:          new Date().toISOString().slice(0, 10),
     };
 
-    ShopData.addOrder(order);
-    localStorage.setItem('shopnow-last-order', JSON.stringify(order));
-    ShopNow.clearCart();
-    window.location.href = 'confirmation.html';
-  });
-
-  document.querySelectorAll('[data-payment-option]').forEach(option => {
-    option.addEventListener('click', () => {
-      document.querySelectorAll('[data-payment-option]').forEach(item => item.classList.remove('is-active'));
-      option.classList.add('is-active');
-    });
+    try {
+      const saved = await ShopData.addOrder(order);
+      localStorage.setItem('shopnow-last-order', JSON.stringify(saved));
+      ShopNow.clearCart();
+      window.location.href = 'confirmation.html';
+    } catch (error) {
+      console.error('Erro ao salvar pedido:', error);
+      ShopNow.toast('Não foi possível registrar o pedido. Tente novamente.', 'error');
+    }
   });
 
   bindCepLookup(checkoutForm);
@@ -192,7 +186,7 @@ function renderConfirmation(container) {
   const label = document.createElement('strong');
   label.textContent = 'Total:';
   total.appendChild(label);
-  total.appendChild(document.createTextNode(` ${ShopNow.money(order.total || 0)}`));
+  total.appendChild(document.createTextNode(` ${ShopNow.money(order.total || 0, true)}`));
   container.appendChild(total);
 
   const actions = document.createElement('div');

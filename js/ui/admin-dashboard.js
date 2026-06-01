@@ -190,7 +190,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Últimos 5 pedidos — tabela de pedidos recentes no dashboard.
   if (recentEl) {
     recentEl.innerHTML = '';
-    ShopData.orders().slice(0, 5).forEach(order => {
+    ShopData.orders()
+      .slice()
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 5)
+      .forEach(order => {
       const tr = document.createElement('tr');
 
       const tdId = document.createElement('td');

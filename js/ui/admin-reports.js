@@ -41,6 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
     return ShopData.weeklyRevenue();
   }
 
+  function reportOrders() {
+    return ShopData.orders().filter(order => ['paid', 'ready', 'shipped', 'delivered'].includes(order.status));
+  }
+
   // ---------------------------------------------------------
   // topProducts(n) — calcula os N produtos mais rentáveis
   // agregando os itens de todos os pedidos do mock.
@@ -48,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---------------------------------------------------------
   function topProducts(n = 5) {
     const map = {};
-    ShopData.orders().forEach(order => {
+    reportOrders().forEach(order => {
       order.items.forEach(item => {
         if (!map[item.name]) map[item.name] = { name: item.name, qty: 0, revenue: 0 };
         map[item.name].qty     += item.qty;
@@ -70,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!kpisEl) return;
 
     const data    = revenueData(period);
-    const orders  = ShopData.orders();
+    const orders  = reportOrders();
     const revenue = data.reduce((s, d) => s + d.value, 0);
     const avgTicket = orders.length ? revenue / orders.length : 0;
     const uniqueCustomers = new Set(orders.map(o => o.email)).size;
@@ -193,9 +197,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Agrega receita por categoria
     const map = {};
-    ShopData.orders().forEach(order => {
+    reportOrders().forEach(order => {
       order.items.forEach(item => {
-        const product = ShopData.products().find(p => p.name === item.name);
+        const product = ShopData.products().find(p => p.id === String(item.productId));
         const cat = product?.category || 'Outros';
         map[cat] = (map[cat] || 0) + item.price * item.qty;
       });
@@ -365,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!container) return;
 
     const map = {};
-    ShopData.orders().forEach(o => { map[o.paymentMethod] = (map[o.paymentMethod] || 0) + 1; });
+    reportOrders().forEach(o => { map[o.paymentMethod] = (map[o.paymentMethod] || 0) + 1; });
     const total   = Object.values(map).reduce((s, v) => s + v, 0);
     const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
     const COLORS  = { Cartão: '#818cf8', PIX: '#34d399', Boleto: '#fbbf24', TED: '#f87171', Dinheiro: '#60a5fa' };

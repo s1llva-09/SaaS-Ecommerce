@@ -11,7 +11,7 @@
 <body class="page" data-root="">
   <header class="store-header">
     <div class="store-header__inner">
-      <a class="store-brand" href="index.html"><span class="store-brand__mark">S</span><span data-store-name>ShopNow</span></a>
+      <a class="store-brand" href="index.html"><span class="store-brand__mark">S</span><span data-store-name></span></a>
       <nav class="store-nav" aria-label="Principal" data-categories-nav>
         <a href="pages/products.html">Produtos</a>
       </nav>
@@ -49,7 +49,7 @@
         <div class="hero__box">
           <span class="hero__badge">Novidades 2026</span>
           <h1>Tudo o que você precisa em um lugar</h1>
-          <p>Eletrônicos, moda, calçados e muito mais. Frete grátis acima de R$ 299.</p>
+          <p data-hero-subtitle></p>
           <div class="hero__actions">
             <a class="btn btn-light" href="pages/products.html">Ver ofertas</a>
             <a class="btn btn-ghost" href="pages/products.html">Explorar produtos</a>
@@ -60,7 +60,7 @@
 
     <div class="benefits-bar">
       <div class="benefits-bar__inner">
-        <div><span aria-hidden="true">✓</span> Frete grátis acima de R$ 299</div>
+        <div data-free-shipping-benefit><span aria-hidden="true">✓</span></div>
         <div><span aria-hidden="true">◆</span> Compra 100% segura</div>
         <div><span aria-hidden="true">↺</span> Devolução em 30 dias</div>
         <div><span aria-hidden="true">☎</span> Suporte 24/7</div>
@@ -97,12 +97,12 @@
             <h2>Ofertas do dia</h2>
             <span class="text-muted">Só até meia-noite</span>
           </div>
-          <div class="countdown" aria-label="Tempo restante">
-            <div class="countdown__box" data-countdown-h>07<small>h</small></div>
+          <div class="countdown countdown--hidden" aria-label="Tempo restante">
+            <div class="countdown__box" data-countdown-h><small>h</small></div>
             <strong>:</strong>
-            <div class="countdown__box" data-countdown-m>34<small>m</small></div>
+            <div class="countdown__box" data-countdown-m><small>m</small></div>
             <strong>:</strong>
-            <div class="countdown__box" data-countdown-s>16<small>s</small></div>
+            <div class="countdown__box" data-countdown-s><small>s</small></div>
           </div>
         </div>
         <div class="product-grid" data-offer-products></div>
@@ -114,9 +114,9 @@
     <div class="container">
       <div class="store-footer__grid">
         <div>
-          <h3><span class="store-brand__mark">S</span><span data-store-name>ShopNow</span></h3>
+          <h3><span class="store-brand__mark">S</span><span data-store-name></span></h3>
           <p>Sua loja online com bons produtos, preços claros e uma experiência de compra simples do começo ao fim.</p>
-          <p>Suporte 24/7, compra segura e frete grátis acima de R$ 299.</p>
+          <p data-footer-free-shipping>Suporte 24/7, compra segura e frete grátis acima de R$ 299.</p>
         </div>
         <div>
           <h4>Loja</h4>
@@ -127,8 +127,8 @@
         </div>
         <div>
           <h4>Atendimento</h4>
-          <a href="pages/login.html">Minha conta</a>
-          <a href="pages/login.html">Meus pedidos</a>
+          <a href="pages/account.html">Minha conta</a>
+          <a href="pages/account.html">Meus pedidos</a>
           <a href="#">Fale conosco</a>
           <a href="#">Rastrear pedido</a>
         </div>
@@ -142,7 +142,7 @@
       </div>
       <div class="store-footer__bottom">
         <div>
-          <span>© 2026 ShopNow. Todos os direitos reservados.</span>
+          <span>© 2026 <span data-store-name></span>. Todos os direitos reservados.</span>
           <span>CNPJ: 00.000.000/0000-00</span>
           <span style="color: #34d399;">Loja segura e certificada</span>
         </div>
@@ -150,7 +150,7 @@
           <a href="#">Facebook</a>
           <a href="#">Instagram</a>
           <a href="#">WhatsApp</a>
-          <a href="pages/login.html" style="color: #93c5fd; font-weight: 700;">Admin</a>
+          <a href="pages/admin/login.html" class="footer-admin-link">Admin</a>
         </div>
       </div>
     </div>

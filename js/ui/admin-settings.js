@@ -46,14 +46,59 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ---------------------------------------------------------
   // Carregar e coletar dados dos formulários
   // ---------------------------------------------------------
+  function renderStoreBrandPreview(form, values = {}) {
+    const preview = form.querySelector('[data-store-brand-preview]');
+    if (!preview) return;
+
+    const storeNameField = form.querySelector('[name="storeName"]');
+    const logoField = form.querySelector('[name="logo"]');
+    const name = values.storeName || storeNameField?.value || 'ShopNow';
+    const logoValue = String(values.logo || logoField?.value || '').trim();
+
+    preview.innerHTML = '';
+
+    const badge = document.createElement('div');
+    badge.className = 'settings-store-brand-preview__badge';
+
+    if (logoValue) {
+      const image = document.createElement('img');
+      image.src = logoValue;
+      image.alt = `${name} logo`;
+      image.className = 'settings-store-brand-preview__logo';
+      badge.appendChild(image);
+    } else {
+      const placeholder = document.createElement('span');
+      placeholder.className = 'settings-store-brand-preview__placeholder';
+      placeholder.textContent = 'Sem logo';
+      badge.appendChild(placeholder);
+    }
+
+    const text = document.createElement('div');
+    text.className = 'settings-store-brand-preview__text';
+    const title = document.createElement('strong');
+    title.textContent = name;
+    const subtitle = document.createElement('span');
+    subtitle.textContent = 'Pré-visualização da marca na loja';
+    text.appendChild(title);
+    text.appendChild(subtitle);
+    badge.appendChild(text);
+
+    preview.appendChild(badge);
+  }
+
   function hydrateForms() {
     const settings = ShopData.settings();
 
     forms.forEach(form => {
       const formType = form.dataset.form;
       const values = settings[formType] || {};
+      const logoField = form.querySelector('[name="logo"]');
+      const logoUrlField = form.querySelector('[name="logoUrl"]');
+      const logoPreview = form.querySelector('[data-logo-preview]');
+      const logoRemoveBtn = form.querySelector('[data-logo-remove]');
 
       form.querySelectorAll('[name]').forEach(field => {
+        if (field.type === 'file') return;
         if (!(field.name in values)) return;
 
         if (field.type === 'checkbox') {
@@ -62,8 +107,28 @@ document.addEventListener('DOMContentLoaded', async () => {
           return;
         }
 
+        if (field.name === 'logoUrl') {
+          field.value = values.logo && !String(values.logo).startsWith('data:') ? values.logo : '';
+          return;
+        }
+
         field.value = values[field.name] ?? '';
       });
+
+      if (logoPreview && logoField) {
+        const logoValue = String(logoField.value || values.logo || '').trim();
+        if (logoValue) {
+          logoPreview.src = logoValue;
+          logoPreview.hidden = false;
+          if (logoRemoveBtn) logoRemoveBtn.hidden = false;
+        } else {
+          logoPreview.hidden = true;
+          logoPreview.removeAttribute('src');
+          if (logoRemoveBtn) logoRemoveBtn.hidden = true;
+        }
+      }
+
+      renderStoreBrandPreview(form, values);
     });
   }
 
@@ -73,6 +138,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     form.querySelectorAll('input[type="checkbox"][name]').forEach(input => {
       data[input.name] = input.checked;
     });
+
+    if (data.logoUrl && !data.logo) {
+      data.logo = String(data.logoUrl).trim();
+    }
+    delete data.logoUrl;
 
     if (form.dataset.form === 'comercial' && data.freeShippingValue !== '') {
       data.freeShippingValue = Number(data.freeShippingValue);
@@ -90,6 +160,68 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Salvar configurações
   // ---------------------------------------------------------
   forms.forEach(form => {
+    const logoFileInput = form.querySelector('[data-logo-file]');
+    const logoField = form.querySelector('[name="logo"]');
+    const logoUrlField = form.querySelector('[name="logoUrl"]');
+    const logoPreview = form.querySelector('[data-logo-preview]');
+    const logoRemoveBtn = form.querySelector('[data-logo-remove]');
+
+    const refreshLogoPreview = () => {
+      if (!logoPreview || !logoField) return;
+      const value = String(logoField.value || '').trim();
+      if (!value) {
+        logoPreview.hidden = true;
+        logoPreview.removeAttribute('src');
+        if (logoRemoveBtn) logoRemoveBtn.hidden = true;
+        return;
+      }
+      logoPreview.src = value;
+      logoPreview.hidden = false;
+      if (logoRemoveBtn) logoRemoveBtn.hidden = false;
+    };
+
+    if (logoFileInput && logoField) {
+      logoFileInput.addEventListener('change', () => {
+        const file = logoFileInput.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = String(reader.result || '');
+          logoField.value = result;
+          if (logoUrlField) {
+            logoUrlField.value = '';
+          }
+          refreshLogoPreview();
+          renderStoreBrandPreview(form);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (logoRemoveBtn && logoField) {
+      logoRemoveBtn.addEventListener('click', () => {
+        if (logoUrlField) logoUrlField.value = '';
+        logoField.value = '';
+        if (logoFileInput) logoFileInput.value = '';
+        refreshLogoPreview();
+        renderStoreBrandPreview(form);
+      });
+    }
+
+    if (logoUrlField && logoField) {
+      logoUrlField.addEventListener('input', () => {
+        const value = String(logoUrlField.value || '').trim();
+        logoField.value = value;
+        refreshLogoPreview();
+        renderStoreBrandPreview(form);
+      });
+    }
+
+    const storeNameField = form.querySelector('[name="storeName"]');
+    if (storeNameField) {
+      storeNameField.addEventListener('input', () => renderStoreBrandPreview(form));
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const data = collectFormData(form);

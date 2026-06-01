@@ -10,9 +10,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const titleEl = document.querySelector('[data-cart-title]');
   if (!list || !summary) return;
 
-  const STORE_ADDRESS = 'Rua das Flores, 1234 - Seg-Sáb 9h-20h, Dom 10h-18h';
-  let delivery = 'home';
+  const STORE_ADDRESS_FALLBACK = 'Rua das Flores, 1234 - Seg-Sáb 9h-20h, Dom 10h-18h';
+  const HOME_DELIVERY_ENABLED = false;
+  let delivery = HOME_DELIVERY_ENABLED ? 'home' : 'pickup';
   let appliedCoupon = null;
+
+  function getStoreAddress() {
+    const settings = ShopData.settings();
+    const address = settings?.geral?.address?.trim();
+    const hours = settings?.geral?.businessHours?.trim();
+    if (address && hours) {
+      return `${address} - ${hours}`;
+    }
+    return STORE_ADDRESS_FALLBACK;
+  }
 
   function renderItems() {
     const items = ShopNow.cartItems();
@@ -78,11 +89,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const qty = document.createElement('div');
     qty.className = 'qty-control';
-    qty.innerHTML = `
-      <button data-cart-dec="${item.id}" aria-label="Diminuir quantidade" type="button">−</button>
-      <span>${item.qty}</span>
-      <button data-cart-inc="${item.id}" aria-label="Aumentar quantidade" type="button">+</button>
-    `;
+
+    const decBtn = document.createElement('button');
+    decBtn.type = 'button';
+    decBtn.dataset.cartDec = item.id;
+    decBtn.setAttribute('aria-label', 'Diminuir quantidade');
+    decBtn.textContent = '−';
+    if (item.qty <= 1) decBtn.disabled = true;
+
+    const qtyValue = document.createElement('span');
+    qtyValue.textContent = item.qty;
+
+    const incBtn = document.createElement('button');
+    incBtn.type = 'button';
+    incBtn.dataset.cartInc = item.id;
+    incBtn.setAttribute('aria-label', 'Aumentar quantidade');
+    incBtn.textContent = '+';
+    if (item.qty >= item.product.stock) incBtn.disabled = true;
+
+    qty.appendChild(decBtn);
+    qty.appendChild(qtyValue);
+    qty.appendChild(incBtn);
     info.appendChild(qty);
     article.appendChild(info);
 
@@ -123,8 +150,9 @@ document.addEventListener('DOMContentLoaded', () => {
     tabs.appendChild(deliveryTab({
       type: 'home',
       title: 'Receber em casa',
-      subtitle: '2-5 dias úteis',
+      subtitle: HOME_DELIVERY_ENABLED ? '2-5 dias úteis' : 'Em breve',
       icon: '<rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
+      disabled: !HOME_DELIVERY_ENABLED,
     }));
     tabs.appendChild(deliveryTab({
       type: 'pickup',
@@ -139,11 +167,16 @@ document.addEventListener('DOMContentLoaded', () => {
       address.className = 'delivery-address';
       address.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
       const span = document.createElement('span');
-      const [street, hours] = STORE_ADDRESS.split(' - ');
-      const strong = document.createElement('strong');
-      strong.textContent = street;
-      span.appendChild(strong);
-      span.appendChild(document.createTextNode(` - ${hours}`));
+      const storeAddress = getStoreAddress();
+      if (storeAddress.includes(' - ')) {
+        const [street, hours] = storeAddress.split(' - ');
+        const strong = document.createElement('strong');
+        strong.textContent = street;
+        span.appendChild(strong);
+        span.appendChild(document.createTextNode(` - ${hours}`));
+      } else {
+        span.textContent = storeAddress;
+      }
       address.appendChild(span);
       section.appendChild(address);
     } else {
@@ -183,11 +216,13 @@ document.addEventListener('DOMContentLoaded', () => {
     bindCep(section);
   }
 
-  function deliveryTab({ type, title, subtitle, icon }) {
+  function deliveryTab({ type, title, subtitle, icon, disabled = false }) {
     const button = document.createElement('button');
-    button.className = 'delivery-tab' + (delivery === type ? ' is-active' : '');
+    button.className = 'delivery-tab' + (delivery === type ? ' is-active' : '') + (disabled ? ' is-disabled' : '');
     button.dataset.delivery = type;
     button.type = 'button';
+    button.disabled = disabled;
+    button.title = disabled ? 'Opção não disponível no momento' : '';
     button.innerHTML = `
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icon}</svg>
       <div>
@@ -359,5 +394,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  renderItems();
+  async function initCartPage() {
+    try {
+      await ShopData.ready();
+    } catch (error) {
+      console.warn('ShopData.ready falhou no carrinho, continuando sem dados adicionais.', error);
+    }
+    ShopNow.updateCartCount();
+    renderItems();
+  }
+
+  if (document.readyState !== 'loading') {
+    initCartPage();
+  } else {
+    document.addEventListener('DOMContentLoaded', initCartPage);
+    window.addEventListener('load', initCartPage, { once: true });
+  }
 });

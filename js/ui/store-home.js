@@ -3,12 +3,51 @@
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Countdown roda imediatamente — só precisa de Date math, sem banco
+  startCountdown();
+
+  renderLoadingSkeletons();
   ShopData.ready().then(() => {
     renderCategories();
     renderFeaturedProducts();
     renderOfferProducts();
-    startCountdown();
   });
+
+  function renderLoadingSkeletons() {
+    const categoriesGrid = document.querySelector('[data-categories]');
+    const featuredGrid = document.querySelector('[data-featured-products]');
+    const offerGrid = document.querySelector('[data-offer-products]');
+
+    if (categoriesGrid) {
+      categoriesGrid.innerHTML = '';
+      for (let i = 0; i < 4; i += 1) {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'category-card card skeleton';
+        placeholder.style.minHeight = '120px';
+        categoriesGrid.appendChild(placeholder);
+      }
+    }
+
+    if (featuredGrid) {
+      featuredGrid.innerHTML = '';
+      for (let i = 0; i < 4; i += 1) {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'product-card card skeleton';
+        placeholder.style.minHeight = '260px';
+        featuredGrid.appendChild(placeholder);
+      }
+    }
+
+    if (offerGrid) {
+      offerGrid.innerHTML = '';
+      for (let i = 0; i < 4; i += 1) {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'product-card card skeleton';
+        placeholder.style.minHeight = '260px';
+        offerGrid.appendChild(placeholder);
+      }
+    }
+  }
 
   function renderProductCard(product) {
     return ShopNow.productCard(product);
@@ -131,6 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let timer;
 
+    const countdownEl = countdownH.closest('.countdown');
+
     function updateCountdown() {
       const diff = target - new Date();
 
@@ -143,13 +184,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const hours   = Math.floor(diff / (1000 * 60 * 60));
       const minutes = Math.floor((diff / (1000 * 60)) % 60);
       const seconds = Math.floor((diff / 1000) % 60);
 
       countdownH.innerHTML = `${String(hours).padStart(2, '0')}<small>h</small>`;
       countdownM.innerHTML = `${String(minutes).padStart(2, '0')}<small>m</small>`;
       countdownS.innerHTML = `${String(seconds).padStart(2, '0')}<small>s</small>`;
+
+      if (countdownEl) countdownEl.classList.add('is-visible');
     }
 
     updateCountdown();

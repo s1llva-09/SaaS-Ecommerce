@@ -12,21 +12,6 @@ function showNotification(message, type = 'info') {
 
   const notification = document.createElement('div');
   notification.className = `notification notification--${type}`;
-  notification.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    max-width: 400px;
-    padding: 16px 20px;
-    background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3b82f6'};
-    color: white;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-  `;
-
   notification.textContent = message;
   document.body.appendChild(notification);
 
@@ -51,7 +36,7 @@ async function supabaseAuth(action, email, password, name = null) {
   };
 
   if (action === 'signup' && name) {
-    body.user_metadata = { name };
+    body.data = { name };
   }
 
   try {
@@ -206,8 +191,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Login com Supabase Auth
         const result = await supabaseAuth('signin', email, password);
-
-        console.log('Resposta login:', result);
 
         // Salva token (compatível com /token endpoint)
         const token = result.access_token || result.session?.access_token;

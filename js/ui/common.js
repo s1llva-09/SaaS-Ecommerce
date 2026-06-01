@@ -59,18 +59,39 @@ const ShopNow = {
 
     const cart = this.cart();
     const current = cart.find(item => item.id === product.id);
-    if (current) current.qty += qty;
-    else cart.push({ id: product.id, qty });
+    const currentQty = current ? current.qty : 0;
+    const nextQty = Math.min(product.stock, currentQty + qty);
+
+    if (nextQty <= 0) return;
+    if (nextQty === currentQty) {
+      this.toast('Quantidade máxima disponível no estoque', 'error');
+      return;
+    }
+
+    if (current) {
+      current.qty = nextQty;
+    } else {
+      cart.push({ id: product.id, qty: nextQty });
+    }
 
     this.saveCart(cart);
     this.toast('Produto adicionado ao carrinho');
   },
 
   updateQty(productId, qty) {
+    const product = ShopData.products().find(item => item.id === String(productId));
     const nextQty = Number(qty);
+    if (!product) return;
+
+    const adjustedQty = Math.max(0, Math.min(nextQty, product.stock));
     const cart = this.cart()
-      .map(item => item.id === String(productId) ? { ...item, qty: nextQty } : item)
+      .map(item => item.id === String(productId) ? { ...item, qty: adjustedQty } : item)
       .filter(item => item.qty > 0);
+
+    if (nextQty > product.stock) {
+      this.toast(`Ajustado para ${product.stock} unidades disponíveis`, 'error');
+    }
+
     this.saveCart(cart);
   },
 
@@ -79,9 +100,22 @@ const ShopNow = {
   },
 
   cartItems() {
-    return this.cart()
-      .map(item => ({ ...item, product: ShopData.products().find(product => product.id === item.id) }))
-      .filter(item => item.product);
+    const cart = this.cart();
+    let changed = false;
+
+    const items = cart
+      .map(item => {
+        const product = ShopData.products().find(product => product.id === item.id);
+        if (!product) return null;
+
+        const adjustedQty = Math.min(item.qty, product.stock);
+        if (adjustedQty !== item.qty) changed = true;
+        return { ...item, qty: adjustedQty, product };
+      })
+      .filter(item => item && item.qty > 0);
+
+    if (changed) this.saveCart(items.map(({ id, qty }) => ({ id, qty })));
+    return items;
   },
 
   cartTotal() {
@@ -259,17 +293,23 @@ const ShopNow = {
     const closeBtn = document.querySelector('[data-search-close]');
     if (!overlay) return;
 
+    overlay.inert = true;
+
     const open = () => {
       overlay.classList.add('is-open');
       overlay.setAttribute('aria-hidden', 'false');
+      overlay.inert = false;
       const input = overlay.querySelector('input');
       setTimeout(() => input?.focus(), 50);
       document.body.style.overflow = 'hidden';
     };
 
     const close = () => {
+      const input = overlay.querySelector('input');
+      if (input === document.activeElement) input.blur();
       overlay.classList.remove('is-open');
       overlay.setAttribute('aria-hidden', 'true');
+      overlay.inert = true;
       document.body.style.overflow = '';
     };
 
@@ -331,10 +371,25 @@ const ShopNow = {
     });
   },
 
+  renderCategoriesNavSkeleton() {
+    const nav = document.querySelector('[data-categories-nav]');
+    if (!nav) return;
+    nav.innerHTML = '';
+
+    const placeholderCount = 4;
+    for (let i = 0; i < placeholderCount; i += 1) {
+      const item = document.createElement('span');
+      item.className = 'nav-skeleton skeleton';
+      item.textContent = ' ';
+      nav.appendChild(item);
+    }
+  },
+
   injectModeSwitch() {
     if (document.querySelector('[data-mode-switch]')) return;
     if (document.body.classList.contains('auth-page')) return;
-    const isAdmin = document.body.classList.contains('admin-page');
+    if (document.body.classList.contains('admin-page')) return;
+    const isAdmin = false;
     const root = this.root();
     const switcher = document.createElement('nav');
     switcher.className = 'mode-switch';
@@ -360,17 +415,27 @@ const ShopNow = {
     if (document.body.classList.contains('admin-page') || document.body.classList.contains('auth-page')) return;
 
     const root = this.root();
-    const storeName = ShopData.settings()?.geral?.storeName || 'ShopNow';
+    const settings = ShopData.settings();
+    const geral = settings?.geral || {};
+    const contato = settings?.contato || {};
+    const comercial = settings?.comercial || {};
+    const storeName = geral.storeName || 'ShopNow';
     const safeStoreName = this.escapeHTML(storeName);
+    const logoUrl = String(geral.logo || '').trim();
+    const freeShippingText = comercial.freeShippingText || `Frete grátis acima de R$ ${comercial.freeShippingValue || 299}`;
+    const cnpjText = geral.cpfCnpj ? `CNPJ: ${this.escapeHTML(geral.cpfCnpj)}` : 'CNPJ: 00.000.000/0000-00';
+    const brandMarkup = logoUrl
+      ? `<img src="${this.escapeHTML(logoUrl)}" alt="${safeStoreName} logo" class="store-footer__logo" />` 
+      : '<span class="store-brand__mark">S</span>';
     const footer = document.createElement('footer');
     footer.className = 'store-footer';
     footer.innerHTML = `
       <div class="container">
         <div class="store-footer__grid">
           <div>
-            <h3><span class="store-brand__mark">S</span><span>${safeStoreName}</span></h3>
+            <h3>${brandMarkup}<span>${safeStoreName}</span></h3>
             <p>Sua loja online com bons produtos, preços claros e uma experiência de compra simples do começo ao fim.</p>
-            <p>Suporte 24/7, compra segura e frete grátis acima de R$ 299.</p>
+            <p>Suporte 24/7, compra segura e ${this.escapeHTML(freeShippingText)}.</p>
           </div>
           <div>
             <h4>Loja</h4>
@@ -383,13 +448,13 @@ const ShopNow = {
             <h4>Atendimento</h4>
             <a href="${root}pages/account.html">Minha conta</a>
             <a href="${root}pages/account.html">Meus pedidos</a>
-            <a href="#">Fale conosco</a>
-            <a href="#">Rastrear pedido</a>
+            <a href="mailto:${this.escapeHTML(geral.email || 'contato@shopnow.com')}">Fale conosco</a>
+            <a href="https://wa.me/${this.escapeHTML(contato.whatsapp || '')}" target="_blank">WhatsApp</a>
           </div>
           <div>
             <h4>Informações</h4>
-            <a href="#">Política de privacidade</a>
-            <a href="#">Termos de uso</a>
+            <a href="${this.escapeHTML(contato.privacyUrl || '#')}">Política de privacidade</a>
+            <a href="${this.escapeHTML(contato.termsUrl || '#')}">Termos de uso</a>
             <a href="#">Política de trocas</a>
             <a href="#">FAQ</a>
           </div>
@@ -397,13 +462,13 @@ const ShopNow = {
         <div class="store-footer__bottom">
           <div>
             <span>© 2026 ${safeStoreName}. Todos os direitos reservados.</span>
-            <span>CNPJ: 00.000.000/0000-00</span>
+            <span>${cnpjText}</span>
             <span style="color: #34d399;">Loja segura e certificada</span>
           </div>
           <div class="store-footer__social">
-            <a href="#">Facebook</a>
-            <a href="#">Instagram</a>
-            <a href="#">WhatsApp</a>
+            <a href="${this.escapeHTML(contato.facebook || '#')}" target="_blank">Facebook</a>
+            <a href="${this.escapeHTML(`https://instagram.com/${contato.instagram || ''}`)}" target="_blank">Instagram</a>
+            <a href="${this.escapeHTML(contato.whatsapp ? `https://wa.me/${contato.whatsapp.replace(/\D/g, '')}` : '#')}" target="_blank">WhatsApp</a>
             <a href="${root}pages/admin/login.html" style="color: #93c5fd; font-weight: 700;">Admin</a>
           </div>
         </div>
@@ -419,7 +484,9 @@ document.addEventListener('DOMContentLoaded', () => {
   ShopNow.bindSearchOverlay();
   ShopNow.injectModeSwitch();
   ShopNow.injectStoreFooter();
+  ShopNow.renderCategoriesNavSkeleton();
   ShopNow.renderCategoriesNav();
+  ShopData.ready().then(() => ShopNow.renderCategoriesNav());
 
   const user = ShopNow.getUser();
   const loginButton = document.querySelector('[data-login-btn]');

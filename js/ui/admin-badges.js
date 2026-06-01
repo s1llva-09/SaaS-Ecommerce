@@ -3,81 +3,77 @@
 // Atualiza badges do menu lateral baseado em dados reais
 // ============================================================
 
+const ADMIN_BADGE_COUNTS_KEY = 'shopnow-admin-badge-counts';
+
 document.addEventListener('DOMContentLoaded', () => {
+  function getStoredCounts() {
+    try {
+      return JSON.parse(localStorage.getItem(ADMIN_BADGE_COUNTS_KEY) || '{}');
+    } catch {
+      return {};
+    }
+  }
+
+  function saveStoredCounts(counts) {
+    localStorage.setItem(ADMIN_BADGE_COUNTS_KEY, JSON.stringify(counts));
+  }
+
+  function showBadge(badge, diff) {
+    if (!badge) return;
+    if (diff > 0) {
+      badge.textContent = String(diff);
+      badge.style.display = '';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
   function updateAllBadges() {
     if (typeof ShopData === 'undefined') return;
 
-    // Badge de Pedidos
-    const ordersBadge = document.querySelector('[data-orders-badge]');
-    if (ordersBadge) {
-      const ordersCount = ShopData.orders().length;
-      if (ordersCount > 0) {
-        ordersBadge.textContent = String(ordersCount);
-        ordersBadge.style.display = '';
-      } else {
-        ordersBadge.style.display = 'none';
-      }
-    }
+    const current = {
+      orders: ShopData.orders().length,
+      products: ShopData.products().length,
+      customers: ShopData.customers().length,
+      cashflow: ShopData.cashflow().length,
+      reports: ShopData.orders().length,
+      promotions: ShopData.promotions().length,
+    };
 
-    // Badge de Produtos
-    const productsBadge = document.querySelector('[data-products-badge]');
-    if (productsBadge) {
-      const productsCount = ShopData.products().length;
-      if (productsCount > 0) {
-        productsBadge.textContent = String(productsCount);
-        productsBadge.style.display = '';
-      } else {
-        productsBadge.style.display = 'none';
-      }
-    }
+    const previous = getStoredCounts();
+    const hasPrevious = Object.keys(previous).length > 0;
 
-    // Badge de Clientes
-    const customersBadge = document.querySelector('[data-customers-badge]');
-    if (customersBadge) {
-      const customersCount = ShopData.customers().length;
-      if (customersCount > 0) {
-        customersBadge.textContent = String(customersCount);
-        customersBadge.style.display = '';
-      } else {
-        customersBadge.style.display = 'none';
-      }
-    }
+    showBadge(
+      document.querySelector('[data-orders-badge]'),
+      hasPrevious ? Math.max(0, current.orders - (previous.orders || 0)) : 0
+    );
 
-    // Badge de Caixa
-    const cashflowBadge = document.querySelector('[data-cashflow-badge]');
-    if (cashflowBadge) {
-      const cashflowCount = ShopData.cashflow().length;
-      if (cashflowCount > 0) {
-        cashflowBadge.textContent = String(cashflowCount);
-        cashflowBadge.style.display = '';
-      } else {
-        cashflowBadge.style.display = 'none';
-      }
-    }
+    showBadge(
+      document.querySelector('[data-products-badge]'),
+      hasPrevious ? Math.max(0, current.products - (previous.products || 0)) : 0
+    );
 
-    // Badge de Relatórios (baseado em pedidos/vendas)
-    const reportsBadge = document.querySelector('[data-reports-badge]');
-    if (reportsBadge) {
-      const ordersCount = ShopData.orders().length;
-      if (ordersCount > 0) {
-        reportsBadge.textContent = String(ordersCount);
-        reportsBadge.style.display = '';
-      } else {
-        reportsBadge.style.display = 'none';
-      }
-    }
+    showBadge(
+      document.querySelector('[data-customers-badge]'),
+      hasPrevious ? Math.max(0, current.customers - (previous.customers || 0)) : 0
+    );
 
-    // Badge de Promoções
-    const promotionsBadge = document.querySelector('[data-promotions-badge]');
-    if (promotionsBadge) {
-      const promotionsCount = ShopData.promotions().length;
-      if (promotionsCount > 0) {
-        promotionsBadge.textContent = String(promotionsCount);
-        promotionsBadge.style.display = '';
-      } else {
-        promotionsBadge.style.display = 'none';
-      }
-    }
+    showBadge(
+      document.querySelector('[data-cashflow-badge]'),
+      hasPrevious ? Math.max(0, current.cashflow - (previous.cashflow || 0)) : 0
+    );
+
+    showBadge(
+      document.querySelector('[data-reports-badge]'),
+      hasPrevious ? Math.max(0, current.reports - (previous.reports || 0)) : 0
+    );
+
+    showBadge(
+      document.querySelector('[data-promotions-badge]'),
+      hasPrevious ? Math.max(0, current.promotions - (previous.promotions || 0)) : 0
+    );
+
+    saveStoredCounts(current);
   }
 
   // Aguarda dados e atualiza badges

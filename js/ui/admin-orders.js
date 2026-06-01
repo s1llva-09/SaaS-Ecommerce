@@ -255,7 +255,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const actionsDiv = document.createElement('div');
       actionsDiv.className = 'drawer-actions';
 
-      if (order.status === 'paid') {
+      if (order.status === 'pending') {
+        actionsDiv.appendChild(buildActionButton('btn-confirm-delivery', 'advance', order.id, SVG_CHECK, 'Confirmar pagamento'));
+      } else if (order.status === 'paid') {
         const label = order.type === 'pickup' ? 'Marcar como pronto' : 'Marcar como enviado';
         const btn = buildActionButton('btn-confirm-delivery', 'advance', order.id, SVG_CHECK, label);
         btn.style.background = 'var(--brand)';
@@ -277,14 +279,36 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', () => {
         const action = btn.dataset.orderAction;
         if (action === 'advance') {
-          ShopData.updateOrderStatus(order.id, nextOrderStatus(order));
-          ShopNow.toast('Status atualizado com sucesso!');
+          const confirmText = order.status === 'pending'
+            ? 'Deseja confirmar o pagamento deste pedido?'
+            : order.status === 'paid'
+              ? order.type === 'pickup'
+                ? 'Deseja marcar este pedido como pronto para retirada?'
+                : 'Deseja marcar este pedido como enviado?'
+              : order.status === 'shipped'
+                ? 'Deseja confirmar a entrega deste pedido?'
+                : order.status === 'ready'
+                  ? 'Deseja confirmar a retirada deste pedido?'
+                  : 'Deseja avançar o status deste pedido?';
+
+          adminConfirm('Atualizar status', confirmText, () => {
+            ShopData.updateOrderStatus(order.id, nextOrderStatus(order));
+            ShopNow.toast('Status atualizado com sucesso!');
+            closeDrawer();
+            render();
+          });
         } else if (action === 'cancel') {
-          ShopData.updateOrderStatus(order.id, 'cancelled');
-          ShopNow.toast('Pedido cancelado.');
+          const cancelText = order.status === 'shipped'
+            ? 'Este pedido já foi enviado. Deseja cancelar mesmo assim?'
+            : 'Deseja cancelar este pedido?';
+
+          adminConfirm('Cancelar pedido', cancelText, () => {
+            ShopData.updateOrderStatus(order.id, 'cancelled');
+            ShopNow.toast('Pedido cancelado.');
+            closeDrawer();
+            render();
+          }, true);
         }
-        closeDrawer();
-        render();
       });
     });
 
@@ -439,3 +463,46 @@ document.addEventListener('DOMContentLoaded', () => {
     render();
   }
 });
+
+function adminConfirm(title, message, onConfirm, destructive = false) {
+  const overlay    = document.getElementById('adminConfirmOverlay');
+  const titleEl    = document.getElementById('adminConfirmTitle');
+  const msgEl      = document.getElementById('adminConfirmMsg');
+  const okBtn      = document.getElementById('adminConfirmOkBtn');
+  const cancelBtn  = document.getElementById('adminConfirmCancelBtn');
+  if (!overlay) return onConfirm();
+
+  const iconEl = document.getElementById('adminConfirmIcon');
+  titleEl.textContent = title;
+  msgEl.textContent   = message;
+  okBtn.textContent   = destructive ? 'Cancelar pedido' : 'Confirmar';
+  okBtn.classList.toggle('btn-confirm--danger', destructive);
+  okBtn.disabled = false;
+  if (iconEl) {
+    iconEl.classList.toggle('confirm-modal__icon--danger', destructive);
+    iconEl.classList.toggle('confirm-modal__icon--brand', !destructive);
+  }
+  overlay.style.display = 'flex';
+
+  let confirmed = false;
+
+  function close() {
+    overlay.style.display = 'none';
+    okBtn.removeEventListener('click', handleOk);
+    cancelBtn.removeEventListener('click', close);
+    overlay.removeEventListener('click', handleOverlay);
+  }
+
+  function handleOk() {
+    if (confirmed) return;
+    confirmed = true;
+    okBtn.disabled = true;
+    close();
+    onConfirm();
+  }
+  function handleOverlay(e) { if (e.target === overlay) close(); }
+
+  okBtn.addEventListener('click', handleOk);
+  cancelBtn.addEventListener('click', close);
+  overlay.addEventListener('click', handleOverlay);
+}

@@ -316,9 +316,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (editingId) {
       ShopData.updateProduct(editingId, product);
       ShopNow.toast('Produto atualizado com sucesso!');
+      const timestamp = Date.now();
+      localStorage.setItem('admin-products-update', timestamp);
+      window.dispatchEvent(new CustomEvent('admin:products:updated', { detail: { action: 'update', timestamp } }));
     } else {
       ShopData.addProduct({ ...product, id: `P${Date.now()}` });
       ShopNow.toast('Produto criado com sucesso!');
+      const timestamp = Date.now();
+      localStorage.setItem('admin-products-update', timestamp);
+      window.dispatchEvent(new CustomEvent('admin:products:updated', { detail: { action: 'add', timestamp } }));
     }
 
     render();
@@ -479,13 +485,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (editBtn) {
       openModal(product);
     } else if (deleteBtn) {
-      // Modal de confirmação
-      const confirmed = confirm(`Tem certeza que quer deletar "${product.name}"?`);
-      if (confirmed) {
+      confirmDeleteProduct(product, () => {
         ShopData.deleteProduct(product.id);
-        ShopNow.toast('✓ Produto deletado!');
+        const timestamp = Date.now();
+        localStorage.setItem('admin-products-update', timestamp);
+        window.dispatchEvent(new CustomEvent('admin:products:updated', { detail: { action: 'delete', timestamp } }));
+        ShopNow.toast('Produto deletado!');
         render();
-      }
+      });
     }
   });
 
@@ -736,3 +743,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderCategories();
 });
+
+function confirmDeleteProduct(product, onConfirm) {
+  const overlay  = document.getElementById('deleteConfirmOverlay');
+  const msg      = document.getElementById('deleteConfirmMsg');
+  const confirmBtn = document.getElementById('deleteConfirmBtn');
+  const cancelBtn  = document.getElementById('deleteCancelBtn');
+  if (!overlay) return onConfirm();
+
+  msg.textContent = `"${product.name}" será removido permanentemente.`;
+  overlay.style.display = 'flex';
+
+  function close() {
+    overlay.style.display = 'none';
+    confirmBtn.removeEventListener('click', handleConfirm);
+    cancelBtn.removeEventListener('click', close);
+    overlay.removeEventListener('click', handleOverlay);
+  }
+
+  function handleConfirm() { close(); onConfirm(); }
+  function handleOverlay(e) { if (e.target === overlay) close(); }
+
+  confirmBtn.addEventListener('click', handleConfirm);
+  cancelBtn.addEventListener('click', close);
+  overlay.addEventListener('click', handleOverlay);
+}

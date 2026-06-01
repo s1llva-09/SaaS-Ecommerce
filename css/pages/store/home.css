@@ -185,6 +185,14 @@
   line-height: 1.15;
 }
 
+.countdown--hidden {
+  visibility: hidden;
+}
+
+.countdown.is-visible {
+  visibility: visible;
+}
+
 .countdown {
   display: inline-flex;
   align-items: center;

@@ -3,7 +3,7 @@
 // Controla filtros, busca, ordenacao e modo de visualizacao.
 // ============================================================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const grid = document.querySelector('[data-products-grid]');
   const count = document.querySelector('[data-products-count]');
   const titleEl = document.querySelector('[data-products-title]');
@@ -37,6 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (breadcrumb) breadcrumb.textContent = `"${searchQuery}"`;
   }
 
+  renderLoadingSkeletons();
+  await ShopData.ready();
   renderCategoryFilter();
   render();
 
@@ -107,6 +109,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (inStock?.checked) products = products.filter(p => p.stock > 0);
 
     products = sortProducts(products);
+
+    if (titleEl) {
+      if (category.value) {
+        titleEl.textContent = category.value;
+      } else if (searchQuery) {
+        titleEl.textContent = `Resultados para "${searchQuery}"`;
+      } else {
+        titleEl.textContent = 'Todos os produtos';
+      }
+    }
+
+    if (breadcrumb) {
+      if (category.value) {
+        breadcrumb.textContent = category.value;
+      } else if (searchQuery) {
+        breadcrumb.textContent = `"${searchQuery}"`;
+      } else {
+        breadcrumb.textContent = 'Produtos';
+      }
+    }
 
     if (count) {
       count.textContent = `${products.length} produto${products.length === 1 ? '' : 's'} encontrado${products.length === 1 ? '' : 's'}`;
@@ -233,6 +255,35 @@ document.addEventListener('DOMContentLoaded', () => {
     if (breadcrumb) breadcrumb.textContent = selected || 'Produtos';
     render();
   });
+
+  function renderLoadingSkeletons() {
+    if (titleEl) {
+      titleEl.textContent = 'Carregando...';
+    }
+    if (breadcrumb) {
+      breadcrumb.textContent = 'Carregando';
+    }
+    if (count) {
+      count.textContent = 'Carregando produtos...';
+    }
+    if (categoryList) {
+      categoryList.innerHTML = '';
+      for (let i = 0; i < 5; i += 1) {
+        const button = document.createElement('span');
+        button.className = 'category-filter__item skeleton';
+        button.style.minWidth = '90px';
+        button.style.height = '38px';
+        categoryList.appendChild(button);
+      }
+    }
+    grid.innerHTML = '';
+    for (let i = 0; i < 8; i += 1) {
+      const card = document.createElement('div');
+      card.className = 'product-card skeleton';
+      card.style.minHeight = '320px';
+      grid.appendChild(card);
+    }
+  }
 
   ratingButtons.forEach(button => {
     button.addEventListener('click', () => {

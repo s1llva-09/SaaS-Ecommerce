@@ -147,7 +147,7 @@ async function fetchRows(table) {
 }
 
 function persist(table, action) {
-  action().catch(error => {
+  return action().catch(error => {
     if (error.status === 404) _missingTables.add(table);
     console.warn(`[ShopData] Falha ao salvar ${table}:`, error, error.detail || '');
   });
@@ -232,7 +232,7 @@ function productToRow(product) {
 function normalizeOrder(row) {
   return {
     id: String(getValue(row, 'id') ?? ''),
-    userId: getValue(row, 'userId', 'user_id') || '',
+    userId: String(getValue(row, 'userId', 'user_id') || ''),
     customer: getValue(row, 'customer', 'customer_name', 'cliente') || '',
     email: getValue(row, 'email', 'customer_email') || '',
     items: asArray(getValue(row, 'items', 'itens')),
@@ -435,8 +435,12 @@ function refreshCategoryCounts() {
   });
 }
 
+function isCompletedOrder(order) {
+  return ['paid', 'ready', 'shipped', 'delivered'].includes(order.status);
+}
+
 function aggregateRevenueByDay(orders) {
-  return orders.reduce((map, order) => {
+  return orders.filter(isCompletedOrder).reduce((map, order) => {
     const key = dateOnly(order.date);
     map[key] = (map[key] || 0) + order.total;
     return map;
@@ -459,7 +463,7 @@ function makeWeeklyRevenue(orders) {
 }
 
 function makeMonthlyRevenue(orders) {
-  const revenue = orders.reduce((map, order) => {
+  const revenue = orders.filter(isCompletedOrder).reduce((map, order) => {
     const key = dateOnly(order.date).slice(0, 7);
     map[key] = (map[key] || 0) + order.total;
     return map;
@@ -600,25 +604,103 @@ const ShopData = {
     persist('products', () => deleteRow('products', 'id', String(id)));
   },
 
-  addOrder(order) {
-    const next = { id: `#${Date.now()}`, status: 'pending', type: 'delivery', ...order };
+  async addOrder(order) {
+    const next = {
+      id: `#${Date.now()}`,
+      status: 'pending',
+      type: 'delivery',
+      userId: order.userId ? String(order.userId) : '',
+      ...order,
+    };
+
+    for (const item of next.items || []) {
+      const product = _state.products.find(p => p.id === String(item.productId));
+      if (!product) {
+        throw new Error(`Produto não encontrado: ${item.name}`);
+      }
+      if (product.stock < item.qty) {
+        throw new Error(`Estoque insuficiente para ${product.name}`);
+      }
+    }
+
     _state.orders.unshift(next);
     _state.customers = deriveCustomers(_state.orders);
     refreshDerivedData();
-    persist('orders', () => upsertRow('orders', orderToRow(next)));
+
+    try {
+      await upsertRow('orders', orderToRow(next));
+    } catch (error) {
+      _state.orders = _state.orders.filter(item => item.id !== next.id);
+      _state.customers = deriveCustomers(_state.orders);
+      refreshDerivedData();
+      throw error;
+    }
+
     return next;
   },
 
   updateOrderStatus(id, status) {
     const order = _state.orders.find(item => item.id === id);
     if (!order) return;
+
+    const previousStatus = order.status;
+    const statusChanges = [];
+
+    const orderCashflowBase = `CF_ORDER_${order.id}`;
+
+    if (previousStatus === 'pending' && status === 'paid') {
+      for (const item of order.items || []) {
+        const product = _state.products.find(p => p.id === String(item.productId));
+        if (!product) continue;
+        product.stock = Math.max(0, product.stock - item.qty);
+        statusChanges.push(product);
+      }
+
+      ShopData.addCashflow({
+        id: `${orderCashflowBase}_INCOME`,
+        type: 'income',
+        description: `Pedido ${order.id}`,
+        category: 'Vendas',
+        amount: order.total,
+        date: `${new Date().toISOString().slice(0, 16).replace('T', ' ')}`,
+        paymentMethod: order.paymentMethod || 'Pagamento',
+      });
+    }
+
+    if (status === 'cancelled' && ['paid', 'ready', 'shipped'].includes(previousStatus)) {
+      for (const item of order.items || []) {
+        const product = _state.products.find(p => p.id === String(item.productId));
+        if (!product) continue;
+        product.stock += item.qty;
+        statusChanges.push(product);
+      }
+
+      ShopData.addCashflow({
+        id: `${orderCashflowBase}_REFUND`,
+        type: 'expense',
+        description: `Reembolso ${order.id}`,
+        category: 'Reembolsos',
+        amount: order.total,
+        date: `${new Date().toISOString().slice(0, 16).replace('T', ' ')}`,
+        paymentMethod: order.paymentMethod || 'Reembolso',
+      });
+    }
+
     order.status = status;
-    refreshDerivedData();
+    if (statusChanges.length) refreshDerivedData();
     persist('orders', () => patchRow('orders', 'id', id, { status }));
+    statusChanges.forEach(product => {
+      persist('products', () => upsertRow('products', productToRow(product)));
+    });
   },
 
   addCashflow(entry) {
-    _state.cashflow.push(entry);
+    const existingIndex = _state.cashflow.findIndex(item => item.id === entry.id);
+    if (existingIndex >= 0) {
+      _state.cashflow[existingIndex] = entry;
+    } else {
+      _state.cashflow.push(entry);
+    }
     persist('cashflow', () => upsertRow('cashflow', cashflowToRow(entry)));
   },
 

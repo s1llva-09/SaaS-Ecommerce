@@ -3,39 +3,35 @@ document.addEventListener('DOMContentLoaded', async () => {
   await ShopData.ready();
 
   const settings = ShopData.settings();
+  const geral = settings.geral || {};
   const comercial = settings.comercial || {};
 
-  // Atualiza texto de frete grátis
   const freeShippingValue = comercial.freeShippingValue || 299;
   const freeShippingText = comercial.freeShippingText || `Frete grátis acima de R$ ${freeShippingValue}`;
 
-  // Atualiza no hero
-  const heroText = document.querySelector('section.hero p');
-  if (heroText) {
-    heroText.textContent = `Eletrônicos, moda, calçados e muito mais. ${freeShippingText}`;
+  // Hero subtitle
+  const heroSubtitle = document.querySelector('[data-hero-subtitle]');
+  if (heroSubtitle) {
+    heroSubtitle.textContent = `Eletrônicos, moda, calçados e muito mais. ${freeShippingText}`;
   }
 
-  // Atualiza na seção de benefícios
-  const benefitBar = document.querySelector('.benefits-bar__inner');
-  if (benefitBar) {
-    const benefitItems = benefitBar.querySelectorAll('div');
-    if (benefitItems[0]) {
-      benefitItems[0].innerHTML = `<span aria-hidden="true">✓</span> ${freeShippingText}`;
-    }
+  // Barra de benefícios
+  const freeBenefit = document.querySelector('[data-free-shipping-benefit]');
+  if (freeBenefit) {
+    freeBenefit.innerHTML = `<span aria-hidden="true">✓</span> ${freeShippingText}`;
   }
 
-  // Atualiza no carrinho e checkout se existir
-  const cartBenefits = document.querySelectorAll('[class*="benefits"] div, [class*="benefit"] div');
-  cartBenefits.forEach(item => {
-    if (item.textContent && item.textContent.includes('Frete grátis')) {
-      item.textContent = freeShippingText;
-    }
-  });
+  // Rodapé dinâmico
+  const footerBenefit = document.querySelector('[data-footer-free-shipping]');
+  if (footerBenefit) {
+    footerBenefit.textContent = `Suporte 24/7, compra segura e ${freeShippingText}.`;
+  }
 
-  // Armazena valor no window para uso em outros scripts
   window.shopConfig = {
     freeShippingValue,
     freeShippingText,
-    ...comercial
+    storeName: geral.storeName || 'ShopNow',
+    logo: String(geral.logo || '').trim(),
+    ...comercial,
   };
 });

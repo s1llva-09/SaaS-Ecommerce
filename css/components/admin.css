@@ -1484,6 +1484,10 @@
   overflow: auto;
 }
 
+.modal--sm {
+  max-width: 400px;
+}
+
 .modal__header {
   display: flex;
   justify-content: space-between;
@@ -1532,6 +1536,61 @@
   border-top: 1px solid var(--admin-line);
   background: var(--admin-bg);
 }
+
+/* ---- Modal de confirmação (delete / status) ---- */
+.confirm-modal__body {
+  padding: 32px 28px;
+  text-align: center;
+}
+
+.confirm-modal__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 18px;
+}
+
+.confirm-modal__icon--danger { background: rgba(220, 38, 38, .15); }
+.confirm-modal__icon--brand  { background: rgba(15, 118, 110, .15); }
+
+.confirm-modal__svg { display: none; }
+.confirm-modal__icon--brand  .confirm-modal__svg--brand  { display: block; }
+.confirm-modal__icon--danger .confirm-modal__svg--danger { display: block; }
+
+.confirm-modal__title {
+  margin: 0 0 8px;
+  color: var(--admin-text);
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.confirm-modal__msg {
+  margin: 0 0 24px;
+  color: var(--admin-muted);
+  font-size: 14px;
+}
+
+.confirm-modal__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn-confirm {
+  min-width: 110px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  transition: opacity .15s;
+}
+
+.btn-confirm:hover { opacity: .88; }
+.btn-confirm--danger { background: #ef4444; }
 
 .form-group {
   margin-bottom: 16px;

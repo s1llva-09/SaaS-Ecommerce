@@ -115,6 +115,14 @@
   align-items: center;
 }
 
+.order-card__review-count {
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .od-overlay {
   position: fixed;
   inset: 0;
@@ -347,6 +355,110 @@
   gap: 10px;
 }
 
+
+.review-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  background: rgba(15, 23, 42, .6);
+  opacity: 0;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  transition: opacity .22s ease;
+}
+
+.review-modal-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.review-modal {
+  width: min(520px, calc(100% - 32px));
+  margin: 0 16px;
+  border-radius: var(--radius);
+  padding: 24px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  color: var(--text);
+}
+
+.review-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.review-modal-close {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.review-modal__product-name {
+  margin: 0 0 14px;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.review-modal__stars {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.review-modal__star {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.review-modal__star.is-active {
+  color: var(--brand);
+  border-color: var(--brand-soft);
+  background: var(--brand-soft);
+}
+
+.review-modal__comment {
+  width: 100%;
+  min-height: 120px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  resize: vertical;
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.review-modal__actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.reviewed-badge {
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 700;
+}
+
 @media (max-width: 768px) {
   .account-profile-card {
     padding: 18px;
@@ -366,3 +478,4 @@
     align-items: flex-start;
   }
 }
+

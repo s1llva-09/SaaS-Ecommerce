@@ -201,6 +201,17 @@
   color: var(--subtle);
 }
 
+.delivery-tab.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.delivery-tab.is-disabled strong,
+.delivery-tab.is-disabled span,
+.delivery-tab.is-disabled svg {
+  color: var(--muted);
+}
+
 .delivery-tab.is-active {
   border-color: var(--brand);
   background: var(--brand-soft);

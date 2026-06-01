@@ -125,10 +125,39 @@
                     <p class="settings-card__description">Nome público, documento e canais principais.</p>
                   </div>
                 </div>
+                <div class="settings-store-brand-preview" data-store-brand-preview>
+                  <div class="settings-store-brand-preview__badge">
+                    <span class="settings-store-brand-preview__mark">S</span>
+                    <div class="settings-store-brand-preview__text">
+                      <strong>ShopNow</strong>
+                      <span>Pré-visualização da marca na loja</span>
+                    </div>
+                  </div>
+                </div>
                 <div class="settings-field-grid settings-field-grid--two">
                   <div class="form-col">
                     <label class="form-label">Nome da Loja *</label>
                     <input type="text" class="admin-input" name="storeName" placeholder="ShopNow" required>
+                  </div>
+                  <div class="form-col">
+                    <label class="form-label">Logo da loja</label>
+                    <div class="settings-logo-field">
+                      <img class="settings-logo-preview" data-logo-preview hidden alt="Prévia do logo" />
+                      <label class="settings-logo-upload" data-logo-upload-label>
+                        <input type="file" accept="image/*" data-logo-file>
+                        <div class="image-upload-icon">
+                          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        </div>
+                        <p>Clique para enviar imagem</p>
+                        <small>PNG, JPG, SVG · máx 2 MB</small>
+                      </label>
+                      <input type="url" class="admin-input settings-logo-url" name="logoUrl" placeholder="ou cole a URL do logo">
+                      <button type="button" class="settings-logo-remove-btn" data-logo-remove hidden>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                        Remover logo
+                      </button>
+                      <input type="hidden" name="logo">
+                    </div>
                   </div>
                   <div class="form-col">
                     <label class="form-label">CNPJ/CPF</label>
