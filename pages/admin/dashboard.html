@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -14,7 +14,7 @@
     <aside class="admin-sidebar">
       <a class="admin-brand" href="dashboard.html">
         <span class="admin-brand__mark">S</span>
-        <span data-store-name>ShopNow<small>Admin Panel</small></span>
+        <span data-store-name><small>Admin Panel</small></span>
       </a>
       <nav class="admin-nav">
         <a class="is-active" href="dashboard.html">
@@ -41,10 +41,10 @@
         </a>
         <a href="reports.html">
           <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
-          RelatÃ³rios
+          Relatórios
           <span class="admin-nav__badge" data-reports-badge style="display: none;"></span>
         </a>
-        <p class="admin-nav__section">PromoÃ§Ãµes</p>
+        <p class="admin-nav__section">Promoções</p>
         <a href="promotions.html">
           <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-4V4M8 16h4v4"/></svg></span>
           Ofertas
@@ -62,7 +62,7 @@
         <button class="admin-hamburger" data-sidebar-btn>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
-        <div><h1>Dashboard</h1><span class="text-muted">VisÃ£o geral da operaÃ§Ã£o</span></div>
+        <div><h1>Dashboard</h1><span class="text-muted">Visão geral da operação</span></div>
         <div class="admin-topbar__right">
           <div class="search-wrapper">
             <div class="admin-searchbar">
@@ -86,30 +86,30 @@
       </header>
       <section class="admin-content">
         <div class="dashboard-subheader">
-          <p>VisÃ£o geral do perÃ­odo</p>
+          <p>Visão geral do período</p>
           <div class="period-tabs">
             <button class="period-tab" data-period="today">Hoje</button>
             <button class="period-tab is-active" data-period="week">Semana</button>
-            <button class="period-tab" data-period="month">MÃªs</button>
+            <button class="period-tab" data-period="month">Mês</button>
             <button class="period-tab" data-period="year">Ano</button>
           </div>
         </div>
         <div class="admin-grid-4" data-admin-kpis></div>
         <div class="admin-grid-2 mt-16">
           <article class="admin-card">
-            <h2 class="admin-card__title" data-revenue-title>Receita â€” Ãºltimos 7 dias</h2>
+            <h2 class="admin-card__title" data-revenue-title>Receita — últimos 7 dias</h2>
             <p class="text-muted admin-card__subtitle" data-revenue-sub></p>
             <div class="chart-box"><canvas id="revenueChart"></canvas></div>
           </article>
           <article class="admin-card">
             <h2 class="admin-card__title">Canais de venda</h2>
-            <p class="text-muted admin-card__subtitle">DistribuiÃ§Ã£o por canal</p>
+            <p class="text-muted admin-card__subtitle">Distribuição por canal</p>
             <div class="chart-box chart-box--sm"><canvas id="channelsChart"></canvas></div>
             <div class="chart-legend" data-channels-legend></div>
           </article>
         </div>
         <article class="admin-card mt-16">
-          <h2 class="admin-card__title">Ãšltimos pedidos</h2>
+          <h2 class="admin-card__title">Últimos pedidos</h2>
           <table class="admin-table">
             <thead><tr><th>Pedido</th><th>Cliente</th><th>Total</th><th>Status</th></tr></thead>
             <tbody data-admin-recent-orders></tbody>
@@ -118,6 +118,7 @@
       </section>
     </main>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../../js/ui/admin-auth.js"></script>
   <script src="../../js/data.js"></script>
   <script src="../../js/ui/common.js"></script>

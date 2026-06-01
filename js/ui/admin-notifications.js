@@ -16,6 +16,19 @@
 // -----------------------------------------------------------
 let NOTIFICATIONS = [];
 
+const NOTIF_CLEARED_KEY = 'shopnow-notif-cleared';
+
+function getClearedIds() {
+  try { return new Set(JSON.parse(localStorage.getItem(NOTIF_CLEARED_KEY) || '[]')); }
+  catch { return new Set(); }
+}
+
+function addClearedIds(ids) {
+  const cleared = getClearedIds();
+  ids.forEach(id => cleared.add(id));
+  localStorage.setItem(NOTIF_CLEARED_KEY, JSON.stringify([...cleared]));
+}
+
 // -----------------------------------------------------------
 // ÍCONES por tipo — SVGs consistentes entre plataformas
 // -----------------------------------------------------------
@@ -65,41 +78,41 @@ function loadRealNotifications() {
 
   if (typeof ShopData === 'undefined') return;
 
-  // Pedidos recentes não pagos (unread)
+  const cleared = getClearedIds();
+
+  // Pedidos recentes pendentes
   try {
     const orders = ShopData.orders() || [];
-    const pendingOrders = orders.filter(o => o && o.status === 'pending').slice(0, 2);
-
-    pendingOrders.forEach(order => {
-      NOTIFICATIONS.push({
-        id: `N-${order.id}`,
-        type: 'order',
-        text: `Novo pedido ${order.id} — ${order.customer || 'Cliente'}`,
-        time: 'Agora',
-        unread: true
-      });
+    orders.filter(o => o && o.status === 'pending').slice(0, 2).forEach(order => {
+      const id = `N-${order.id}`;
+      if (!cleared.has(id)) {
+        NOTIFICATIONS.push({
+          id,
+          type: 'order',
+          text: `Novo pedido ${order.id} — ${order.customer || 'Cliente'}`,
+          time: 'Agora',
+          unread: true,
+        });
+      }
     });
-  } catch (e) {
-    // Silent fail
-  }
+  } catch (e) { /* silent */ }
 
   // Produtos com estoque baixo
   try {
     const products = ShopData.products() || [];
-    const lowStock = products.filter(p => p && p.stock > 0 && p.stock < 5).slice(0, 1);
-
-    lowStock.forEach(product => {
-      NOTIFICATIONS.push({
-        id: `S-${product.id}`,
-        type: 'stock',
-        text: `Estoque baixo: ${product.name} (${product.stock} un.)`,
-        time: 'Há pouco',
-        unread: false
-      });
+    products.filter(p => p && p.stock > 0 && p.stock < 5).slice(0, 1).forEach(product => {
+      const id = `S-${product.id}`;
+      if (!cleared.has(id)) {
+        NOTIFICATIONS.push({
+          id,
+          type: 'stock',
+          text: `Estoque baixo: ${product.name} (${product.stock} un.)`,
+          time: 'Há pouco',
+          unread: false,
+        });
+      }
     });
-  } catch (e) {
-    // Silent fail
-  }
+  } catch (e) { /* silent */ }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -110,11 +123,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Sem os elementos na página, não faz nada
   if (!btn || !panel) return
 
-  // Carrega notificações reais quando ShopData estiver pronto
+  // Carrega notificações iniciais quando ShopData estiver pronto
   if (typeof ShopData !== 'undefined') {
     ShopData.ready().then(() => {
       loadRealNotifications();
       render();
+      initRealtimeOrders(render);
     });
   }
 
@@ -150,7 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const clearBtn = document.createElement('button');
       clearBtn.className = 'notif-clear-btn';
       clearBtn.textContent = 'Limpar tudo';
-      clearBtn.addEventListener('click', () => { NOTIFICATIONS.length = 0; render(); });
+      clearBtn.addEventListener('click', () => {
+        addClearedIds(NOTIFICATIONS.map(n => n.id));
+        NOTIFICATIONS.length = 0;
+        render();
+      });
       header.appendChild(clearBtn);
     }
     panel.appendChild(header);
@@ -206,7 +224,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Clicar numa notificação não lida a marca como lida
       if (n.unread) {
-        li.addEventListener('click', () => { n.unread = false; render(); });
+        li.addEventListener('click', () => {
+          n.unread = false;
+          addClearedIds([n.id]);
+          render();
+        });
       }
 
       ul.appendChild(li);
@@ -221,7 +243,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const markAllBtn = document.createElement('button');
       markAllBtn.className = 'notif-mark-all-btn';
       markAllBtn.textContent = 'Marcar todas como lidas';
-      markAllBtn.addEventListener('click', () => { NOTIFICATIONS.forEach(n => n.unread = false); render(); });
+      markAllBtn.addEventListener('click', () => {
+        addClearedIds(NOTIFICATIONS.map(n => n.id));
+        NOTIFICATIONS.forEach(n => n.unread = false);
+        render();
+      });
       footer.appendChild(markAllBtn);
       panel.appendChild(footer);
     }
@@ -247,6 +273,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
   render();
 }); // ← fecha DOMContentLoaded
+
+// ============================================================
+// REALTIME — ouve novos pedidos via Supabase WebSocket
+// ============================================================
+function initRealtimeOrders(render) {
+  if (typeof supabase === 'undefined') return;
+  if (typeof ADMIN_SUPABASE_URL === 'undefined') return;
+
+  const client = supabase.createClient(ADMIN_SUPABASE_URL, ADMIN_SUPABASE_KEY);
+
+  client
+    .channel('admin-orders')
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'orders' },
+      (payload) => {
+        const order  = payload.new;
+        const id     = `N-${order.id}`;
+        const cleared = getClearedIds();
+
+        if (cleared.has(id)) return;
+
+        // Evita duplicata se já estiver na lista
+        if (NOTIFICATIONS.some(n => n.id === id)) return;
+
+        NOTIFICATIONS.unshift({
+          id,
+          type:   'order',
+          text:   `Novo pedido ${order.id} — ${order.customer_name || order.customer || 'Cliente'}`,
+          time:   'Agora',
+          unread: true,
+        });
+
+        render();
+      }
+    )
+    .subscribe();
+}
 
 // ============================================================
 // SIDEBAR MOBILE — toggle hamburguer

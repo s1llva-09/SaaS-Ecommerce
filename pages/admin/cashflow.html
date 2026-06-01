@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -14,7 +14,7 @@
     <aside class="admin-sidebar">
       <a class="admin-brand" href="dashboard.html">
         <span class="admin-brand__mark">S</span>
-        <span data-store-name>ShopNow<small>Admin Panel</small></span>
+        <span data-store-name><small>Admin Panel</small></span>
       </a>
       <nav class="admin-nav">
         <a href="dashboard.html">
@@ -41,10 +41,10 @@
         </a>
         <a href="reports.html">
           <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
-          RelatÃ³rios
+          Relatórios
           <span class="admin-nav__badge" data-reports-badge style="display: none;"></span>
         </a>
-        <p class="admin-nav__section">PromoÃ§Ãµes</p>
+        <p class="admin-nav__section">Promoções</p>
         <a href="promotions.html">
           <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-4V4M8 16h4v4"/></svg></span>
           Ofertas
@@ -62,7 +62,7 @@
         <button class="admin-hamburger" data-sidebar-btn>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
-        <div><h1>Caixa</h1><span class="text-muted">MovimentaÃ§Ã£o financeira</span></div>
+        <div><h1>Caixa</h1><span class="text-muted">Movimentação financeira</span></div>
         <div class="admin-topbar__right">
           <div class="search-wrapper">
             <div class="admin-searchbar">
@@ -89,35 +89,35 @@
           <div class="cashflow-bar">
             <button class="period-tab is-active" data-cf-period="today">Hoje</button>
             <button class="period-tab" data-cf-period="week">Semana</button>
-            <button class="period-tab" data-cf-period="month">MÃªs</button>
+            <button class="period-tab" data-cf-period="month">Mês</button>
             <button class="period-tab" data-cf-period="year">Ano</button>
           </div>
           <button class="btn btn-primary" data-cf-new>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Nova MovimentaÃ§Ã£o
+            Nova Movimentação
           </button>
         </div>
         <div class="finance-grid" data-cash-summary></div>
         <div class="admin-grid-2 mt-16">
           <article class="admin-card">
-            <h2 class="admin-card__title">MovimentaÃ§Ãµes</h2>
+            <h2 class="admin-card__title">Movimentações</h2>
             <table class="admin-table">
-              <thead><tr><th>Tipo</th><th>DescriÃ§Ã£o</th><th>MÃ©todo</th><th>Data</th><th>Valor</th></tr></thead>
+              <thead><tr><th>Tipo</th><th>Descrição</th><th>Método</th><th>Data</th><th>Valor</th></tr></thead>
               <tbody data-admin-cashflow></tbody>
             </table>
           </article>
           <article class="admin-card">
-            <h2 class="admin-card__title">Fluxo no perÃ­odo</h2>
+            <h2 class="admin-card__title">Fluxo no período</h2>
             <div class="chart-box"><canvas id="cashflowChart"></canvas></div>
           </article>
         </div>
       </section>
 
-      <!-- Modal Nova MovimentaÃ§Ã£o -->
+      <!-- Modal Nova Movimentação -->
       <div class="admin-modal-overlay is-hidden" data-cf-modal-overlay>
         <div class="admin-modal">
           <div class="admin-modal__head">
-            <span class="admin-modal__title">Nova MovimentaÃ§Ã£o</span>
+            <span class="admin-modal__title">Nova Movimentação</span>
             <button type="button" class="admin-modal__close" data-cf-modal-close>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
@@ -133,11 +133,11 @@
                 <label class="cf-type-opt">
                   <input type="radio" name="cfType" value="expense">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
-                  SaÃ­da
+                  Saída
                 </label>
               </div>
               <div>
-                <label class="admin-field-label">DescriÃ§Ã£o</label>
+                <label class="admin-field-label">Descrição</label>
                 <input type="text" name="cfDesc" class="admin-field" placeholder="Ex: Pagamento de fornecedor" required>
               </div>
               <div class="admin-form-grid-2">
@@ -151,10 +151,10 @@
                   </select>
                 </div>
                 <div>
-                  <label class="admin-field-label">MÃ©todo</label>
+                  <label class="admin-field-label">Método</label>
                   <select name="cfPayment" class="admin-field">
                     <option>PIX</option>
-                    <option>CartÃ£o</option>
+                    <option>Cartão</option>
                     <option>Boleto</option>
                     <option>TED</option>
                     <option>Dinheiro</option>
@@ -181,6 +181,7 @@
       </div>
     </main>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../../js/ui/admin-auth.js"></script>
   <script src="../../js/data.js"></script>
   <script src="../../js/ui/common.js"></script>

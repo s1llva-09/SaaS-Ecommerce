@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -119,7 +119,7 @@
     <h1 class="confirm-title" id="title">Confirmando seu email</h1>
     <p class="confirm-message" id="message">Aguarde enquanto validamos seu email.</p>
 
-    <div class="confirm-status loading" id="status">Processando confirmaÃ§Ã£o...</div>
+    <div class="confirm-status loading" id="status">Processando confirmação...</div>
 
     <div class="confirm-action" id="actions">
       <button class="btn btn-primary" disabled>Aguarde...</button>
@@ -146,12 +146,12 @@
         localStorage.setItem('user', JSON.stringify({
           id: user.id,
           email: user.email,
-          name: user.user_metadata?.name || 'UsuÃ¡rio',
+          name: user.user_metadata?.name || 'Usuário',
         }));
       }
 
       titleEl.textContent = 'Email confirmado';
-      messageEl.textContent = 'Seu email foi confirmado com sucesso. VocÃª jÃ¡ pode fazer login.';
+      messageEl.textContent = 'Seu email foi confirmado com sucesso. Você já pode fazer login.';
       statusEl.textContent = 'Email confirmado com sucesso';
       statusEl.className = 'confirm-status success';
       spinnerEl.style.display = 'none';
@@ -177,19 +177,19 @@
     }
 
     async function confirmEmail() {
-      // Supabase redireciona de duas formas apÃ³s verificar o link:
-      // 1. Hash: #access_token=...&type=signup  (fluxo implÃ­cito)
-      // 2. Query: ?token=...&type=signup         (fluxo antigo â€” precisa chamar /verify)
+      // Supabase redireciona de duas formas após verificar o link:
+      // 1. Hash: #access_token=...&type=signup  (fluxo implícito)
+      // 2. Query: ?token=...&type=signup         (fluxo antigo — precisa chamar /verify)
       const hash = new URLSearchParams(window.location.hash.slice(1));
       const query = new URLSearchParams(window.location.search);
 
       const error = hash.get('error') || query.get('error');
       if (error) {
-        showError('Link invÃ¡lido', hash.get('error_description') || query.get('error_description') || 'O link expirou ou Ã© invÃ¡lido.');
+        showError('Link inválido', hash.get('error_description') || query.get('error_description') || 'O link expirou ou é inválido.');
         return;
       }
 
-      // Fluxo 1: Supabase jÃ¡ verificou, temos o access_token no hash
+      // Fluxo 1: Supabase já verificou, temos o access_token no hash
       const accessToken = hash.get('access_token');
       const hashType = hash.get('type');
       if (accessToken && (hashType === 'signup' || hashType === 'email')) {
@@ -205,7 +205,7 @@
         return;
       }
 
-      // Fluxo 2: token na query string â€” chama /verify
+      // Fluxo 2: token na query string — chama /verify
       const token = query.get('token');
       const queryType = query.get('type');
       if (token && (queryType === 'signup' || queryType === 'email')) {
@@ -219,12 +219,12 @@
           const data = await res.json();
           showSuccess(data.access_token || data.session?.access_token, data.user);
         } catch {
-          showError('Erro na confirmaÃ§Ã£o', 'O link pode ter expirado. Tente criar sua conta novamente.');
+          showError('Erro na confirmação', 'O link pode ter expirado. Tente criar sua conta novamente.');
         }
         return;
       }
 
-      showError('Link invÃ¡lido', 'O link de confirmaÃ§Ã£o Ã© invÃ¡lido ou expirou.');
+      showError('Link inválido', 'O link de confirmação é inválido ou expirou.');
     }
 
     confirmEmail();

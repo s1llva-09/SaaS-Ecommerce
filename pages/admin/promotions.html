@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="../../imgs/favicon.svg" type="image/svg+xml">
-  <title>PromoÃ§Ãµes - ShopNow Admin</title>
+  <title>Promoções - ShopNow Admin</title>
   <link rel="stylesheet" href="../../css/admin.css">
 </head>
 <body class="admin-page" data-root="../../">
@@ -13,7 +13,7 @@
     <aside class="admin-sidebar">
       <a class="admin-brand" href="dashboard.html">
         <span class="admin-brand__mark">S</span>
-        <span data-store-name>ShopNow<small>Admin Panel</small></span>
+        <span data-store-name><small>Admin Panel</small></span>
       </a>
       <nav class="admin-nav">
         <a href="dashboard.html">
@@ -40,10 +40,10 @@
         </a>
         <a href="reports.html">
           <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
-          RelatÃ³rios
+          Relatórios
           <span class="admin-nav__badge" data-reports-badge style="display: none;"></span>
         </a>
-        <p class="admin-nav__section">PromoÃ§Ãµes</p>
+        <p class="admin-nav__section">Promoções</p>
         <a class="is-active" href="promotions.html">
           <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-4V4M8 16h4v4"/></svg></span>
           Ofertas
@@ -61,7 +61,7 @@
         <button class="admin-hamburger" data-sidebar-btn>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
-        <div><h1>Ofertas & PromoÃ§Ãµes</h1><span class="text-muted">Gerencie descontos e promoÃ§Ãµes</span></div>
+        <div><h1>Ofertas & Promoções</h1><span class="text-muted">Gerencie descontos e promoções</span></div>
         <div class="admin-topbar__right">
           <div class="search-wrapper">
             <div class="admin-searchbar">
@@ -85,8 +85,8 @@
       </header>
       <section class="admin-content">
         <div style="display: flex; gap: 12px; margin-bottom: 20px; align-items: center;">
-          <h2 style="margin: 0; flex: 1;">PromoÃ§Ãµes Ativas</h2>
-          <button class="btn btn-primary" data-promo-add-btn>+ Adicionar PromoÃ§Ã£o</button>
+          <h2 style="margin: 0; flex: 1;">Promoções Ativas</h2>
+          <button class="btn btn-primary" data-promo-add-btn>+ Adicionar Promoção</button>
         </div>
 
         <article class="admin-card">
@@ -95,9 +95,9 @@
               <tr>
                 <th>Produto</th>
                 <th>Desconto</th>
-                <th>VÃ¡lido atÃ©</th>
+                <th>Válido até</th>
                 <th>Status</th>
-                <th>AÃ§Ãµes</th>
+                <th>Ações</th>
               </tr>
             </thead>
             <tbody data-promotions-table></tbody>
@@ -107,11 +107,11 @@
     </main>
   </div>
 
-  <!-- MODAL: Adicionar/Editar PromoÃ§Ã£o -->
+  <!-- MODAL: Adicionar/Editar Promoção -->
   <div class="modal-overlay" data-promo-modal style="display: none;">
     <div class="modal">
       <div class="modal__header">
-        <h2 data-promo-modal-title>Adicionar PromoÃ§Ã£o</h2>
+        <h2 data-promo-modal-title>Adicionar Promoção</h2>
         <button class="modal__close" data-promo-modal-close>&times;</button>
       </div>
       <div class="modal__body">
@@ -127,7 +127,7 @@
             <input type="number" data-promo-discount min="0" max="100" required placeholder="Ex: 15">
           </div>
           <div class="form-group">
-            <label>VÃ¡lido atÃ© *</label>
+            <label>Válido até *</label>
             <input type="datetime-local" data-promo-enddate required>
           </div>
           <div class="form-group">
@@ -145,6 +145,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../../js/ui/admin-auth.js"></script>
   <script src="../../js/data.js"></script>
   <script src="../../js/ui/common.js"></script>

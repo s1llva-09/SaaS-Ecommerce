@@ -184,7 +184,8 @@ const ShopNow = {
 
     const install = document.createElement('p');
     install.className = 'product-card__installments';
-    install.textContent = `ou ${installments}x de ${this.money(product.price / installments, true)}`;
+    const displayInstallments = installments >= 3 ? installments : 3;
+    install.textContent = `ou ${displayInstallments}x de ${this.money(product.price / displayInstallments, true)}`;
     priceCol.appendChild(install);
 
     if (product.badge === 'Retirada disponível') {

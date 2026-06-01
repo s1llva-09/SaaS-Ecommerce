@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -13,7 +13,7 @@
     <aside class="admin-sidebar">
       <a class="admin-brand" href="dashboard.html">
         <span class="admin-brand__mark">S</span>
-        <span data-store-name>ShopNow<small>Admin Panel</small></span>
+        <span data-store-name><small>Admin Panel</small></span>
       </a>
       <nav class="admin-nav">
         <a href="dashboard.html">
@@ -28,7 +28,7 @@
           <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg></span>
           Pedidos
           <span class="admin-nav__badge" data-orders-badge style="display: none;"></span>
-          <!-- Badge Ã© atualizado dinamicamente por admin-badges.js -->
+          <!-- Badge é atualizado dinamicamente por admin-badges.js -->
         </a>
         <a href="customers.html">
           <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
@@ -41,10 +41,10 @@
         </a>
         <a href="reports.html">
           <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
-          RelatÃ³rios
+          Relatórios
           <span class="admin-nav__badge" data-reports-badge style="display: none;"></span>
         </a>
-        <p class="admin-nav__section">PromoÃ§Ãµes</p>
+        <p class="admin-nav__section">Promoções</p>
         <a href="promotions.html">
           <span class="admin-nav__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-4V4M8 16h4v4"/></svg></span>
           Ofertas
@@ -62,7 +62,7 @@
         <button class="admin-hamburger" data-sidebar-btn>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
-        <div><h1>Pedidos</h1><span class="text-muted">GestÃ£o de pedidos</span></div>
+        <div><h1>Pedidos</h1><span class="text-muted">Gestão de pedidos</span></div>
         <div class="admin-topbar__right">
           <div class="search-wrapper">
             <div class="admin-searchbar">
@@ -117,6 +117,7 @@
       </section>
     </main>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../../js/ui/admin-auth.js"></script>
   <script src="../../js/data.js"></script>
   <script src="../../js/ui/common.js"></script>
