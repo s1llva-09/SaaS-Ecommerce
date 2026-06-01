@@ -22,6 +22,16 @@ create table if not exists public.products (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.reviews (
+  id uuid primary key default gen_random_uuid(),
+  product_id text not null references public.products(id) on delete cascade,
+  user_id text not null,
+  user_email text,
+  rating numeric not null default 0,
+  created_at timestamptz not null default now(),
+  constraint reviews_product_user_unique unique (product_id, user_id)
+);
+
 create table if not exists public.orders (
   id text primary key,
   customer text,
@@ -128,6 +138,7 @@ create table if not exists public.email_verifications (
 );
 
 alter table public.products enable row level security;
+alter table public.reviews enable row level security;
 alter table public.orders enable row level security;
 alter table public.customers enable row level security;
 alter table public.categories enable row level security;
@@ -141,6 +152,8 @@ alter table public.email_verifications enable row level security;
 
 drop policy if exists "shopnow public read products" on public.products;
 drop policy if exists "shopnow public write products" on public.products;
+drop policy if exists "shopnow public read reviews" on public.reviews;
+drop policy if exists "shopnow public write reviews" on public.reviews;
 drop policy if exists "shopnow public read orders" on public.orders;
 drop policy if exists "shopnow public write orders" on public.orders;
 drop policy if exists "shopnow public read customers" on public.customers;
@@ -164,6 +177,9 @@ drop policy if exists "shopnow public write email_verifications" on public.email
 
 create policy "shopnow public read products" on public.products for select using (true);
 create policy "shopnow public write products" on public.products for all using (true) with check (true);
+
+create policy "shopnow public read reviews" on public.reviews for select using (true);
+create policy "shopnow public write reviews" on public.reviews for all using (true) with check (true);
 
 create policy "shopnow public read orders" on public.orders for select using (true);
 create policy "shopnow public write orders" on public.orders for all using (true) with check (true);

@@ -51,6 +51,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   desc.textContent = product.description;
   aside.appendChild(desc);
 
+  if (product.reviews > 0) {
+    const ratingRow = document.createElement('p');
+    ratingRow.className = 'product-card__rating';
+    ratingRow.innerHTML = ShopNow.stars(product.rating);
+    const reviewCount = document.createElement('em');
+    reviewCount.textContent = ` (${ShopNow.int(product.reviews)} avaliações)`;
+    ratingRow.appendChild(reviewCount);
+    aside.appendChild(ratingRow);
+  }
+
   const price = document.createElement('div');
   price.className = 'price-xl';
   price.textContent = ShopNow.money(product.price, true);

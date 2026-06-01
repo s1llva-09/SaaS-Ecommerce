@@ -37,42 +37,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ---------------------------------------------------------
   const ordersCount = document.querySelector('[data-orders-count]');
   const spentTotal = document.querySelector('[data-spent-total]');
-  const REVIEW_STORAGE_KEY = 'shopnow-product-reviews';
-  let productReviews = [];
 
-  // Remove any previous localStorage review state and keep reviews only in memory.
-  if (localStorage.getItem(REVIEW_STORAGE_KEY)) {
-    localStorage.removeItem(REVIEW_STORAGE_KEY);
-  }
-
-  function loadProductReviews() {
-    return productReviews;
-  }
-
-  function saveProductReviews(reviews) {
-    productReviews = Array.isArray(reviews) ? reviews : [];
-  }
+  // Reviews carregadas do Supabase para o usuário logado
+  let userReviews = [];
 
   function getReviewIdentifier(item) {
-    // Use the most stable identifier available for order items.
-    // Orders created from checkout carry productId, while some existing items may use id or sku.
     return String(item.productId || item.id || item.sku || item.name || '').trim();
   }
 
   function getProductReview(item) {
     const key = getReviewIdentifier(item);
-    return loadProductReviews().find(review => review.productKey === key);
+    return userReviews.find(r => r.productKey === key);
   }
 
-  function setProductReview(review) {
-    const reviews = loadProductReviews();
-    const index = reviews.findIndex(item => item.productKey === review.productKey);
-    if (index >= 0) {
-      reviews[index] = review;
-    } else {
-      reviews.push(review);
-    }
-    saveProductReviews(reviews);
+  function setLocalReview(review) {
+    const index = userReviews.findIndex(r => r.productKey === review.productKey);
+    if (index >= 0) userReviews[index] = review;
+    else userReviews.push(review);
   }
 
   let reviewDialog = null;
@@ -200,23 +181,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function openReviewModal(item, order) {
     if (!reviewDialog) reviewDialog = createReviewDialog();
-    const savedReview = getProductReview(item) || { rating: 0, comment: '' };
+    const savedReview = getProductReview(item) || { rating: 0 };
     reviewDialog.currentItem = item;
     reviewDialog.currentOrder = order;
     reviewDialog.productName.textContent = item.name || 'Produto';
-    reviewDialog.comment.value = savedReview.comment || '';
     renderReviewStars(savedReview.rating || 0);
-    reviewDialog.save.onclick = () => {
+    reviewDialog.save.onclick = async () => {
+      const newRating = reviewDialog.currentRating;
+      if (!newRating) {
+        ShopNow.toast('Selecione pelo menos 1 estrela', 'error');
+        return;
+      }
+      reviewDialog.save.disabled = true;
+      const productId = getReviewIdentifier(item);
       const review = {
-        productKey: getReviewIdentifier(item),
+        productKey: productId,
         productName: item.name || '',
-        orderId: order.id,
-        rating: reviewDialog.currentRating,
-        comment: reviewDialog.comment.value.trim(),
-        date: new Date().toISOString(),
+        rating: newRating,
       };
-      setProductReview(review);
-      ShopNow.toast('Avaliação salva');
+      setLocalReview(review);
+      try {
+        await ShopData.addReview({
+          productId,
+          userId: user.id,
+          userEmail: user.email,
+          rating: newRating,
+        });
+        ShopNow.toast('Avaliação salva');
+      } catch {
+        ShopNow.toast('Avaliação salva localmente (sem conexão)', 'warning');
+      }
+      reviewDialog.save.disabled = false;
       refreshReviewButtons();
       updateOrderCardReviewCount(order);
       closeReviewModal();
@@ -421,6 +416,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   renderOrderSkeletons();
   await ShopData.ready();
+
+  // Carrega reviews do usuário do Supabase
+  const supaReviews = await ShopData.getUserReviews(String(user.id || '')).catch(() => []);
+  userReviews = supaReviews.map(r => ({
+    productKey: r.productId,
+    productName: r.productId,
+    rating: r.rating,
+  }));
+
   clearOrderSkeletons();
   updateOrderStats();
 

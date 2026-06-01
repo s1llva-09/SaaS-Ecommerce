@@ -377,6 +377,17 @@ function promotionToRow(promotion) {
   };
 }
 
+function normalizeReview(row) {
+  return {
+    id: String(getValue(row, 'id') ?? ''),
+    productId: String(getValue(row, 'product_id', 'productId') ?? ''),
+    userId: String(getValue(row, 'user_id', 'userId') ?? ''),
+    userEmail: getValue(row, 'user_email', 'userEmail') || '',
+    rating: asNumber(getValue(row, 'rating'), 0),
+    createdAt: getValue(row, 'created_at', 'createdAt') || '',
+  };
+}
+
 function normalizeSettings(rows) {
   const settings = clone(EMPTY_SETTINGS);
   if (!rows.length) return settings;
@@ -593,7 +604,39 @@ const ShopData = {
     if (index === -1) return;
     _state.products[index] = { ..._state.products[index], ...updates, id: String(id) };
     refreshDerivedData();
-    persist('products', () => upsertRow('products', productToRow(_state.products[index])));
+    return persist('products', () => upsertRow('products', productToRow(_state.products[index])));
+  },
+
+  async addReview({ productId, userId, userEmail, rating }) {
+    const row = {
+      product_id: String(productId),
+      user_id: String(userId),
+      user_email: userEmail || '',
+      rating: asNumber(rating),
+    };
+    await supabaseRequest(`reviews?on_conflict=product_id,user_id`, {
+      method: 'POST',
+      headers: { Prefer: 'return=minimal,resolution=merge-duplicates' },
+      body: row,
+    });
+    const allReviews = await supabaseRequest(
+      `reviews?product_id=eq.${encodeURIComponent(String(productId))}&select=rating`
+    );
+    const list = Array.isArray(allReviews) ? allReviews : [];
+    const count = list.length;
+    const avg = count > 0 ? list.reduce((sum, r) => sum + asNumber(r.rating), 0) / count : 0;
+    await this.updateProduct(productId, { rating: Math.round(avg * 10) / 10, reviews: count });
+  },
+
+  async getUserReviews(userId) {
+    try {
+      const rows = await supabaseRequest(
+        `reviews?user_id=eq.${encodeURIComponent(String(userId))}&select=*`
+      );
+      return Array.isArray(rows) ? rows.map(normalizeReview) : [];
+    } catch {
+      return [];
+    }
   },
 
   deleteProduct(id) {
